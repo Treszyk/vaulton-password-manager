@@ -1,0 +1,44 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# VS / Rider / IDE
+.vs/
+.idea/
+*.suo
+*.user
+*.rsuser
+*.userosscache
+*.sln.docstates
+*.sln.iml
+
+# Docker build cache (VS)
+**/obj/Docker/
+
+# Logs & test outputs
+*.log
+TestResult*/
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coverage*/
+
+# Packages (if you ever pack locally)
+*.nupkg
+*.snupkg
+
+# Local config / secrets (keep env-specific secrets out of git)
+*.local.json
+appsettings.*.local.json
+.env
+.env.*
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Optional editor configs (uncomment if you don’t want them tracked)
+#.vscode/
