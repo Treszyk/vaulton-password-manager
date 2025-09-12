@@ -34,7 +34,7 @@ coverage*/
 *.local.json
 appsettings.*.local.json
 .env
-.env.*
+# .env.*
 
 # OS cruft
 .DS_Store
