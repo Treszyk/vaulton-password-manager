@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 
 namespace Tests.Integration
 {
