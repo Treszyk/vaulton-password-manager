@@ -42,3 +42,6 @@ Thumbs.db
 
 # Optional editor configs (uncomment if you don’t want them tracked)
 #.vscode/
+appsettings.Development.json
+
+/Api/appsettings.Development.json
