@@ -44,3 +44,4 @@ Thumbs.db
 #.vscode/
 appsettings.Development.json
 
+/Api/appsettings.Development.json
