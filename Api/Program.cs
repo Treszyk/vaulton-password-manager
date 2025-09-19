@@ -1,6 +1,8 @@
 using Api.Health;
 using Api.Startup;
+using Application.Services.Auth;
 using Infrastructure.Data;
+using Infrastructure.Security;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -27,6 +29,7 @@ namespace Api
 				.AddCheck<FastSqlHealthCheck>("sql");
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
+			builder.Services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
 
 			var app = builder.Build();
 

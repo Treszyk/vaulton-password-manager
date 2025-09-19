@@ -4,6 +4,9 @@ using System.Text.Json.Serialization;
 namespace Api.DTOs.Auth;
 
 public sealed record LoginRequest(
-	[property: Required, JsonPropertyName("AccountId")] Guid AccountId,
-	[property: Required, JsonPropertyName("Verifier")] byte[] Verifier
+	[Required][property: JsonPropertyName("AccountId")] Guid AccountId,
+	[Required][property: JsonPropertyName("Verifier")] byte[] Verifier
 );
+
+
+
