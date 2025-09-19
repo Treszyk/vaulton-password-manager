@@ -1,6 +1,10 @@
+using Api.Health;
 using Api.Startup;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Text.Json;
 
 namespace Api
 {
@@ -19,10 +23,22 @@ namespace Api
 				o.UseSqlServer(conn, sql => sql.EnableRetryOnFailure()));
 
 			builder.Services.AddControllers();
+			builder.Services.AddHealthChecks()
+				.AddCheck<FastSqlHealthCheck>("sql");
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 
 			var app = builder.Build();
+
+			app.MapHealthChecks("/healthz", new HealthCheckOptions
+			{
+				ResponseWriter = async (ctx, report) =>
+				{
+					ctx.Response.ContentType = "application/json";
+					var status = report.Status == HealthStatus.Healthy ? "ok" : "unavailable";
+					await ctx.Response.WriteAsync(JsonSerializer.Serialize(new { status }));
+				}
+			});
 
 			await app.ApplyMigrationsAsync();
 
