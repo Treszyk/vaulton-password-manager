@@ -15,8 +15,8 @@ namespace Tests.Unit
 				Id = Guid.NewGuid(),
 				Verifier = [1, 2, 3],
 				S_Pwd = [4, 5, 6],
-				MK_Wrap_Pwd = [7, 8, 9],
-				// RK related fields optional for now
+				S_Verifier = [7, 8, 9],
+				MK_Wrap_Pwd = [10, 11, 12],
 				CreatedAt = now,
 				UpdatedAt = now
 			};
