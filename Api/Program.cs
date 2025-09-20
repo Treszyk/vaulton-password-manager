@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace Api
 {
-	public class Program
+	public static class Program
 	{
 		private static async Task Main(string[] args)
 		{
@@ -30,6 +30,13 @@ namespace Api
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 			builder.Services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
+			builder.Services.AddCors(o =>
+			{
+				o.AddDefaultPolicy(p => p
+					.AllowAnyOrigin()
+					.AllowAnyHeader()
+					.AllowAnyMethod());
+			});
 
 			var app = builder.Build();
 
@@ -55,7 +62,7 @@ namespace Api
 				app.UseHttpsRedirection();
 			}
 
-
+			app.UseCors();
 
 			app.UseAuthorization();
 			app.MapControllers();
