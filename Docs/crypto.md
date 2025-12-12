@@ -40,9 +40,18 @@ Used to split `K_argon` into multiple independent keys:
 
 - `K_vrf` (verifier key for auth)
 - `K_kek` (key-encryption key for wrapping the Master Key)
-- `K_tag` (key used for calculating deterministic domain tags)
 
-HKDF uses fixed, public `info` strings (e.g. `"vaulton/verifier"`, `"vaulton/mk-wrap"`, `"vaulton/domain-tag"`); these do **not** need to be stored per-user.
+HKDF uses fixed, public `info` strings (e.g. `"vaulton/verifier"`, `"vaulton/mk-wrap"`); these do **not** need to be stored per-user.
+
+#### **Master Key (MK) and tag key**
+
+- The Master Key (`MK`) is a randomly generated high-entropy symmetric key (e.g. 256 bits), created on the client during registration.
+- `MK` is never sent to the server in plaintext and is used to encrypt vault entries with AES-GCM.
+- From `MK`, Vaulton derives a separate key for deterministic domain tags using HKDF:
+
+  `K_tag = HKDF(MK, info = "vaulton/domain-tag")`
+
+Deriving `K_tag` from `MK` (instead of from `K_argon`) keeps domain tags independent of password changes: as long as `MK` stays the same, `K_tag` and all existing tags remain valid. A password change only re-wraps `MK` with a new `K_kek` and updates the verifier; it does not require re-tagging all entries.
 
 #### **AES-GCM (AEAD)**
 
@@ -62,7 +71,7 @@ Used with `K_tag` to compute deterministic tags for normalized domains:
 
 Stored server-side to let a planned extension easily fetch entries by domain without decrypting the whole vault.
 
-This intentionally leaks a small amount of information: an attacker (or hosting provider) who can see the database can tell that a given user has, for example, 3 entries with the same `DomainTag`. They still do not learn the actual domain name or any plaintext credentials without the master password (`K_tag`), but they can see that those 3 entries belong to the same unknown site.
+This intentionally leaks a small amount of information: an attacker (or hosting provider) who can see the database can tell that a given user has, for example, 3 entries with the same `DomainTag`. They still do not learn the actual domain name or any plaintext credentials without the master password (and thus `MK` and `K_tag`), but they can see that those 3 entries belong to the same unknown site.
 
 ### 3.2 Server-side primitives
 
