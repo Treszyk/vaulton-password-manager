@@ -4,12 +4,22 @@ using System.Text.Json.Serialization;
 namespace Api.DTOs.Auth;
 
 public sealed record RegisterRequest(
+	[Required][property: JsonPropertyName("AccountId")] Guid AccountId,
+
 	[Required][property: JsonPropertyName("Verifier")] byte[] Verifier,
-	[Required][property: JsonPropertyName("S_Verifier")] byte[] S_Verifier,
 	[Required][property: JsonPropertyName("S_Pwd")] byte[] S_Pwd,
+
+	// Argon2id parameters
+	[Required][property: JsonPropertyName("ArgonMem")] int ArgonMem,
+	[Required][property: JsonPropertyName("ArgonTime")] int ArgonTime,
+	[Required][property: JsonPropertyName("ArgonLanes")] int ArgonLanes,
+	[Required][property: JsonPropertyName("ArgonVersion")] int ArgonVersion,
+
 	[Required][property: JsonPropertyName("MK_Wrap_Pwd")] byte[] MK_Wrap_Pwd,
 
 	// optional RK things (I'm gonna be making these mandatory later)
-	[property: JsonPropertyName("S_Rk")] byte[]? S_Rk,
-	[property: JsonPropertyName("MK_Wrap_Rk")] byte[]? MK_Wrap_Rk
+	[property: JsonPropertyName("MK_Wrap_Rk")] byte[]? MK_Wrap_Rk,
+
+	// always 1 in for mvp 1.0
+	[Required][property: JsonPropertyName("CryptoSchemaVer")] int CryptoSchemaVer
 );
