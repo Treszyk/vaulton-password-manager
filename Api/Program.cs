@@ -30,13 +30,6 @@ namespace Api
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 			builder.Services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
-			builder.Services.AddCors(o =>
-			{
-				o.AddDefaultPolicy(p => p
-					.AllowAnyOrigin()
-					.AllowAnyHeader()
-					.AllowAnyMethod());
-			});
 
 			var app = builder.Build();
 
@@ -61,8 +54,6 @@ namespace Api
 			{
 				app.UseHttpsRedirection();
 			}
-
-			app.UseCors();
 
 			app.UseAuthorization();
 			app.MapControllers();
