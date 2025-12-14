@@ -21,7 +21,6 @@ public class User
 	public required byte[] MK_Wrap_Pwd { get; set; } // MK wrapped with password-derived KEK
 
 	// Recovery Key - user can opt in for recovery, might change it to forced
-	public byte[]? S_Rk { get; set; }
 	public byte[]? MK_Wrap_Rk { get; set; } // MK wrapped with random recovery key
 
 	// Crypto schema version (always 1 in this prototype)

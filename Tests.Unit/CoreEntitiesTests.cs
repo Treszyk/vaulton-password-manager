@@ -36,7 +36,6 @@ namespace Tests.Unit
 			user.Verifier.Should().NotBeNullOrEmpty();
 			user.S_Pwd.Should().NotBeNullOrEmpty();
 			user.MK_Wrap_Pwd.Should().NotBeNullOrEmpty();
-			user.S_Rk.Should().BeNull();          // optional
 			user.MK_Wrap_Rk.Should().BeNull();    // optional
 			user.CreatedAt.Should().BeOnOrAfter(now.AddMinutes(-1));
 			user.UpdatedAt.Should().BeOnOrAfter(now.AddMinutes(-1));

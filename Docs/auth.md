@@ -114,14 +114,12 @@ The client must have already:
     {
       "AccountId": "4e3d1c7d-9f9e-4a31-b720-9f6a2a6e3f5a",
       "Verifier": "base64(K_vrf)",
-      "S_Verifier": "base64(Pbkdf2Salt)",
       "S_Pwd": "base64(Argon2Salt)",
       "ArgonMem": 65536,
       "ArgonTime": 3,
       "ArgonLanes": 1,
       "ArgonVersion": 19,
       "MK_Wrap_Pwd": "base64(ciphertext)",
-      "S_Rk": "base64(...) or null",
       "MK_Wrap_Rk": "base64(...) or null",
       "CryptoSchemaVer": 1
     }
@@ -136,19 +134,20 @@ The client must have already:
 
 1. Validate the request (required fields present, base64 decodes, etc.).
 2. Ensure `AccountId` is not already in use.
-3. Compute the stored verifier using PBKDF2+pepper:
+3. Generate a random per-user PBKDF2 salt `S_Verifier`.
+4. Compute the stored verifier using PBKDF2+pepper:
 
    StoredVerifier = PBKDF2(Verifier_raw || Pepper, S_Verifier, iterations, outputLength)
 
-4. Create a new `User` row with:
+5. Create a new `User` row with:
    - `Id = AccountId`
    - `Verifier = StoredVerifier`
    - `S_Verifier`, `S_Pwd`
-   - `MK_Wrap_Pwd`, optional `S_Rk` and `MK_Wrap_Rk`
+   - `MK_Wrap_Pwd`, optional `MK_Wrap_Rk`
    - `ArgonMem`, `ArgonTime`, `ArgonLanes`, `ArgonVersion`
-   - `CryptoSchemaVer = 1` (fixed in this prototype)
+   - `CryptoSchemaVer`
    - Timestamps (`CreatedAt`, `UpdatedAt`)
-5. Save to the database and return `201 Created`.
+6. Save to the database and return `201 Created`.
 
 **Error cases**
 
