@@ -2,6 +2,7 @@
 using Application.Services.Auth;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers;
 
@@ -16,6 +17,21 @@ public class AuthController : ControllerBase
 	{
 		_db = db;
 		_tokenIssuer = tokenIssuer;
+	}
+
+	[HttpPost("pre-register")]
+	public async Task<ActionResult<PreRegisterResponse>> PreRegister()
+	{
+		var accountId = Guid.NewGuid();
+
+		// checking just in case, tho in case of Guids it's most likely never gonna happen
+		var exists = await _db.Users.AnyAsync(u => u.Id == accountId);
+		if (exists)
+		{
+			return StatusCode(StatusCodes.Status500InternalServerError);
+		}
+
+		return Ok(new PreRegisterResponse(accountId));
 	}
 
 	[HttpPost("register")]
