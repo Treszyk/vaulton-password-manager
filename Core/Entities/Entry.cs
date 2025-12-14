@@ -10,6 +10,9 @@ public class Entry
 	public byte[] CipherText { get; set; } = default!;  // Encrypted payload, encrypt-all
 	public byte[] Tag { get; set; } = default!;         // Auth tag, to make sure the payload wasnt tampered with since last encryption
 
+	// Domain tag for extension-friendly lookup (HMAC(K_tag, normalizedDomain))
+	public byte[] DomainTag { get; set; } = default!;
+
 	// metadata
 	public DateTime CreatedAt { get; set; }
 	public DateTime UpdatedAt { get; set; }
