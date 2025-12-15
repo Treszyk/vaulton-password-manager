@@ -22,8 +22,6 @@ services:
       - ASPNETCORE_URLS=${ASPNETCORE_URLS}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ConnectionStrings__Default=Server=sqlserver,1433;Database=${DB_NAME};User Id=SA;Password=${SA_PASSWORD};TrustServerCertificate=True;
-      - Jwt__Secret=${JWT_SECRET}
-      - Jwt__Issuer=Vaulton
     ports:
       - "8080:8080"
     depends_on:
