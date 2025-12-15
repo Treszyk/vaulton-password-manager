@@ -4,10 +4,7 @@ using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
-using System.Text;
 using Core.Entities;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 
 
 
@@ -21,6 +18,7 @@ public class AuthController : ControllerBase
 	private readonly ITokenIssuer _tokenIssuer;
 	private readonly IConfiguration _config;
 	private readonly int _verifierPbkdf2Iterations;
+	private readonly byte[] _verifierPepperBytes;
 
 	public AuthController(VaultonDbContext db, ITokenIssuer tokenIssuer, IConfiguration config)
 	{
@@ -33,6 +31,22 @@ public class AuthController : ControllerBase
 		{
 			_verifierPbkdf2Iterations = 600_000; // fallback
 		}
+
+		var pepperB64 = _config["Auth:VerifierPepper"];
+		if (string.IsNullOrWhiteSpace(pepperB64))
+			throw new InvalidOperationException("Missing Auth:VerifierPepper configuration.");
+
+		try
+		{
+			_verifierPepperBytes = Convert.FromBase64String(pepperB64);
+		}
+		catch (FormatException)
+		{
+			throw new InvalidOperationException("Auth:VerifierPepper must be base64.");
+		}
+
+		if (_verifierPepperBytes.Length != 32)
+			throw new InvalidOperationException("Auth:VerifierPepper must decode to 32 bytes.");
 	}
 
 	[HttpPost("pre-register")]
@@ -64,16 +78,10 @@ public class AuthController : ControllerBase
 			return Conflict(new { message = "Account cannot be created." });
 		}
 
-		var pepper = _config["Auth:VerifierPepper"];
-		if (string.IsNullOrEmpty(pepper))
-		{
-			throw new InvalidOperationException("Missing Auth:VerifierPepper configuration.");
-		}
-
 		var sVerifier = new byte[16];
 		RandomNumberGenerator.Fill(sVerifier);
 
-		var storedVerifier = ComputeStoredVerifier(request.Verifier, sVerifier, pepper);
+		var storedVerifier = ComputeStoredVerifier(request.Verifier, sVerifier, _verifierPepperBytes);
 
 		var now = DateTime.UtcNow;
 
@@ -112,11 +120,9 @@ public class AuthController : ControllerBase
 		throw new NotImplementedException();
 	}
 
-	private byte[] ComputeStoredVerifier(byte[] verifierRaw, byte[] salt, string pepper)
+	private byte[] ComputeStoredVerifier(byte[] verifierRaw, byte[] salt, byte[] pepperBytes)
 	{
-		var pepperBytes = Encoding.UTF8.GetBytes(pepper);
 		var input = new byte[verifierRaw.Length + pepperBytes.Length];
-
 		Buffer.BlockCopy(verifierRaw, 0, input, 0, verifierRaw.Length);
 		Buffer.BlockCopy(pepperBytes, 0, input, verifierRaw.Length, pepperBytes.Length);
 
