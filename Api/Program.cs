@@ -3,6 +3,7 @@ using Api.Startup;
 using Application.Services.Auth;
 using Infrastructure.Data;
 using Infrastructure.Security;
+using Infrastructure.Services.Auth;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -30,6 +31,7 @@ namespace Api
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 			builder.Services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
+			builder.Services.AddScoped<IAuthService, AuthService>();
 
 			var app = builder.Build();
 
