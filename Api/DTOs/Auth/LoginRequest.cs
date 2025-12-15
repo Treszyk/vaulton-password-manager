@@ -5,7 +5,10 @@ namespace Api.DTOs.Auth;
 
 public sealed record LoginRequest(
 	[Required][property: JsonPropertyName("AccountId")] Guid AccountId,
-	[Required][property: JsonPropertyName("Verifier")] byte[] Verifier
+	
+	[Required]
+	[Length(32, 32)]
+	[property: JsonPropertyName("Verifier")] byte[] Verifier
 );
 
 

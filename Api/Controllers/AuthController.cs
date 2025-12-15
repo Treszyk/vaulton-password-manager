@@ -117,7 +117,42 @@ public class AuthController : ControllerBase
 	[HttpPost("login")]
 	public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
 	{
-		throw new NotImplementedException();
+		var user = await _db.Users.SingleOrDefaultAsync(u => u.Id == request.AccountId);
+		if (user is null)
+		{
+			DoDummyVerifierWork();
+			return Unauthorized(new { message = "Invalid credentials." });
+		}
+
+		var computed = ComputeStoredVerifier(request.Verifier, user.S_Verifier, _verifierPepperBytes);
+		
+		// constant-time comparison helps against timing attacks
+		var ok =
+			user.Verifier.Length == computed.Length &&
+			CryptographicOperations.FixedTimeEquals(user.Verifier, computed);
+
+		if (!ok)
+		{
+			return Unauthorized(new { message = "Invalid credentials." });
+		}
+
+		// metadata update
+		var now = DateTime.UtcNow;
+		user.LastLoginAt = now;
+		user.UpdatedAt = now;
+		await _db.SaveChangesAsync();
+
+		var token = _tokenIssuer.IssueToken(user.Id);
+		return Ok(new LoginResponse(token));
+	}
+
+	// helps with attackers trying to guess if an AccountId exists
+	private void DoDummyVerifierWork()
+	{
+		var dummyVerifier = new byte[32];
+		var dummySalt = new byte[16];
+
+		_ = ComputeStoredVerifier(dummyVerifier, dummySalt, _verifierPepperBytes);
 	}
 
 	private byte[] ComputeStoredVerifier(byte[] verifierRaw, byte[] salt, byte[] pepperBytes)
@@ -131,5 +166,4 @@ public class AuthController : ControllerBase
 		using var pbkdf2 = new Rfc2898DeriveBytes(input, salt, _verifierPbkdf2Iterations, HashAlgorithmName.SHA256);
 		return pbkdf2.GetBytes(outputLength);
 	}
-
 }

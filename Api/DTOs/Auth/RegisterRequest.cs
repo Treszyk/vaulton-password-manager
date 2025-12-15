@@ -6,6 +6,7 @@ namespace Api.DTOs.Auth;
 public sealed record RegisterRequest(
 	[Required][property: JsonPropertyName("AccountId")] Guid AccountId,
 
+	[Length(32, 32)]
 	[Required][property: JsonPropertyName("Verifier")] byte[] Verifier,
 	[Required][property: JsonPropertyName("S_Pwd")] byte[] S_Pwd,
 
