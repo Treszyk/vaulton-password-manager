@@ -55,6 +55,7 @@ public class AuthController(IAuthService auth) : ControllerBase
 		{
 			return result.Error switch
 			{
+				RegisterError.InvalidCryptoBlob => BadRequest(new { message = "Invalid crypto blob sizes." }),
 				RegisterError.InvalidKdfMode => BadRequest(new { message = "Invalid KDF mode." }),
 				RegisterError.UnsupportedCryptoSchema => BadRequest(new { message = "Unsupported crypto schema version." }),
 				RegisterError.AccountExists => Conflict(new { message = "Account cannot be created." }),

@@ -70,15 +70,21 @@ namespace Infrastructure.Services.Auth
 			if (exists)
 				return RegisterResult.Fail(RegisterError.AccountExists);
 
+			if (!IsValidMkWrap(cmd.MkWrapPwd))
+				return RegisterResult.Fail(RegisterError.InvalidCryptoBlob);
+
+			if (cmd.MkWrapRk is not null && !IsValidMkWrap(cmd.MkWrapRk))
+				return RegisterResult.Fail(RegisterError.InvalidCryptoBlob);
+
+			if (cmd.KdfMode is not KdfMode.Default and not KdfMode.Strong)
+				return RegisterResult.Fail(RegisterError.InvalidKdfMode);
+
 			var sVerifier = new byte[CryptoSizes.SaltLen];
 			RandomNumberGenerator.Fill(sVerifier);
 
 			var storedVerifier = ComputeStoredVerifier(cmd.Verifier, sVerifier, _verifierPepperBytes);
 
 			var now = DateTime.UtcNow;
-
-			if (cmd.KdfMode is not KdfMode.Default and not KdfMode.Strong)
-				return RegisterResult.Fail(RegisterError.InvalidKdfMode);
 
 			var user = new User
 			{
@@ -153,5 +159,13 @@ namespace Infrastructure.Services.Auth
 			using var pbkdf2 = new Rfc2898DeriveBytes(input, salt, _verifierPbkdf2Iterations, HashAlgorithmName.SHA256);
 			return pbkdf2.GetBytes(CryptoSizes.VerifierLen);
 		}
+
+		private static bool IsValidMkWrap(EncryptedValue w)
+		{
+			return w.Nonce is { Length: CryptoSizes.GcmNonceLen }
+				&& w.Tag is { Length: CryptoSizes.GcmTagLen }
+				&& w.CipherText is { Length: CryptoSizes.MkLen };
+		}
+
 	}
 }

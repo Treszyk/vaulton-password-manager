@@ -6,22 +6,35 @@ using System.Text.Json.Serialization;
 namespace Api.DTOs.Auth;
 
 public sealed record RegisterRequest(
-	[Required][property: JsonPropertyName("AccountId")] Guid AccountId,
+	[property: Required]
+	[property: JsonPropertyName("AccountId")]
+	Guid AccountId,
 
-	[Length(CryptoSizes.VerifierLen, CryptoSizes.VerifierLen)]
-	[Required][property: JsonPropertyName("Verifier")] byte[] Verifier,
-	[Length(CryptoSizes.SaltLen, CryptoSizes.SaltLen)]
-	[Required][property: JsonPropertyName("S_Pwd")] byte[] S_Pwd,
+	[property: Required]
+	[property: Length(CryptoSizes.VerifierLen, CryptoSizes.VerifierLen)]
+	[property: JsonPropertyName("Verifier")]
+	byte[] Verifier,
 
-	[Range(1, 2)]
-	[Required][property: JsonPropertyName("KdfMode")] int KdfMode,
+	[property: Required]
+	[property: Length(CryptoSizes.SaltLen, CryptoSizes.SaltLen)]
+	[property: JsonPropertyName("S_Pwd")]
+	byte[] S_Pwd,
 
-	[Required][property: JsonPropertyName("MKWrapPwd")] EncryptedValueDto MkWrapPwd,
+	[property: Required]
+	[property: Range(1, 2)]
+	[property: JsonPropertyName("KdfMode")]
+	int KdfMode,
 
-	// optional RK things (I'm gonna be making these mandatory later)
-	[property: JsonPropertyName("MKWrapRk")] EncryptedValueDto? MkWrapRk,
+	[property: Required]
+	[property: JsonPropertyName("MKWrapPwd")]
+	EncryptedValueDto MkWrapPwd,
 
-	 // always 1 in for mvp 1.0
-	[Range(1, 1)]
-	[Required][property: JsonPropertyName("CryptoSchemaVer")] int CryptoSchemaVer
+	[property: JsonPropertyName("MKWrapRk")]
+	EncryptedValueDto? MkWrapRk,
+
+	[property: Required]
+	[property: Range(1, 1)]
+	[property: JsonPropertyName("CryptoSchemaVer")]
+	int CryptoSchemaVer
 );
+

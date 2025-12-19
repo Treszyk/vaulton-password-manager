@@ -5,14 +5,14 @@ using System.Text.Json.Serialization;
 namespace Api.DTOs.Crypto;
 
 public sealed record EncryptedValueDto(
-	[Length(CryptoSizes.GcmNonceLen, CryptoSizes.GcmNonceLen)]
-	[Required]
+	[property: Length(CryptoSizes.GcmNonceLen, CryptoSizes.GcmNonceLen)]
+	[property: Required]
 	[property: JsonPropertyName("Nonce")] byte[] Nonce,
 
-	[Required]
+	[property: Required]
 	[property: JsonPropertyName("CipherText")] byte[] CipherText,
 
-	[Length(CryptoSizes.GcmTagLen, CryptoSizes.GcmTagLen)]
-	[Required]
+	[property: Length(CryptoSizes.GcmTagLen, CryptoSizes.GcmTagLen)]
+	[property: Required]
 	[property: JsonPropertyName("Tag")] byte[] Tag
 );
