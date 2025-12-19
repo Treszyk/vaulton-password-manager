@@ -13,18 +13,8 @@ public sealed record RegisterRequest(
 	[Length(CryptoSizes.SaltLen, CryptoSizes.SaltLen)]
 	[Required][property: JsonPropertyName("S_Pwd")] byte[] S_Pwd,
 
-	 // Argon2id parameters
-	[Range(1, int.MaxValue)]
-	[Required][property: JsonPropertyName("ArgonMem")] int ArgonMem,
-	
-	[Range(1, int.MaxValue)]
-	[Required][property: JsonPropertyName("ArgonTime")] int ArgonTime,
-	
-	[Range(1, int.MaxValue)]
-	[Required][property: JsonPropertyName("ArgonLanes")] int ArgonLanes,
-	
-	[Range(1, int.MaxValue)]
-	[Required][property: JsonPropertyName("ArgonVersion")] int ArgonVersion,
+	[Range(1, 2)]
+	[Required][property: JsonPropertyName("KdfMode")] int KdfMode,
 
 	[Required][property: JsonPropertyName("MKWrapPwd")] EncryptedValueDto MkWrapPwd,
 

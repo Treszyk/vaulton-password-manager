@@ -77,17 +77,16 @@ namespace Infrastructure.Services.Auth
 
 			var now = DateTime.UtcNow;
 
+			if (cmd.KdfMode is not KdfMode.Default and not KdfMode.Strong)
+				return RegisterResult.Fail(RegisterError.InvalidKdfMode);
+
 			var user = new User
 			{
 				Id = cmd.AccountId,
 				Verifier = storedVerifier,
 				S_Verifier = sVerifier,
 				S_Pwd = cmd.S_Pwd,
-
-				ArgonMem = cmd.ArgonMem,
-				ArgonTime = cmd.ArgonTime,
-				ArgonLanes = cmd.ArgonLanes,
-				ArgonVersion = cmd.ArgonVersion,
+				KdfMode = cmd.KdfMode,
 
 				MkWrapPwd = cmd.MkWrapPwd,
 				MkWrapRk = cmd.MkWrapRk,

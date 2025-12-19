@@ -13,11 +13,8 @@ public class User
 	// Initial KDF salt
 	public required byte[] S_Pwd { get; set; }
 
-	// Argon2id parameters (v1 will likely use global defaults, but these are stored for future-proofing)
-	public int ArgonMem { get; set; }
-	public int ArgonTime { get; set; }
-	public int ArgonLanes { get; set; }
-	public int ArgonVersion { get; set; }
+	// Maps to libsodium defaults
+	public KdfMode KdfMode { get; set; }
 
 	// Master key wraps
 	public required EncryptedValue MkWrapPwd { get; set; }

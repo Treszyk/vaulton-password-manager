@@ -43,10 +43,7 @@ public class AuthController(IAuthService auth) : ControllerBase
 			request.AccountId,
 			request.Verifier,
 			request.S_Pwd,
-			request.ArgonMem,
-			request.ArgonTime,
-			request.ArgonLanes,
-			request.ArgonVersion,
+			(KdfMode)request.KdfMode,
 			mkWrapPwd,
 			mkWrapRk,
 			request.CryptoSchemaVer
@@ -58,6 +55,7 @@ public class AuthController(IAuthService auth) : ControllerBase
 		{
 			return result.Error switch
 			{
+				RegisterError.InvalidKdfMode => BadRequest(new { message = "Invalid KDF mode." }),
 				RegisterError.UnsupportedCryptoSchema => BadRequest(new { message = "Unsupported crypto schema version." }),
 				RegisterError.AccountExists => Conflict(new { message = "Account cannot be created." }),
 				_ => StatusCode(StatusCodes.Status500InternalServerError)

@@ -3,5 +3,6 @@
 public enum RegisterError
 {
 	UnsupportedCryptoSchema,
-	AccountExists
+	AccountExists,
+	InvalidKdfMode
 }

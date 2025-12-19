@@ -111,6 +111,10 @@ namespace Infrastructure.Data
 			modelBuilder.Entity<Entry>()
 				.Navigation(e => e.Payload)
 				.IsRequired();
+
+			modelBuilder.Entity<User>()
+				.Property(u => u.KdfMode)
+				.HasConversion<int>();
 		}
 	}
 }
