@@ -8,4 +8,6 @@ public interface IAuthService
 	Task<Guid> PreRegisterAsync();
 	Task<RegisterResult> RegisterAsync(RegisterCommand cmd);
 	Task<LoginResult> LoginAsync(LoginCommand cmd);
+	Task<RefreshResult> RefreshAsync(RefreshCommand cmd);
+	Task LogoutAsync(string refreshToken);
 }

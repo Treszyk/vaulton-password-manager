@@ -98,6 +98,15 @@ namespace Infrastructure.Data
 				 .HasForeignKey(rt => rt.UserId)
 				 .OnDelete(DeleteBehavior.Cascade);
 
+				b.Property(rt => rt.TokenHash)
+					.HasMaxLength(32)
+					.IsRequired();
+
+				b.HasIndex(rt => rt.TokenHash).IsUnique();
+				b.HasIndex(rt => rt.UserId);
+
+				b.Property(rt => rt.CreatedAt).IsRequired();
+				b.Property(rt => rt.ExpiresAt).IsRequired();
 			});
 
 			modelBuilder.Entity<User>()

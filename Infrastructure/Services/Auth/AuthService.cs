@@ -8,6 +8,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.WebUtilities;
 
 
 namespace Infrastructure.Services.Auth
@@ -18,6 +19,7 @@ namespace Infrastructure.Services.Auth
 		private readonly ITokenIssuer _tokenIssuer;
 		private readonly int _verifierPbkdf2Iterations;
 		private readonly byte[] _verifierPepperBytes;
+		private static readonly TimeSpan RefreshTtl = TimeSpan.FromDays(7);
 
 		public AuthService(VaultonDbContext db, ITokenIssuer tokenIssuer, IConfiguration config)
 		{
@@ -140,8 +142,84 @@ namespace Infrastructure.Services.Auth
 			user.UpdatedAt = now;
 			await _db.SaveChangesAsync();
 
-			var token = _tokenIssuer.IssueToken(user.Id);
-			return LoginResult.Ok(token);
+			var (refreshToken, refreshHash) = MintRefreshToken();
+			var refreshExpires = now.Add(RefreshTtl);
+
+			_db.RefreshTokens.Add(new RefreshToken
+			{
+				Id = Guid.NewGuid(),
+				UserId = user.Id,
+				TokenHash = refreshHash,
+				CreatedAt = now,
+				ExpiresAt = refreshExpires,
+				RevokedAt = null
+			});
+
+			await _db.SaveChangesAsync();
+
+			var accessToken = _tokenIssuer.IssueToken(user.Id);
+			return LoginResult.Ok(accessToken, refreshToken, refreshExpires);
+		}
+
+		public async Task<RefreshResult> RefreshAsync(RefreshCommand cmd)
+		{
+			if (string.IsNullOrWhiteSpace(cmd.RefreshToken))
+				return RefreshResult.Fail(RefreshError.MissingRefreshToken);
+
+			if (!TryHashRefreshToken(cmd.RefreshToken, out var hash))
+				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+
+			var now = DateTime.UtcNow;
+
+			var rt = await _db.RefreshTokens
+				.Include(x => x.User)
+				.SingleOrDefaultAsync(x =>
+					x.TokenHash == hash &&
+					x.RevokedAt == null &&
+					x.ExpiresAt > now);
+
+			if (rt is null)
+				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+
+			rt.RevokedAt = now;
+
+			var (newToken, newHash) = MintRefreshToken();
+			var newExpires = now.Add(RefreshTtl);
+
+			_db.RefreshTokens.Add(new RefreshToken
+			{
+				Id = Guid.NewGuid(),
+				UserId = rt.UserId,
+				TokenHash = newHash,
+				CreatedAt = now,
+				ExpiresAt = newExpires,
+				RevokedAt = null
+			});
+
+			await _db.SaveChangesAsync();
+
+			var access = _tokenIssuer.IssueToken(rt.UserId);
+			return RefreshResult.Ok(access, newToken, newExpires);
+		}
+
+		public async Task LogoutAsync(string refreshToken)
+		{
+			if (string.IsNullOrWhiteSpace(refreshToken))
+				return;
+
+			if (!TryHashRefreshToken(refreshToken, out var hash))
+				return;
+
+			var now = DateTime.UtcNow;
+
+			var rt = await _db.RefreshTokens
+				.SingleOrDefaultAsync(x => x.TokenHash == hash && x.RevokedAt == null);
+
+			if (rt is null)
+				return;
+
+			rt.RevokedAt = now;
+			await _db.SaveChangesAsync();
 		}
 
 		// helps with attackers trying to guess if an AccountId exists
@@ -168,6 +246,27 @@ namespace Infrastructure.Services.Auth
 			return w.Nonce is { Length: CryptoSizes.GcmNonceLen }
 				&& w.Tag is { Length: CryptoSizes.GcmTagLen }
 				&& w.CipherText is { Length: CryptoSizes.MkLen };
+		}
+		private static (string token, byte[] tokenHash) MintRefreshToken()
+		{
+			var raw = RandomNumberGenerator.GetBytes(64);
+			var token = WebEncoders.Base64UrlEncode(raw);
+			var hash = SHA256.HashData(raw);
+			return (token, hash);
+		}
+		private static bool TryHashRefreshToken(string token, out byte[] hash)
+		{
+			hash = Array.Empty<byte>();
+			try
+			{
+				var raw = WebEncoders.Base64UrlDecode(token);
+				hash = SHA256.HashData(raw);
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
 		}
 
 	}

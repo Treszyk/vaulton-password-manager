@@ -12,9 +12,20 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("auth")]
-public class AuthController(IAuthService auth) : ControllerBase
+public class AuthController(IAuthService auth, IWebHostEnvironment env) : ControllerBase
 {
 	private readonly IAuthService _auth = auth;
+	private readonly IWebHostEnvironment _env = env;
+	private const string RefreshCookieName = "Vaulton.Refresh";
+	private CookieOptions RefreshCookieOptions(DateTime expiresUtc)
+	=> new CookieOptions
+	{
+		HttpOnly = true,
+		Secure = !_env.IsDevelopment(),
+		SameSite = SameSiteMode.Strict,
+		Expires = new DateTimeOffset(expiresUtc),
+		Path = "/auth"
+	};
 
 	[HttpPost("pre-register")]
 	public async Task<ActionResult<PreRegisterResponse>> PreRegister()
@@ -81,7 +92,45 @@ public class AuthController(IAuthService auth) : ControllerBase
 			return Unauthorized(new { message = "Invalid credentials." });
 		}
 
+		Response.Cookies.Append(
+			RefreshCookieName,
+			result.RefreshToken!,
+			RefreshCookieOptions(result.RefreshExpiresAt!.Value)
+		);
+
 		return Ok(new LoginResponse(result.Token!));
+	}
+
+	[HttpPost("refresh")]
+	public async Task<ActionResult<LoginResponse>> Refresh()
+	{
+		if (!Request.Cookies.TryGetValue(RefreshCookieName, out var rt) || string.IsNullOrWhiteSpace(rt))
+			return Unauthorized(new { message = "Missing refresh token." });
+
+		var result = await _auth.RefreshAsync(new RefreshCommand(rt));
+
+		if (!result.Success)
+			return Unauthorized(new { message = "Invalid refresh token." });
+
+		Response.Cookies.Append(
+			RefreshCookieName,
+			result.RefreshToken!,
+			RefreshCookieOptions(result.RefreshExpiresAt!.Value)
+		);
+
+		return Ok(new LoginResponse(result.AccessToken!));
+	}
+
+	[HttpPost("logout")]
+	public async Task<IActionResult> Logout()
+	{
+		if (Request.Cookies.TryGetValue(RefreshCookieName, out var rt) && !string.IsNullOrWhiteSpace(rt))
+		{
+			await _auth.LogoutAsync(rt);
+		}
+
+		Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/auth" });
+		return NoContent();
 	}
 
 	[Authorize]
