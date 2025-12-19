@@ -18,7 +18,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	private readonly IWebHostEnvironment _env = env;
 	private const string RefreshCookieName = "Vaulton.Refresh";
 	private CookieOptions RefreshCookieOptions(DateTime expiresUtc)
-	=> new CookieOptions
+	=> new()
 	{
 		HttpOnly = true,
 		Secure = !_env.IsDevelopment(),
@@ -132,6 +132,21 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/auth" });
 		return NoContent();
 	}
+
+	[Authorize]
+	[HttpPost("logout-all")]
+	public async Task<IActionResult> LogoutAll()
+	{
+		var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+		if (!Guid.TryParse(sub, out var accountId))
+			return Unauthorized();
+
+		await _auth.LogoutAllAsync(accountId);
+
+		Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/auth" });
+		return NoContent();
+	}
+
 
 	[Authorize]
 	[HttpGet("me")]

@@ -171,17 +171,23 @@ namespace Infrastructure.Services.Auth
 
 			var now = DateTime.UtcNow;
 
-			var rt = await _db.RefreshTokens
-				.Include(x => x.User)
-				.SingleOrDefaultAsync(x =>
-					x.TokenHash == hash &&
-					x.RevokedAt == null &&
-					x.ExpiresAt > now);
+			var tokenRow = await _db.RefreshTokens
+				.SingleOrDefaultAsync(x => x.TokenHash == hash);
 
-			if (rt is null)
+			if (tokenRow is null)
 				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
 
-			rt.RevokedAt = now;
+			if (tokenRow.ExpiresAt <= now)
+				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+
+			// reuse detection
+			if (tokenRow.RevokedAt is not null)
+			{
+				await LogoutAllAsync(tokenRow.UserId);
+				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+			}
+
+			tokenRow.RevokedAt = now;
 
 			var (newToken, newHash) = MintRefreshToken();
 			var newExpires = now.Add(RefreshTtl);
@@ -189,7 +195,7 @@ namespace Infrastructure.Services.Auth
 			_db.RefreshTokens.Add(new RefreshToken
 			{
 				Id = Guid.NewGuid(),
-				UserId = rt.UserId,
+				UserId = tokenRow.UserId,
 				TokenHash = newHash,
 				CreatedAt = now,
 				ExpiresAt = newExpires,
@@ -198,7 +204,7 @@ namespace Infrastructure.Services.Auth
 
 			await _db.SaveChangesAsync();
 
-			var access = _tokenIssuer.IssueToken(rt.UserId);
+			var access = _tokenIssuer.IssueToken(tokenRow.UserId);
 			return RefreshResult.Ok(access, newToken, newExpires);
 		}
 
@@ -220,6 +226,14 @@ namespace Infrastructure.Services.Auth
 
 			rt.RevokedAt = now;
 			await _db.SaveChangesAsync();
+		}
+		public async Task LogoutAllAsync(Guid accountId)
+		{
+			var now = DateTime.UtcNow;
+
+			await _db.RefreshTokens
+				.Where(rt => rt.UserId == accountId && rt.RevokedAt == null)
+				.ExecuteUpdateAsync(s => s.SetProperty(rt => rt.RevokedAt, now));
 		}
 
 		// helps with attackers trying to guess if an AccountId exists

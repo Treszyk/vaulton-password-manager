@@ -10,4 +10,6 @@ public interface IAuthService
 	Task<LoginResult> LoginAsync(LoginCommand cmd);
 	Task<RefreshResult> RefreshAsync(RefreshCommand cmd);
 	Task LogoutAsync(string refreshToken);
+	Task LogoutAllAsync(Guid accountId);
+
 }
