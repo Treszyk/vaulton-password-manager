@@ -7,7 +7,12 @@ using Infrastructure.Services.Auth;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.OpenApi.Models;
+using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Api
 {
@@ -29,9 +34,69 @@ namespace Api
 			builder.Services.AddHealthChecks()
 				.AddCheck<FastSqlHealthCheck>("sql");
 			builder.Services.AddEndpointsApiExplorer();
-			builder.Services.AddSwaggerGen();
+			builder.Services.AddSwaggerGen(c =>
+			{
+				c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+				{
+					Name = "Authorization",
+					Type = SecuritySchemeType.Http,
+					Scheme = "bearer",
+					BearerFormat = "JWT",
+					In = ParameterLocation.Header,
+					Description = "Paste: Bearer {your JWT token}"
+				});
+
+				c.AddSecurityRequirement(new OpenApiSecurityRequirement
+				{
+					{
+						new OpenApiSecurityScheme
+						{
+							Reference = new OpenApiReference
+							{
+								Type = ReferenceType.SecurityScheme,
+								Id = "Bearer"
+							}
+						},
+						Array.Empty<string>()
+					}
+				});
+			});
+
 			builder.Services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
 			builder.Services.AddScoped<IAuthService, AuthService>();
+
+			var jwtSecret = builder.Configuration["Jwt:Secret"]
+				?? throw new InvalidOperationException("Missing Jwt:Secret");
+
+			if (Encoding.UTF8.GetByteCount(jwtSecret) < 32)
+				throw new InvalidOperationException("Jwt:Secret must be at least 32 bytes (HS256).");
+
+			var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+			var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+			builder.Services
+				.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+				.AddJwtBearer(options =>
+				{
+					options.TokenValidationParameters = new TokenValidationParameters
+					{
+						ValidateIssuerSigningKey = true,
+						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+
+						ValidateIssuer = !string.IsNullOrWhiteSpace(jwtIssuer),
+						ValidIssuer = jwtIssuer,
+
+						ValidateAudience = !string.IsNullOrWhiteSpace(jwtAudience),
+						ValidAudience = jwtAudience,
+
+						ValidateLifetime = true,
+						ClockSkew = TimeSpan.FromSeconds(30)
+					};
+					options.MapInboundClaims = false;
+					options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Sub;
+				});
+
+			builder.Services.AddAuthorization();
 
 			var app = builder.Build();
 
@@ -57,6 +122,7 @@ namespace Api
 				app.UseHttpsRedirection();
 			}
 
+			app.UseAuthentication();
 			app.UseAuthorization();
 			app.MapControllers();
 

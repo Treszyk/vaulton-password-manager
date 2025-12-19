@@ -3,7 +3,10 @@ using Application.Services.Auth;
 using Application.Services.Auth.Commands;
 using Application.Services.Auth.Errors;
 using Core.Crypto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Api.Controllers;
 
@@ -80,4 +83,16 @@ public class AuthController(IAuthService auth) : ControllerBase
 
 		return Ok(new LoginResponse(result.Token!));
 	}
+
+	[Authorize]
+	[HttpGet("me")]
+	public ActionResult Me()
+	{
+		var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+		if (!Guid.TryParse(sub, out var accountId))
+			return Unauthorized();
+
+		return Ok(new { AccountId = accountId });
+	}
+
 }

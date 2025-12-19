@@ -16,6 +16,9 @@ public sealed class JwtTokenIssuer(IConfiguration config) : ITokenIssuer
 		var secret = _config["Jwt:Secret"]
 			?? throw new InvalidOperationException("Missing Jwt:Secret");
 
+		if (Encoding.UTF8.GetByteCount(secret) < 32)
+			throw new InvalidOperationException("Jwt:Secret must be at least 32 bytes (HS256).");
+
 		var issuer = _config["Jwt:Issuer"];
 		var audience = _config["Jwt:Audience"];
 
