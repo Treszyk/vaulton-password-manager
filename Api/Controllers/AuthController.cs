@@ -2,6 +2,7 @@
 using Application.Services.Auth;
 using Application.Services.Auth.Commands;
 using Application.Services.Auth.Errors;
+using Core.Crypto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -22,6 +23,22 @@ public class AuthController(IAuthService auth) : ControllerBase
 	[HttpPost("register")]
 	public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request)
 	{
+		var mkWrapPwd = new EncryptedValue
+		{
+			Nonce = request.MkWrapPwd.Nonce,
+			CipherText = request.MkWrapPwd.CipherText,
+			Tag = request.MkWrapPwd.Tag
+		};
+
+		EncryptedValue? mkWrapRk = request.MkWrapRk is null
+			? null
+			: new EncryptedValue
+			{
+				Nonce = request.MkWrapRk.Nonce,
+				CipherText = request.MkWrapRk.CipherText,
+				Tag = request.MkWrapRk.Tag
+			};
+
 		var cmd = new RegisterCommand(
 			request.AccountId,
 			request.Verifier,
@@ -30,8 +47,8 @@ public class AuthController(IAuthService auth) : ControllerBase
 			request.ArgonTime,
 			request.ArgonLanes,
 			request.ArgonVersion,
-			request.MK_Wrap_Pwd,
-			request.MK_Wrap_Rk,
+			mkWrapPwd,
+			mkWrapRk,
 			request.CryptoSchemaVer
 		);
 

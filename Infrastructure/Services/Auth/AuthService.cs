@@ -2,6 +2,7 @@
 using Application.Services.Auth.Commands;
 using Application.Services.Auth.Errors;
 using Application.Services.Auth.Results;
+using Core.Crypto;
 using Core.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +43,7 @@ namespace Infrastructure.Services.Auth
 				throw new InvalidOperationException("Auth:VerifierPepper must be base64.");
 			}
 
-			if (_verifierPepperBytes.Length != 32)
+			if (_verifierPepperBytes.Length != CryptoSizes.PepperLen)
 				throw new InvalidOperationException("Auth:VerifierPepper must decode to 32 bytes.");
 		}
 
@@ -69,7 +70,7 @@ namespace Infrastructure.Services.Auth
 			if (exists)
 				return RegisterResult.Fail(RegisterError.AccountExists);
 
-			var sVerifier = new byte[16];
+			var sVerifier = new byte[CryptoSizes.SaltLen];
 			RandomNumberGenerator.Fill(sVerifier);
 
 			var storedVerifier = ComputeStoredVerifier(cmd.Verifier, sVerifier, _verifierPepperBytes);
@@ -88,8 +89,8 @@ namespace Infrastructure.Services.Auth
 				ArgonLanes = cmd.ArgonLanes,
 				ArgonVersion = cmd.ArgonVersion,
 
-				MK_Wrap_Pwd = cmd.MK_Wrap_Pwd,
-				MK_Wrap_Rk = cmd.MK_Wrap_Rk,
+				MkWrapPwd = cmd.MkWrapPwd,
+				MkWrapRk = cmd.MkWrapRk,
 
 				CryptoSchemaVer = cmd.CryptoSchemaVer,
 
@@ -138,8 +139,8 @@ namespace Infrastructure.Services.Auth
 		// helps with attackers trying to guess if an AccountId exists
 		private void DoDummyVerifierWork()
 		{
-			var dummyVerifier = new byte[32];
-			var dummySalt = new byte[16];
+			var dummyVerifier = new byte[CryptoSizes.VerifierLen];
+			var dummySalt = new byte[CryptoSizes.SaltLen];
 
 			_ = ComputeStoredVerifier(dummyVerifier, dummySalt, _verifierPepperBytes);
 		}
@@ -150,10 +151,8 @@ namespace Infrastructure.Services.Auth
 			Buffer.BlockCopy(verifierRaw, 0, input, 0, verifierRaw.Length);
 			Buffer.BlockCopy(pepperBytes, 0, input, verifierRaw.Length, pepperBytes.Length);
 
-			const int outputLength = 32; // 256-bit
-
 			using var pbkdf2 = new Rfc2898DeriveBytes(input, salt, _verifierPbkdf2Iterations, HashAlgorithmName.SHA256);
-			return pbkdf2.GetBytes(outputLength);
+			return pbkdf2.GetBytes(CryptoSizes.VerifierLen);
 		}
 	}
 }

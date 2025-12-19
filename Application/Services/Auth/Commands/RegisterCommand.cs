@@ -1,4 +1,6 @@
-﻿namespace Application.Services.Auth.Commands;
+﻿using Core.Crypto;
+
+namespace Application.Services.Auth.Commands;
 
 public sealed record RegisterCommand(
 	Guid AccountId,
@@ -8,7 +10,7 @@ public sealed record RegisterCommand(
 	int ArgonTime,
 	int ArgonLanes,
 	int ArgonVersion,
-	byte[] MK_Wrap_Pwd,
-	byte[]? MK_Wrap_Rk,
+	EncryptedValue MkWrapPwd,
+	EncryptedValue? MkWrapRk,
 	int CryptoSchemaVer
 );
