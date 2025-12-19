@@ -70,6 +70,9 @@ namespace Infrastructure.Services.Auth
 			if (exists)
 				return RegisterResult.Fail(RegisterError.AccountExists);
 
+			if (cmd.Verifier.Length != CryptoSizes.VerifierLen || cmd.S_Pwd.Length != CryptoSizes.SaltLen)
+				return RegisterResult.Fail(RegisterError.InvalidCryptoBlob);
+
 			if (!IsValidMkWrap(cmd.MkWrapPwd))
 				return RegisterResult.Fail(RegisterError.InvalidCryptoBlob);
 
