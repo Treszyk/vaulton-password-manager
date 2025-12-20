@@ -4,15 +4,15 @@ using Application.Services.Auth;
 using Infrastructure.Data;
 using Infrastructure.Security;
 using Infrastructure.Services.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Api
 {
@@ -63,6 +63,8 @@ namespace Api
 			});
 
 			builder.Services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
+			builder.Services.AddSingleton<AuthCryptoOptions>();
+			builder.Services.AddSingleton<AuthCryptoHelpers>();
 			builder.Services.AddScoped<IAuthService, AuthService>();
 
 			var jwtSecret = builder.Configuration["Jwt:Secret"]
