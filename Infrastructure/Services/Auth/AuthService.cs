@@ -7,14 +7,17 @@ using Core.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
+
 namespace Infrastructure.Services.Auth
 {
-	public sealed class AuthService(VaultonDbContext db, ITokenIssuer tokenIssuer, AuthCryptoHelpers cryptoHelpers) : IAuthService
+	public sealed class AuthService(
+		VaultonDbContext db,
+		ITokenIssuer tokenIssuer,
+		AuthCryptoHelpers cryptoHelpers,
+		IAuthCommandValidator validator,
+		ILockoutPolicy lockoutPolicy,
+		IRefreshTokenStore refreshTokenStore) : IAuthService
 	{
-		private static readonly TimeSpan RefreshTtl = TimeSpan.FromDays(7);
-		private const int MaxFailedLoginAttempts = 5;
-		private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
-
 		public async Task<Guid> PreRegisterAsync()
 		{
 			var accountId = Guid.NewGuid();
@@ -30,7 +33,7 @@ namespace Infrastructure.Services.Auth
 		}
 		public async Task<RegisterResult> RegisterAsync(RegisterCommand cmd)
 		{
-			var validationError = ValidateRegisterCommand(cmd);
+			var validationError = validator.ValidateRegister(cmd);
 			if (validationError is not null)
 				return RegisterResult.Fail(validationError.Value);
 
@@ -59,7 +62,7 @@ namespace Infrastructure.Services.Auth
 		}
 		public async Task<LoginResult> LoginAsync(LoginCommand cmd)
 		{
-			var validationError = ValidateLoginCommand(cmd);
+			var validationError = validator.ValidateLogin(cmd);
 			if (validationError is not null)
 				return LoginResult.Fail(validationError.Value);
 
@@ -74,7 +77,7 @@ namespace Infrastructure.Services.Auth
 					return LoginResult.Fail(LoginError.InvalidCredentials);
 				}
 
-				if (user.LockedUntil is not null && user.LockedUntil > now)
+				if (lockoutPolicy.IsLockedOut(user, now))
 				{
 					return LoginResult.Fail(LoginError.InvalidCredentials);
 				}
@@ -95,43 +98,17 @@ namespace Infrastructure.Services.Auth
 
 				if (!ok)
 				{
-					user.FailedLoginCount = Math.Min(user.FailedLoginCount + 1, MaxFailedLoginAttempts);
-					user.LastFailedLoginAt = now;
-					user.UpdatedAt = now;
-
-					if (user.FailedLoginCount >= MaxFailedLoginAttempts)
-					{
-						user.LockedUntil = now.Add(LockoutDuration);
-						user.FailedLoginCount = 0;
-					}
-
+					lockoutPolicy.RegisterFailedLogin(user, now);
 					await db.SaveChangesAsync();
 					return LoginResult.Fail(LoginError.InvalidCredentials);
 				}
 
+				lockoutPolicy.RegisterSuccessfulLogin(user, now);
 				user.LastLoginAt = now;
-				user.FailedLoginCount = 0;
-				user.LastFailedLoginAt = null;
-				user.LockedUntil = null;
-				user.UpdatedAt = now;
 
-				var (refreshToken, refreshHash) = AuthCryptoHelpers.MintRefreshToken();
-				var refreshExpires = now.Add(RefreshTtl);
-
-				db.RefreshTokens.Add(new RefreshToken
-				{
-					Id = Guid.NewGuid(),
-					UserId = user.Id,
-					TokenHash = refreshHash,
-					CreatedAt = now,
-					ExpiresAt = refreshExpires,
-					RevokedAt = null
-				});
-
-				await db.SaveChangesAsync();
-
+				var refreshIssue = await refreshTokenStore.MintAsync(user.Id, now);
 				var accessToken = tokenIssuer.IssueToken(user.Id);
-				return LoginResult.Ok(accessToken, refreshToken, refreshExpires);
+				return LoginResult.Ok(accessToken, refreshIssue.Token, refreshIssue.ExpiresAt);
 			}
 			finally
 			{
@@ -143,86 +120,38 @@ namespace Infrastructure.Services.Auth
 			if (string.IsNullOrWhiteSpace(cmd.RefreshToken))
 				return RefreshResult.Fail(RefreshError.MissingRefreshToken);
 
-			if (!AuthCryptoHelpers.TryHashRefreshToken(cmd.RefreshToken, out var hash))
-				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+			var now = DateTime.UtcNow;
+			var rotation = await refreshTokenStore.RotateAsync(cmd.RefreshToken, now);
 
-			try
+			switch (rotation.Status)
 			{
-				var now = DateTime.UtcNow;
-
-				var tokenRow = await db.RefreshTokens
-					.SingleOrDefaultAsync(x => x.TokenHash.SequenceEqual(hash));
-
-				if (tokenRow is null)
+				case RefreshTokenRotationStatus.Invalid:
 					return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
-
-				if (tokenRow.ExpiresAt <= now)
+				case RefreshTokenRotationStatus.Revoked:
+					if (rotation.UserId is not null)
+					{
+						await refreshTokenStore.RevokeAllAsync(rotation.UserId.Value, now);
+					}
 					return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+				case RefreshTokenRotationStatus.Rotated:
+					if (rotation.UserId is null || rotation.Token is null || rotation.ExpiresAt is null)
+						return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
 
-				if (tokenRow.RevokedAt is not null)
-				{
-					await LogoutAllAsync(tokenRow.UserId);
+					var access = tokenIssuer.IssueToken(rotation.UserId.Value);
+					return RefreshResult.Ok(access, rotation.Token, rotation.ExpiresAt.Value);
+				default:
 					return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
-				}
-
-				tokenRow.RevokedAt = now;
-
-				var (newToken, newHash) = AuthCryptoHelpers.MintRefreshToken();
-				var newExpires = now.Add(RefreshTtl);
-
-				db.RefreshTokens.Add(new RefreshToken
-				{
-					Id = Guid.NewGuid(),
-					UserId = tokenRow.UserId,
-					TokenHash = newHash,
-					CreatedAt = now,
-					ExpiresAt = newExpires,
-					RevokedAt = null
-				});
-
-				await db.SaveChangesAsync();
-
-				var access = tokenIssuer.IssueToken(tokenRow.UserId);
-				return RefreshResult.Ok(access, newToken, newExpires);
-			}
-			finally
-			{
-				CryptographicOperations.ZeroMemory(hash);
 			}
 		}
 		public async Task LogoutAsync(string refreshToken)
 		{
-			if (string.IsNullOrWhiteSpace(refreshToken))
-				return;
-
-			if (!AuthCryptoHelpers.TryHashRefreshToken(refreshToken, out var hash))
-				return;
-
-			try
-			{
-				var now = DateTime.UtcNow;
-
-				var rt = await db.RefreshTokens
-					.SingleOrDefaultAsync(x => x.TokenHash.SequenceEqual(hash) && x.RevokedAt == null);
-
-				if (rt is null)
-					return;
-
-				rt.RevokedAt = now;
-				await db.SaveChangesAsync();
-			}
-			finally
-			{
-				CryptographicOperations.ZeroMemory(hash);
-			}
+			var now = DateTime.UtcNow;
+			await refreshTokenStore.RevokeAsync(refreshToken, now);
 		}
 		public async Task LogoutAllAsync(Guid accountId)
 		{
 			var now = DateTime.UtcNow;
-
-			await db.RefreshTokens
-				.Where(rt => rt.UserId == accountId && rt.RevokedAt == null)
-				.ExecuteUpdateAsync(s => s.SetProperty(rt => rt.RevokedAt, now));
+			await refreshTokenStore.RevokeAllAsync(accountId, now);
 		}
 
 		// helps with attackers trying to guess if an AccountId exists
@@ -243,32 +172,6 @@ namespace Infrastructure.Services.Auth
 		}
 
 		// these methods were made purely to increase readability of the main async ones
-		private static RegisterError? ValidateRegisterCommand(RegisterCommand cmd)
-		{
-			if (cmd.CryptoSchemaVer != 1)
-				return RegisterError.UnsupportedCryptoSchema;
-
-			if (cmd.Verifier.Length != CryptoSizes.VerifierLen || cmd.S_Pwd.Length != CryptoSizes.SaltLen)
-				return RegisterError.InvalidCryptoBlob;
-
-			if (!AuthCryptoHelpers.IsValidMkWrap(cmd.MkWrapPwd))
-				return RegisterError.InvalidCryptoBlob;
-
-			if (cmd.MkWrapRk is not null && !AuthCryptoHelpers.IsValidMkWrap(cmd.MkWrapRk))
-				return RegisterError.InvalidCryptoBlob;
-
-			if (cmd.KdfMode is not KdfMode.Default and not KdfMode.Strong)
-				return RegisterError.InvalidKdfMode;
-
-			return null;
-		}
-		private static LoginError? ValidateLoginCommand(LoginCommand cmd)
-		{
-			if (cmd.Verifier.Length != CryptoSizes.VerifierLen)
-				return LoginError.InvalidCredentials;
-
-			return null;
-		}
 		private static User CreateUserFromRegisterCommand(RegisterCommand cmd, byte[] sVerifier, byte[] verifier)
 		{
 			var now = DateTime.UtcNow;

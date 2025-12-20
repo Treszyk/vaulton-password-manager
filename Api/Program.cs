@@ -66,6 +66,9 @@ namespace Api
 			builder.Services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
 			builder.Services.AddSingleton<AuthCryptoOptions>();
 			builder.Services.AddSingleton<AuthCryptoHelpers>();
+			builder.Services.AddSingleton<IAuthCommandValidator, AuthCommandValidator>();
+			builder.Services.AddSingleton<ILockoutPolicy, LockoutPolicy>();
+			builder.Services.AddScoped<IRefreshTokenStore, RefreshTokenStore>();
 			builder.Services.AddScoped<IAuthService, AuthService>();
 
 			var jwtSecret = builder.Configuration["Jwt:Secret"]
