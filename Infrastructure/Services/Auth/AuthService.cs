@@ -28,7 +28,6 @@ namespace Infrastructure.Services.Auth
 
 			return accountId;
 		}
-
 		public async Task<RegisterResult> RegisterAsync(RegisterCommand cmd)
 		{
 			var validationError = ValidateRegisterCommand(cmd);
@@ -58,84 +57,87 @@ namespace Infrastructure.Services.Auth
 				CryptographicOperations.ZeroMemory(cmd.Verifier);
 			}
 		}
-
 		public async Task<LoginResult> LoginAsync(LoginCommand cmd)
 		{
 			var validationError = ValidateLoginCommand(cmd);
 			if (validationError is not null)
 				return LoginResult.Fail(validationError.Value);
 
-			var now = DateTime.UtcNow;
-			var user = await db.Users.SingleOrDefaultAsync(u => u.Id == cmd.AccountId);
-
-			if (user is null)
-			{
-				DoDummyVerifierWork();
-				return LoginResult.Fail(LoginError.InvalidCredentials);
-			}
-
-			if (user.LockedUntil is not null && user.LockedUntil > now)
-			{
-				return LoginResult.Fail(LoginError.InvalidCredentials);
-			}
-
-			var computed = cryptoHelpers.ComputeStoredVerifier(cmd.Verifier, user.S_Verifier);
-
-			// constant-time comparison helps against timing attacks
-			var ok = false;
 			try
 			{
-				ok =
-					user.Verifier.Length == computed.Length &&
-					CryptographicOperations.FixedTimeEquals(user.Verifier, computed);
+				var now = DateTime.UtcNow;
+				var user = await db.Users.SingleOrDefaultAsync(u => u.Id == cmd.AccountId);
+
+				if (user is null)
+				{
+					DoDummyVerifierWork();
+					return LoginResult.Fail(LoginError.InvalidCredentials);
+				}
+
+				if (user.LockedUntil is not null && user.LockedUntil > now)
+				{
+					return LoginResult.Fail(LoginError.InvalidCredentials);
+				}
+
+				var computed = cryptoHelpers.ComputeStoredVerifier(cmd.Verifier, user.S_Verifier);
+
+				var ok = false;
+				try
+				{
+					ok =
+						user.Verifier.Length == computed.Length &&
+						CryptographicOperations.FixedTimeEquals(user.Verifier, computed);
+				}
+				finally
+				{
+					CryptographicOperations.ZeroMemory(computed);
+				}
+
+				if (!ok)
+				{
+					user.FailedLoginCount = Math.Min(user.FailedLoginCount + 1, MaxFailedLoginAttempts);
+					user.LastFailedLoginAt = now;
+					user.UpdatedAt = now;
+
+					if (user.FailedLoginCount >= MaxFailedLoginAttempts)
+					{
+						user.LockedUntil = now.Add(LockoutDuration);
+						user.FailedLoginCount = 0;
+					}
+
+					await db.SaveChangesAsync();
+					return LoginResult.Fail(LoginError.InvalidCredentials);
+				}
+
+				user.LastLoginAt = now;
+				user.FailedLoginCount = 0;
+				user.LastFailedLoginAt = null;
+				user.LockedUntil = null;
+				user.UpdatedAt = now;
+
+				var (refreshToken, refreshHash) = AuthCryptoHelpers.MintRefreshToken();
+				var refreshExpires = now.Add(RefreshTtl);
+
+				db.RefreshTokens.Add(new RefreshToken
+				{
+					Id = Guid.NewGuid(),
+					UserId = user.Id,
+					TokenHash = refreshHash,
+					CreatedAt = now,
+					ExpiresAt = refreshExpires,
+					RevokedAt = null
+				});
+
+				await db.SaveChangesAsync();
+
+				var accessToken = tokenIssuer.IssueToken(user.Id);
+				return LoginResult.Ok(accessToken, refreshToken, refreshExpires);
 			}
 			finally
 			{
-				CryptographicOperations.ZeroMemory(computed);
+				CryptographicOperations.ZeroMemory(cmd.Verifier);
 			}
-
-			if (!ok)
-			{
-				user.FailedLoginCount = Math.Min(user.FailedLoginCount + 1, MaxFailedLoginAttempts);
-				user.LastFailedLoginAt = now;
-				user.UpdatedAt = now;
-
-				if (user.FailedLoginCount >= MaxFailedLoginAttempts)
-				{
-					user.LockedUntil = now.Add(LockoutDuration);
-					user.FailedLoginCount = 0;
-				}
-
-				await db.SaveChangesAsync();
-				return LoginResult.Fail(LoginError.InvalidCredentials);
-			}
-
-			// metadata update
-			user.LastLoginAt = now;
-			user.FailedLoginCount = 0;
-			user.LastFailedLoginAt = null;
-			user.LockedUntil = null;
-			user.UpdatedAt = now;
-
-			var (refreshToken, refreshHash) = AuthCryptoHelpers.MintRefreshToken();
-			var refreshExpires = now.Add(RefreshTtl);
-
-			db.RefreshTokens.Add(new RefreshToken
-			{
-				Id = Guid.NewGuid(),
-				UserId = user.Id,
-				TokenHash = refreshHash,
-				CreatedAt = now,
-				ExpiresAt = refreshExpires,
-				RevokedAt = null
-			});
-
-			await db.SaveChangesAsync();
-
-			var accessToken = tokenIssuer.IssueToken(user.Id);
-			return LoginResult.Ok(accessToken, refreshToken, refreshExpires);
 		}
-
 		public async Task<RefreshResult> RefreshAsync(RefreshCommand cmd)
 		{
 			if (string.IsNullOrWhiteSpace(cmd.RefreshToken))
@@ -144,45 +146,50 @@ namespace Infrastructure.Services.Auth
 			if (!AuthCryptoHelpers.TryHashRefreshToken(cmd.RefreshToken, out var hash))
 				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
 
-			var now = DateTime.UtcNow;
-
-			var tokenRow = await db.RefreshTokens
-				.SingleOrDefaultAsync(x => x.TokenHash == hash);
-
-			if (tokenRow is null)
-				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
-
-			if (tokenRow.ExpiresAt <= now)
-				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
-
-			// reuse detection
-			if (tokenRow.RevokedAt is not null)
+			try
 			{
-				await LogoutAllAsync(tokenRow.UserId);
-				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+				var now = DateTime.UtcNow;
+
+				var tokenRow = await db.RefreshTokens
+					.SingleOrDefaultAsync(x => x.TokenHash.SequenceEqual(hash));
+
+				if (tokenRow is null)
+					return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+
+				if (tokenRow.ExpiresAt <= now)
+					return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+
+				if (tokenRow.RevokedAt is not null)
+				{
+					await LogoutAllAsync(tokenRow.UserId);
+					return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+				}
+
+				tokenRow.RevokedAt = now;
+
+				var (newToken, newHash) = AuthCryptoHelpers.MintRefreshToken();
+				var newExpires = now.Add(RefreshTtl);
+
+				db.RefreshTokens.Add(new RefreshToken
+				{
+					Id = Guid.NewGuid(),
+					UserId = tokenRow.UserId,
+					TokenHash = newHash,
+					CreatedAt = now,
+					ExpiresAt = newExpires,
+					RevokedAt = null
+				});
+
+				await db.SaveChangesAsync();
+
+				var access = tokenIssuer.IssueToken(tokenRow.UserId);
+				return RefreshResult.Ok(access, newToken, newExpires);
 			}
-
-			tokenRow.RevokedAt = now;
-
-			var (newToken, newHash) = AuthCryptoHelpers.MintRefreshToken();
-			var newExpires = now.Add(RefreshTtl);
-
-			db.RefreshTokens.Add(new RefreshToken
+			finally
 			{
-				Id = Guid.NewGuid(),
-				UserId = tokenRow.UserId,
-				TokenHash = newHash,
-				CreatedAt = now,
-				ExpiresAt = newExpires,
-				RevokedAt = null
-			});
-
-			await db.SaveChangesAsync();
-
-			var access = tokenIssuer.IssueToken(tokenRow.UserId);
-			return RefreshResult.Ok(access, newToken, newExpires);
+				CryptographicOperations.ZeroMemory(hash);
+			}
 		}
-
 		public async Task LogoutAsync(string refreshToken)
 		{
 			if (string.IsNullOrWhiteSpace(refreshToken))
@@ -191,16 +198,23 @@ namespace Infrastructure.Services.Auth
 			if (!AuthCryptoHelpers.TryHashRefreshToken(refreshToken, out var hash))
 				return;
 
-			var now = DateTime.UtcNow;
+			try
+			{
+				var now = DateTime.UtcNow;
 
-			var rt = await db.RefreshTokens
-				.SingleOrDefaultAsync(x => x.TokenHash == hash && x.RevokedAt == null);
+				var rt = await db.RefreshTokens
+					.SingleOrDefaultAsync(x => x.TokenHash.SequenceEqual(hash) && x.RevokedAt == null);
 
-			if (rt is null)
-				return;
+				if (rt is null)
+					return;
 
-			rt.RevokedAt = now;
-			await db.SaveChangesAsync();
+				rt.RevokedAt = now;
+				await db.SaveChangesAsync();
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(hash);
+			}
 		}
 		public async Task LogoutAllAsync(Guid accountId)
 		{
@@ -248,7 +262,6 @@ namespace Infrastructure.Services.Auth
 
 			return null;
 		}
-
 		private static LoginError? ValidateLoginCommand(LoginCommand cmd)
 		{
 			if (cmd.Verifier.Length != CryptoSizes.VerifierLen)
@@ -256,7 +269,6 @@ namespace Infrastructure.Services.Auth
 
 			return null;
 		}
-
 		private static User CreateUserFromRegisterCommand(RegisterCommand cmd, byte[] sVerifier, byte[] verifier)
 		{
 			var now = DateTime.UtcNow;

@@ -48,15 +48,34 @@ namespace Infrastructure.Services.Auth
 		public static bool TryHashRefreshToken(string token, out byte[] hash)
 		{
 			hash = Array.Empty<byte>();
+			if (token.Length < 86 || token.Length > 88)
+			{
+				return false;
+			}
+
+			byte[] raw;
 			try
 			{
-				var raw = WebEncoders.Base64UrlDecode(token);
-				hash = SHA256.HashData(raw);
-				return true;
+				raw = WebEncoders.Base64UrlDecode(token);
 			}
 			catch
 			{
 				return false;
+			}
+
+			try
+			{
+				if (raw.Length != 64)
+				{
+					return false;
+				}
+
+				hash = SHA256.HashData(raw);
+				return true;
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(raw);
 			}
 		}
 	}
