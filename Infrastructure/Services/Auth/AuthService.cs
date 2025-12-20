@@ -12,6 +12,8 @@ namespace Infrastructure.Services.Auth
 	public sealed class AuthService(VaultonDbContext db, ITokenIssuer tokenIssuer, AuthCryptoHelpers cryptoHelpers) : IAuthService
 	{
 		private static readonly TimeSpan RefreshTtl = TimeSpan.FromDays(7);
+		private const int MaxFailedLoginAttempts = 5;
+		private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
 
 		public async Task<Guid> PreRegisterAsync()
 		{
@@ -63,10 +65,17 @@ namespace Infrastructure.Services.Auth
 			if (validationError is not null)
 				return LoginResult.Fail(validationError.Value);
 
+			var now = DateTime.UtcNow;
 			var user = await db.Users.SingleOrDefaultAsync(u => u.Id == cmd.AccountId);
+
 			if (user is null)
 			{
 				DoDummyVerifierWork();
+				return LoginResult.Fail(LoginError.InvalidCredentials);
+			}
+
+			if (user.LockedUntil is not null && user.LockedUntil > now)
+			{
 				return LoginResult.Fail(LoginError.InvalidCredentials);
 			}
 
@@ -87,12 +96,25 @@ namespace Infrastructure.Services.Auth
 
 			if (!ok)
 			{
+				user.FailedLoginCount = Math.Min(user.FailedLoginCount + 1, MaxFailedLoginAttempts);
+				user.LastFailedLoginAt = now;
+				user.UpdatedAt = now;
+
+				if (user.FailedLoginCount >= MaxFailedLoginAttempts)
+				{
+					user.LockedUntil = now.Add(LockoutDuration);
+					user.FailedLoginCount = 0;
+				}
+
+				await db.SaveChangesAsync();
 				return LoginResult.Fail(LoginError.InvalidCredentials);
 			}
 
 			// metadata update
-			var now = DateTime.UtcNow;
 			user.LastLoginAt = now;
+			user.FailedLoginCount = 0;
+			user.LastFailedLoginAt = null;
+			user.LockedUntil = null;
 			user.UpdatedAt = now;
 
 			var (refreshToken, refreshHash) = AuthCryptoHelpers.MintRefreshToken();
@@ -254,7 +276,10 @@ namespace Infrastructure.Services.Auth
 
 				CreatedAt = now,
 				UpdatedAt = now,
-				LastLoginAt = null
+				LastLoginAt = null,
+				FailedLoginCount = 0,
+				LastFailedLoginAt = null,
+				LockedUntil = null
 			};
 		}
 	}

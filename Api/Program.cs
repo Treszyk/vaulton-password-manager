@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json;
+using System.Threading.RateLimiting;
 
 namespace Api
 {
@@ -99,6 +100,23 @@ namespace Api
 				});
 
 			builder.Services.AddAuthorization();
+			builder.Services.AddRateLimiter(options =>
+			{
+				options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+				options.AddPolicy("AuthPolicy", context =>
+				{
+					var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+					return RateLimitPartition.GetFixedWindowLimiter(
+						ip,
+						_ => new FixedWindowRateLimiterOptions
+						{
+							PermitLimit = 10,
+							Window = TimeSpan.FromMinutes(1),
+							QueueLimit = 0,
+							AutoReplenishment = true
+						});
+				});
+			});
 
 			var app = builder.Build();
 
@@ -124,6 +142,7 @@ namespace Api
 				app.UseHttpsRedirection();
 			}
 
+			app.UseRateLimiter();
 			app.UseAuthentication();
 			app.UseAuthorization();
 			app.MapControllers();

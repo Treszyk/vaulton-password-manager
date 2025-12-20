@@ -5,6 +5,7 @@ using Application.Services.Auth.Errors;
 using Core.Crypto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -28,6 +29,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	};
 
 	[HttpPost("pre-register")]
+	[EnableRateLimiting("AuthPolicy")]
 	public async Task<ActionResult<PreRegisterResponse>> PreRegister()
 	{
 		var accountId = await _auth.PreRegisterAsync();
@@ -35,6 +37,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	}
 
 	[HttpPost("register")]
+	[EnableRateLimiting("AuthPolicy")]
 	public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request)
 	{
 		var mkWrapPwd = new EncryptedValue
@@ -82,6 +85,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 
 
 	[HttpPost("login")]
+	[EnableRateLimiting("AuthPolicy")]
 	public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
 	{
 		var cmd = new LoginCommand(request.AccountId, request.Verifier);
@@ -102,6 +106,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	}
 
 	[HttpPost("refresh")]
+	[EnableRateLimiting("AuthPolicy")]
 	public async Task<ActionResult<LoginResponse>> Refresh()
 	{
 		if (!Request.Cookies.TryGetValue(RefreshCookieName, out var rt) || string.IsNullOrWhiteSpace(rt))
