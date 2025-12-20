@@ -29,49 +29,20 @@ namespace Infrastructure.Services.Auth
 
 		public async Task<RegisterResult> RegisterAsync(RegisterCommand cmd)
 		{
-			if (cmd.CryptoSchemaVer != 1)
-				return RegisterResult.Fail(RegisterError.UnsupportedCryptoSchema);
+			var validationError = ValidateRegisterCommand(cmd);
+			if (validationError is not null)
+				return RegisterResult.Fail(validationError.Value);
 
 			var exists = await db.Users.AnyAsync(u => u.Id == cmd.AccountId);
 			if (exists)
 				return RegisterResult.Fail(RegisterError.AccountExists);
-
-			if (cmd.Verifier.Length != CryptoSizes.VerifierLen || cmd.S_Pwd.Length != CryptoSizes.SaltLen)
-				return RegisterResult.Fail(RegisterError.InvalidCryptoBlob);
-
-			if (!cryptoHelpers.IsValidMkWrap(cmd.MkWrapPwd))
-				return RegisterResult.Fail(RegisterError.InvalidCryptoBlob);
-
-			if (cmd.MkWrapRk is not null && !cryptoHelpers.IsValidMkWrap(cmd.MkWrapRk))
-				return RegisterResult.Fail(RegisterError.InvalidCryptoBlob);
-
-			if (cmd.KdfMode is not KdfMode.Default and not KdfMode.Strong)
-				return RegisterResult.Fail(RegisterError.InvalidKdfMode);
 
 			var sVerifier = new byte[CryptoSizes.SaltLen];
 			RandomNumberGenerator.Fill(sVerifier);
 
 			var storedVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.Verifier, sVerifier);
 
-			var now = DateTime.UtcNow;
-
-			var user = new User
-			{
-				Id = cmd.AccountId,
-				Verifier = storedVerifier,
-				S_Verifier = sVerifier,
-				S_Pwd = cmd.S_Pwd,
-				KdfMode = cmd.KdfMode,
-
-				MkWrapPwd = cmd.MkWrapPwd,
-				MkWrapRk = cmd.MkWrapRk,
-
-				CryptoSchemaVer = cmd.CryptoSchemaVer,
-
-				CreatedAt = now,
-				UpdatedAt = now,
-				LastLoginAt = null
-			};
+			var user = CreateUserFromRegisterCommand(cmd, sVerifier, storedVerifier);
 
 			db.Users.Add(user);
 			await db.SaveChangesAsync();
@@ -81,6 +52,10 @@ namespace Infrastructure.Services.Auth
 
 		public async Task<LoginResult> LoginAsync(LoginCommand cmd)
 		{
+			var validationError = ValidateLoginCommand(cmd);
+			if (validationError is not null)
+				return LoginResult.Fail(validationError.Value);
+
 			var user = await db.Users.SingleOrDefaultAsync(u => u.Id == cmd.AccountId);
 			if (user is null)
 			{
@@ -208,5 +183,56 @@ namespace Infrastructure.Services.Auth
 			_ = cryptoHelpers.ComputeStoredVerifier(dummyVerifier, dummySalt);
 		}
 
+		// these methods were made purely to increase readability of the main async ones
+		private RegisterError? ValidateRegisterCommand(RegisterCommand cmd)
+		{
+			if (cmd.CryptoSchemaVer != 1)
+				return RegisterError.UnsupportedCryptoSchema;
+
+			if (cmd.Verifier.Length != CryptoSizes.VerifierLen || cmd.S_Pwd.Length != CryptoSizes.SaltLen)
+				return RegisterError.InvalidCryptoBlob;
+
+			if (!cryptoHelpers.IsValidMkWrap(cmd.MkWrapPwd))
+				return RegisterError.InvalidCryptoBlob;
+
+			if (cmd.MkWrapRk is not null && !cryptoHelpers.IsValidMkWrap(cmd.MkWrapRk))
+				return RegisterError.InvalidCryptoBlob;
+
+			if (cmd.KdfMode is not KdfMode.Default and not KdfMode.Strong)
+				return RegisterError.InvalidKdfMode;
+
+			return null;
+		}
+
+		private static LoginError? ValidateLoginCommand(LoginCommand cmd)
+		{
+			if (cmd.Verifier.Length != CryptoSizes.VerifierLen)
+				return LoginError.InvalidCredentials;
+
+			return null;
+		}
+
+		private static User CreateUserFromRegisterCommand(RegisterCommand cmd, byte[] sVerifier, byte[] verifier)
+		{
+			var now = DateTime.UtcNow;
+
+			return new User
+			{
+				Id = cmd.AccountId,
+				Verifier = verifier,
+				S_Verifier = sVerifier,
+				S_Pwd = cmd.S_Pwd,
+				KdfMode = cmd.KdfMode,
+
+				MkWrapPwd = cmd.MkWrapPwd,
+				MkWrapRk = cmd.MkWrapRk,
+
+				CryptoSchemaVer = cmd.CryptoSchemaVer,
+
+				CreatedAt = now,
+				UpdatedAt = now,
+				LastLoginAt = null
+			};
+		}
 	}
 }
