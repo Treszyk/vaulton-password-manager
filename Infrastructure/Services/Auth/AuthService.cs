@@ -42,12 +42,19 @@ namespace Infrastructure.Services.Auth
 
 			var storedVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.Verifier, sVerifier);
 
-			var user = CreateUserFromRegisterCommand(cmd, sVerifier, storedVerifier);
+			try
+			{
+				var user = CreateUserFromRegisterCommand(cmd, sVerifier, storedVerifier);
 
-			db.Users.Add(user);
-			await db.SaveChangesAsync();
+				db.Users.Add(user);
+				await db.SaveChangesAsync();
 
-			return RegisterResult.Ok(user.Id);
+				return RegisterResult.Ok(user.Id);
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(cmd.Verifier);
+			}
 		}
 
 		public async Task<LoginResult> LoginAsync(LoginCommand cmd)
@@ -66,9 +73,17 @@ namespace Infrastructure.Services.Auth
 			var computed = cryptoHelpers.ComputeStoredVerifier(cmd.Verifier, user.S_Verifier);
 
 			// constant-time comparison helps against timing attacks
-			var ok =
-				user.Verifier.Length == computed.Length &&
-				CryptographicOperations.FixedTimeEquals(user.Verifier, computed);
+			var ok = false;
+			try
+			{
+				ok =
+					user.Verifier.Length == computed.Length &&
+					CryptographicOperations.FixedTimeEquals(user.Verifier, computed);
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(computed);
+			}
 
 			if (!ok)
 			{
@@ -80,7 +95,7 @@ namespace Infrastructure.Services.Auth
 			user.LastLoginAt = now;
 			user.UpdatedAt = now;
 
-			var (refreshToken, refreshHash) = cryptoHelpers.MintRefreshToken();
+			var (refreshToken, refreshHash) = AuthCryptoHelpers.MintRefreshToken();
 			var refreshExpires = now.Add(RefreshTtl);
 
 			db.RefreshTokens.Add(new RefreshToken
@@ -104,7 +119,7 @@ namespace Infrastructure.Services.Auth
 			if (string.IsNullOrWhiteSpace(cmd.RefreshToken))
 				return RefreshResult.Fail(RefreshError.MissingRefreshToken);
 
-			if (!cryptoHelpers.TryHashRefreshToken(cmd.RefreshToken, out var hash))
+			if (!AuthCryptoHelpers.TryHashRefreshToken(cmd.RefreshToken, out var hash))
 				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
 
 			var now = DateTime.UtcNow;
@@ -127,7 +142,7 @@ namespace Infrastructure.Services.Auth
 
 			tokenRow.RevokedAt = now;
 
-			var (newToken, newHash) = cryptoHelpers.MintRefreshToken();
+			var (newToken, newHash) = AuthCryptoHelpers.MintRefreshToken();
 			var newExpires = now.Add(RefreshTtl);
 
 			db.RefreshTokens.Add(new RefreshToken
@@ -151,7 +166,7 @@ namespace Infrastructure.Services.Auth
 			if (string.IsNullOrWhiteSpace(refreshToken))
 				return;
 
-			if (!cryptoHelpers.TryHashRefreshToken(refreshToken, out var hash))
+			if (!AuthCryptoHelpers.TryHashRefreshToken(refreshToken, out var hash))
 				return;
 
 			var now = DateTime.UtcNow;
@@ -180,11 +195,19 @@ namespace Infrastructure.Services.Auth
 			var dummyVerifier = new byte[CryptoSizes.VerifierLen];
 			var dummySalt = new byte[CryptoSizes.SaltLen];
 
-			_ = cryptoHelpers.ComputeStoredVerifier(dummyVerifier, dummySalt);
+			try
+			{
+				_ = cryptoHelpers.ComputeStoredVerifier(dummyVerifier, dummySalt);
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(dummyVerifier);
+				CryptographicOperations.ZeroMemory(dummySalt);
+			}
 		}
 
 		// these methods were made purely to increase readability of the main async ones
-		private RegisterError? ValidateRegisterCommand(RegisterCommand cmd)
+		private static RegisterError? ValidateRegisterCommand(RegisterCommand cmd)
 		{
 			if (cmd.CryptoSchemaVer != 1)
 				return RegisterError.UnsupportedCryptoSchema;
@@ -192,10 +215,10 @@ namespace Infrastructure.Services.Auth
 			if (cmd.Verifier.Length != CryptoSizes.VerifierLen || cmd.S_Pwd.Length != CryptoSizes.SaltLen)
 				return RegisterError.InvalidCryptoBlob;
 
-			if (!cryptoHelpers.IsValidMkWrap(cmd.MkWrapPwd))
+			if (!AuthCryptoHelpers.IsValidMkWrap(cmd.MkWrapPwd))
 				return RegisterError.InvalidCryptoBlob;
 
-			if (cmd.MkWrapRk is not null && !cryptoHelpers.IsValidMkWrap(cmd.MkWrapRk))
+			if (cmd.MkWrapRk is not null && !AuthCryptoHelpers.IsValidMkWrap(cmd.MkWrapRk))
 				return RegisterError.InvalidCryptoBlob;
 
 			if (cmd.KdfMode is not KdfMode.Default and not KdfMode.Strong)

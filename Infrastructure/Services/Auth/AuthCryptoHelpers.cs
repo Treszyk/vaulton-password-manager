@@ -12,26 +12,40 @@ namespace Infrastructure.Services.Auth
 			Buffer.BlockCopy(verifierRaw, 0, input, 0, verifierRaw.Length);
 			Buffer.BlockCopy(options.VerifierPepperBytes, 0, input, verifierRaw.Length, options.VerifierPepperBytes.Length);
 
-			using var pbkdf2 = new Rfc2898DeriveBytes(input, salt, options.VerifierPbkdf2Iterations, HashAlgorithmName.SHA256);
-			return pbkdf2.GetBytes(CryptoSizes.VerifierLen);
+			try
+			{
+				using var pbkdf2 = new Rfc2898DeriveBytes(input, salt, options.VerifierPbkdf2Iterations, HashAlgorithmName.SHA256);
+				return pbkdf2.GetBytes(CryptoSizes.VerifierLen);
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(input);
+			}
 		}
 
-		public bool IsValidMkWrap(EncryptedValue w)
+		public static bool IsValidMkWrap(EncryptedValue w)
 		{
 			return w.Nonce is { Length: CryptoSizes.GcmNonceLen }
 				&& w.Tag is { Length: CryptoSizes.GcmTagLen }
 				&& w.CipherText is { Length: CryptoSizes.MkLen };
 		}
 
-		public (string token, byte[] tokenHash) MintRefreshToken()
+		public static (string token, byte[] tokenHash) MintRefreshToken()
 		{
 			var raw = RandomNumberGenerator.GetBytes(64);
-			var token = WebEncoders.Base64UrlEncode(raw);
-			var hash = SHA256.HashData(raw);
-			return (token, hash);
+			try
+			{
+				var token = WebEncoders.Base64UrlEncode(raw);
+				var hash = SHA256.HashData(raw);
+				return (token, hash);
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(raw);
+			}
 		}
 
-		public bool TryHashRefreshToken(string token, out byte[] hash)
+		public static bool TryHashRefreshToken(string token, out byte[] hash)
 		{
 			hash = Array.Empty<byte>();
 			try
