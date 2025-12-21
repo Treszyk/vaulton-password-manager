@@ -9,6 +9,7 @@ public sealed record EncryptedValueDto(
 	byte[] Nonce,
 
 	[param: Required]
+	[param: MinLength(1)]
 	[property: JsonPropertyName("CipherText")]
 	byte[] CipherText,
 

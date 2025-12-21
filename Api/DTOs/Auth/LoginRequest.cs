@@ -1,9 +1,11 @@
-﻿using Core.Crypto;
+﻿using Api.Validation;
+using Core.Crypto;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 public sealed record LoginRequest(
 	[param: Required]
+	[param: RequiredNonDefault]
 	[property: JsonPropertyName("AccountId")]
 	Guid AccountId,
 
