@@ -3,6 +3,8 @@ using Core.Crypto;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+namespace Api.DTOs.Auth;
+
 public sealed record LoginRequest(
 	[param: Required]
 	[param: RequiredNonDefault]

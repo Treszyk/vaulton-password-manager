@@ -1,7 +1,10 @@
-﻿using Api.Validation;
+﻿using Api.DTOs.Crypto;
+using Api.Validation;
 using Core.Crypto;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+
+namespace Api.DTOs.Auth;
 
 public sealed record RegisterRequest(
 	[param: Required]

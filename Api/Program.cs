@@ -1,9 +1,11 @@
 using Api.Health;
 using Api.Startup;
 using Application.Services.Auth;
+using Application.Services.Vault;
 using Infrastructure.Data;
 using Infrastructure.Security;
 using Infrastructure.Services.Auth;
+using Infrastructure.Services.Vault;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
@@ -70,6 +72,7 @@ namespace Api
 			builder.Services.AddSingleton<ILockoutPolicy, LockoutPolicy>();
 			builder.Services.AddScoped<IRefreshTokenStore, RefreshTokenStore>();
 			builder.Services.AddScoped<IAuthService, AuthService>();
+			builder.Services.AddScoped<IVaultService, VaultService>();
 
 			var jwtSecret = builder.Configuration["Jwt:Secret"]
 				?? throw new InvalidOperationException("Missing Jwt:Secret");

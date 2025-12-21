@@ -2,6 +2,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+namespace Api.DTOs.Crypto;
+
 public sealed record EncryptedValueDto(
 	[param: Required]
 	[param: Length(CryptoSizes.GcmNonceLen, CryptoSizes.GcmNonceLen)]
