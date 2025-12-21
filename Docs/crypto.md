@@ -7,7 +7,7 @@ This doc describes how Vaulton derives keys, encrypts data and maps cryptographi
 **Goals:**
 
 - The server should and **will** never see the master password or master key in plaintext form.
-- Only opaque ciphertexts, salts, key-wrapping blobs and user-specific Argon2id params are persisted in the database
+- Only opaque ciphertexts, salts, key-wrapping blobs and a user-selected KDF mode are persisted in the database
 - A database-only compromise **should not** allow the attacker to decrypt the vault data
 
 **Trade-offs**
@@ -25,18 +25,18 @@ This doc describes how Vaulton derives keys, encrypts data and maps cryptographi
 
 ### 3.1 Client-side primitives
 
-#### **Argon2id**
+#### **Password KDF mode (Argon2id-backed on the client)**
 
-Used to derive a high-entropy root key `K_argon` from the master password and a per-user salt `S_Pwd`. Parameters (per user) are stored in the database:
+Vaulton stores a coarse-grained `KdfMode` selector instead of per-user Argon2 parameters. The client still runs Argon2id and maps the mode to a concrete Argon2id profile (currently aligned with libsodium defaults):
 
-- `ArgonMem` (memory cost)
-- `ArgonTime` (iterations)
-- `ArgonLanes` (parallelism)
-- `ArgonVersion`
+- `KdfMode = 1` → Default profile
+- `KdfMode = 2` → Strong profile
+
+The per-user salt `S_Pwd` (16 bytes) is stored in the database.
 
 #### **HKDF (HMAC-SHA-256)**
 
-Used to split `K_argon` into multiple independent keys:
+Used to split the password-derived root key into multiple independent keys:
 
 - `K_vrf` (verifier key for auth)
 - `K_kek` (key-encryption key for wrapping the Master Key)
@@ -46,20 +46,29 @@ HKDF uses fixed, public `info` strings (e.g. `"vaulton/verifier"`, `"vaulton/mk-
 #### **Master Key (MK) and tag key**
 
 - The Master Key (`MK`) is a randomly generated high-entropy symmetric key (e.g. 256 bits), created on the client during registration.
-- `MK` is never sent to the server in plaintext and is used to encrypt vault entries with AES-GCM.
-- From `MK`, Vaulton derives a separate key for deterministic domain tags using HKDF:
+- `MK` is never sent to the server in plaintext and is **not** used directly for encryption.
+- From `MK`, Vaulton derives:
+  - `K_enc` for encrypting vault entries with AES-GCM, and
+  - `K_tag` for deterministic domain tags.
 
+  `K_enc = HKDF(MK, info = "vaulton/entry-enc")`
   `K_tag = HKDF(MK, info = "vaulton/domain-tag")`
 
-Deriving `K_tag` from `MK` (instead of from `K_argon`) keeps domain tags independent of password changes: as long as `MK` stays the same, `K_tag` and all existing tags remain valid. A password change only re-wraps `MK` with a new `K_kek` and updates the verifier; it does not require re-tagging all entries.
+Deriving `K_tag` from `MK` (instead of from the password-derived root key) keeps domain tags independent of password changes: as long as `MK` stays the same, `K_tag` and all existing tags remain valid. A password change only re-wraps `MK` with a new `K_kek` and updates the verifier; it does not require re-tagging all entries.
 
 #### **AES-GCM (AEAD)**
 
 Used on the client to encrypt:
 
-- The randomly generated Master Key (`MK`) under `K_kek` -> `MK_Wrap_Pwd`
-- (Planned) MK under randomly generated user-held Recovery Key `K_rk` -> `MK_Wrap_Rk`
-- Each vault entry JSON under `MK` -> per-entry { `Nonce`, `CipherText`, `Tag` }
+- The randomly generated Master Key (`MK`) under `K_kek` -> `MKWrapPwd`
+- (Planned) MK under randomly generated user-held Recovery Key `K_rk` -> `MKWrapRk`
+- Each vault entry JSON under `K_enc` -> per-entry { `Nonce`, `CipherText`, `Tag` }
+
+`MKWrapPwd`/`MKWrapRk` are structured values:
+
+- `Nonce` (12 bytes)
+- `CipherText` (32 bytes, the wrapped `MK`)
+- `Tag` (16 bytes)
 
 Provides confidentiality + integrity,
 

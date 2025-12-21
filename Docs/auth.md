@@ -1,6 +1,6 @@
 # Vaulton's auth design
 
-This document describes how accounts are created and authenticated in Vaulton. It focuses on the HTTP API, request/response contracts and the session model. Cryptographic details (Argon2id, HKDF, wraps, domain tags, PIN unlock) are described in `crypto.md`.
+This document describes how accounts are created and authenticated in Vaulton. It focuses on the HTTP API, request/response contracts and the session model. Cryptographic details (KDF modes, HKDF, wraps, domain tags, PIN unlock) are described in `crypto.md`.
 
 ## 1. Overview
 
@@ -11,12 +11,12 @@ Vaulton uses an anonymous, AccountId-only identity model:
 - Authentication is based on a **client-derived verifier** (`K_vrf`) and a **server-side PBKDF2+pepper hash**.
 - After successful login the server issues:
   - a short-lived **JWT access token** (returned in the JSON response), and
-  - a long-lived **refresh token** stored as an HttpOnly, Secure, SameSite cookie.
+  - a long-lived **refresh token** stored as an HttpOnly cookie (`Vaulton.Refresh`).
 
 Registration is split into two steps:
 
 1. A **pre-register handshake** to obtain a fresh `AccountId`.
-2. A **register** call where the client uploads its cryptographic material (verifier, salts, MK wraps, Argon2 parameters, schema version).
+2. A **register** call where the client uploads its cryptographic material (verifier, salt, MK wraps, KDF mode, schema version).
 
 The auth layer only proves knowledge of the password (via `K_vrf`) and establishes a session. Vault decryption and local UX (including PIN unlock) happen entirely on the client.
 
@@ -36,13 +36,13 @@ In the current prototype all accounts use **`CryptoSchemaVer = 1`**. No branchin
 1. The client calls `POST /auth/pre-register` to obtain a fresh `AccountId`.
 2. The client derives all cryptographic material locally from:
    - The master password.
-   - Per-user Argon2id salt `S_Pwd`.
+   - Per-user salt `S_Pwd` (16 bytes).
    - Random values generated on the client (Master Key, optional Recovery Key, etc.).
 3. The client calls `POST /auth/register` with:
    - `AccountId`
    - Raw verifier (`Verifier = K_vrf`)
-   - Salts and Argon2id parameters
-   - Master Key wraps (`MK_Wrap_Pwd`, optional `MK_Wrap_Rk`)
+   - `S_Pwd` and a KDF mode selector
+   - Master Key wraps (`MKWrapPwd`, optional `MKWrapRk`)
    - Crypto schema version (`CryptoSchemaVer = 1` in this prototype)
 4. The server stores only opaque blobs, salts and KDF parameters. It never sees the password or the Master Key in plaintext.
 
@@ -50,11 +50,11 @@ In the current prototype all accounts use **`CryptoSchemaVer = 1`**. No branchin
 
 1. The frontend loads and uses the refresh token cookie (if present) to attempt a silent `POST /auth/refresh`. If that fails, it shows the login form.
 2. The user provides their master password on the client. The frontend already knows the `AccountId` from local storage.
-3. The client recomputes the raw verifier (`Verifier = K_vrf`) using the same Argon2id + HKDF process as during registration.
+3. The client recomputes the raw verifier (`Verifier = K_vrf`) using the same Argon2id + HKDF process as during registration. The stored `KdfMode` selects the Argon2id parameter profile (e.g., libsodium default vs strong) used for this step.
 4. The client calls `POST /auth/login` with `{ AccountId, Verifier }`.
 5. On success the server:
    - Issues a short-lived JWT access token (JSON response).
-   - Creates and sets a long-lived refresh token cookie.
+   - Creates and sets a long-lived refresh token cookie (name `Vaulton.Refresh`, `HttpOnly`, `SameSite=Strict`, `Path=/auth`, `Secure` unless running in development).
 6. The client stores the access token in memory and uses it to call protected endpoints (such as vault CRUD). The refresh token is managed entirely by the browser as an HttpOnly cookie.
 
 ### 2.4 Session vs vault unlock (conceptual)
@@ -99,28 +99,29 @@ Notes:
 ### 3.2 POST /auth/register
 
 **Purpose**  
-Create a new user account, storing only verifier hashes, salts, wraps and Argon2 parameters.
+Create a new user account, storing only verifier hashes, salts, wraps and the KDF mode selector.
 
 The client must have already:
 
 - Derived `K_vrf` from the password (`Verifier = K_vrf`).
 - Generated a random Master Key (`MK`).
-- Derived `K_kek` and computed `MK_Wrap_Pwd`.
-- (Optionally) generated a Recovery Key, derived `K_rk` and computed `MK_Wrap_Rk`.
-- Selected Argon2id parameters (for Vaulton v1 these will likely be fixed globally but still stored explicitly per user).
+- Derived `K_kek` and computed `MKWrapPwd` (AES-GCM encrypted `MK`).
+- (Optionally) generated a Recovery Key, derived `K_rk` and computed `MKWrapRk`.
+- Selected a KDF mode (currently `1 = Default`, `2 = Strong`).
 
 **Request (JSON)**
 
     {
       "AccountId": "4e3d1c7d-9f9e-4a31-b720-9f6a2a6e3f5a",
-      "Verifier": "base64(K_vrf)",
-      "S_Pwd": "base64(Argon2Salt)",
-      "ArgonMem": 65536,
-      "ArgonTime": 3,
-      "ArgonLanes": 1,
-      "ArgonVersion": 19,
-      "MK_Wrap_Pwd": "base64(ciphertext)",
-      "MK_Wrap_Rk": "base64(...) or null",
+      "Verifier": "base64(K_vrf) (32 bytes)",
+      "S_Pwd": "base64(salt) (16 bytes)",
+      "KdfMode": 1,
+      "MKWrapPwd": {
+        "Nonce": "base64(12 bytes)",
+        "CipherText": "base64(32 bytes)",
+        "Tag": "base64(16 bytes)"
+      },
+      "MKWrapRk": null,
       "CryptoSchemaVer": 1
     }
 
@@ -143,18 +144,35 @@ The client must have already:
    - `Id = AccountId`
    - `Verifier = StoredVerifier`
    - `S_Verifier`, `S_Pwd`
-   - `MK_Wrap_Pwd`, optional `MK_Wrap_Rk`
-   - `ArgonMem`, `ArgonTime`, `ArgonLanes`, `ArgonVersion`
+   - `MKWrapPwd`, optional `MKWrapRk`
+   - `KdfMode`
    - `CryptoSchemaVer`
    - Timestamps (`CreatedAt`, `UpdatedAt`)
 6. Save to the database and return `201 Created`.
 
 **Error cases**
 
-- AccountId already used → `409 Conflict` (or `400 Bad Request`), generic message:
+- AccountId already used → `400 Bad Request`, generic message:
 
       {
         "message": "Account cannot be created."
+      }
+- Invalid crypto blob sizes → `400 Bad Request`:
+
+      {
+        "message": "Invalid crypto blob sizes."
+      }
+
+- Unsupported KDF mode → `400 Bad Request`:
+
+      {
+        "message": "Invalid KDF mode."
+      }
+
+- Unsupported crypto schema version → `400 Bad Request`:
+
+      {
+        "message": "Unsupported crypto schema version."
       }
 
 ---
@@ -167,7 +185,7 @@ Authenticate an existing account by verifying the password-derived verifier and 
 The client must:
 
 - Know the `AccountId` (from local storage or manual entry).
-- Re-derive `Verifier = K_vrf` from the password using `S_Pwd` and Argon2id parameters from the `User` record.
+- Re-derive `Verifier = K_vrf` from the password using `S_Pwd` and the `KdfMode` from the `User` record.
 
 **Request (JSON)**
 
@@ -184,9 +202,9 @@ The client must:
 
 In addition to the JSON body, the server also sets a refresh token cookie, for example:
 
-- Name: `vaulton_refresh`
-- Flags: `HttpOnly`, `Secure`, `SameSite=Lax`
-- Path: `/auth/refresh`
+- Name: `Vaulton.Refresh`
+- Flags: `HttpOnly`, `SameSite=Strict`, `Secure` unless running in development
+- Path: `/auth`
 - Expires: several days in the future
 
 The refresh token value itself is a random opaque string (not a JWT). Only a hash of this value is stored in the database.
@@ -207,15 +225,14 @@ The refresh token value itself is a random opaque string (not a JWT). Only a has
     - Compare `Computed` to `StoredVerifier` using constant-time equality.
 
 4.  On success:
-    - Optionally update `LastLoginAt`.
-    - Revoke or delete any existing refresh tokens for this `AccountId` (only one active refresh token per account).
+    - Clear any login lockout counters and update `LastLoginAt`.
     - Issue a short-lived JWT access token via `ITokenIssuer`.
-    - Generate a new refresh token value, store its hash in the database and set the `vaulton_refresh` cookie.
+    - Generate a new refresh token value, store its hash in the database and set the `Vaulton.Refresh` cookie.
     - Return `200 OK` with `{ "Token": "<jwt>" }`.
 
 **Error cases**
 
-- Wrong password / wrong verifier / unknown AccountId → always:
+- Wrong password / wrong verifier / unknown AccountId / locked-out account → always:
 
       HTTP/1.1 401 Unauthorized
       {
@@ -243,7 +260,7 @@ Rotate the refresh token and issue a new access token without requiring the pass
 - Method: POST
 - Path: `/auth/refresh`
 - Body: empty JSON object `{}` or no body.
-- The refresh token is sent automatically by the browser as an HttpOnly cookie (e.g. `vaulton_refresh`).
+- The refresh token is sent automatically by the browser as an HttpOnly cookie (`Vaulton.Refresh`).
 
 **Response (200 OK)**
 
@@ -254,7 +271,7 @@ Rotate the refresh token and issue a new access token without requiring the pass
 **Server behaviour (conceptual)**
 
 1. Read the refresh token value from the cookie.
-2. Look up the corresponding refresh token record in the database by a hash of this value.
+2. Look up the corresponding refresh token record in the database by a SHA-256 hash of this value.
 3. Validate:
    - Token exists and is not revoked.
    - Token belongs to an existing `AccountId`.
@@ -265,12 +282,27 @@ Rotate the refresh token and issue a new access token without requiring the pass
    {
    "message": "Invalid refresh token."
    }
+   - If the token is found but already revoked, the server also revokes all other active refresh tokens for that account.
+
+**Error cases**
+
+- Missing refresh cookie → `401 Unauthorized`:
+
+      {
+        "message": "Missing refresh token."
+      }
+
+- Invalid/expired/revoked refresh token → `401 Unauthorized`:
+
+      {
+        "message": "Invalid refresh token."
+      }
 
 5. If validation succeeds:
    - Create a new JWT access token for the associated `AccountId`.
    - Generate a new refresh token value.
-   - Store the new refresh token hash in the database and revoke/delete the old one (rotation).
-   - Set a new `vaulton_refresh` cookie with the new value (HttpOnly, Secure, SameSite).
+   - Store the new refresh token hash in the database and mark the old one as revoked (rotation).
+   - Set a new `Vaulton.Refresh` cookie with the new value (HttpOnly, `SameSite=Strict`, `Path=/auth`, `Secure` unless running in development).
    - Return `200 OK` with `{ "Token": "<new-jwt>" }`.
 
 ---
@@ -291,17 +323,56 @@ Invalidate the current refresh token and remove its cookie.
 
 1. Read the refresh token value from the cookie, if present.
 2. Revoke or delete the corresponding refresh token record in the database.
-3. Set the `vaulton_refresh` cookie with an immediate expiry (clearing it in the browser).
-4. Return `204 No Content` or `200 OK`.
+3. Set the `Vaulton.Refresh` cookie with an immediate expiry (clearing it in the browser).
+4. Return `204 No Content`.
 
 If no valid refresh token is present, the endpoint still returns success; logout is idempotent.
+
+---
+
+### 3.6 POST /auth/logout-all
+
+**Purpose**
+Invalidate all active refresh tokens for the authenticated account and remove the cookie.
+
+**Request**
+
+- Method: POST
+- Path: `/auth/logout-all`
+- Requires a valid access token (`Authorization: Bearer <token>`).
+
+**Server behaviour (conceptual)**
+
+1. Read `sub` from the JWT and parse it as `AccountId`.
+2. Revoke all non-revoked refresh tokens for that account.
+3. Delete the refresh cookie (`Vaulton.Refresh`).
+4. Return `204 No Content`.
+
+---
+
+### 3.7 GET /auth/me
+
+**Purpose**
+Return the `AccountId` for the current access token.
+
+**Request**
+
+- Method: GET
+- Path: `/auth/me`
+- Requires a valid access token (`Authorization: Bearer <token>`).
+
+**Response (200 OK)**
+
+    {
+      "AccountId": "4e3d1c7d-9f9e-4a31-b720-9f6a2a6e3f5a"
+    }
 
 ## 4. Session model with refresh tokens
 
 Vaulton uses a two-token model:
 
 - A short-lived **access token** (JWT), returned in the JSON body of `/auth/login` and `/auth/refresh`.
-- A long-lived **refresh token**, stored as an HttpOnly, Secure, SameSite cookie.
+- A long-lived **refresh token**, stored as an HttpOnly cookie (`Vaulton.Refresh`, `SameSite=Strict`, `Secure` unless running in development).
 
 **Access token:**
 
@@ -311,23 +382,25 @@ Vaulton uses a two-token model:
 
 **Refresh token:**
 
-- Random opaque value (not a JWT).
-- Stored as a hash in the database, and as an HttpOnly, Secure, SameSite cookie in the browser.
+- Random opaque value (not a JWT), generated from 64 random bytes and base64url-encoded.
+- Stored as a hash in the database, and as an HttpOnly cookie in the browser (`SameSite=Strict`, `Secure` unless running in development, `Path=/auth`).
 - Used only with `/auth/refresh` and `/auth/logout`.
-- Rotated on each successful call to `/auth/refresh` (old token revoked or deleted).
-- At any point there is at most **one active refresh token per account**; successful login or refresh invalidates the previous token.
+- Rotated on each successful call to `/auth/refresh` (old token revoked).
+- Tokens are valid for 7 days from issuance.
+- Multiple active refresh tokens can exist concurrently (each login mints a new token without revoking others). A refresh attempt with a revoked token triggers a revoke-all for that account.
 
 Security properties:
 
 - The access token is not stored in cookies, which reduces CSRF exposure for normal API calls.
 - The refresh token cookie is not accessible from JavaScript (HttpOnly), which reduces the impact of XSS for long-lived sessions.
 - SameSite and same-origin deployment further limit cross-site misuse of the refresh cookie.
+- The login endpoint is protected by a lockout policy (5 consecutive failures trigger a 15-minute lockout).
 
 ## 5. Security considerations
 
 - The server never receives the master password or the Master Key, only derived values (verifier, wraps, salts). All vault decryption happens on the client.
 - The verifier is not stored directly; only a PBKDF2+pepper hash is stored, which makes a database-only compromise less useful to an attacker.
-- Refresh tokens are stored as HttpOnly, Secure, SameSite cookies and only their hashes are stored in the database. This protects long-lived sessions from direct theft via XSS.
+- Refresh tokens are stored as HttpOnly cookies (`SameSite=Strict`, `Secure` unless running in development) and only their hashes are stored in the database. This protects long-lived sessions from direct theft via XSS.
 - Login errors are deliberately uniform (`401 Invalid credentials`) to reduce the risk of account enumeration.
 - All communication between client and server is expected to happen over HTTPS; Vaulton does not implement transport-layer security itself.
 - Additional hardening (rate limiting, logging, account lockout, IP-based alerts) can be added at the API or reverse-proxy level in later stages.
