@@ -45,11 +45,34 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 
 		return StatusCode(StatusCodes.Status201Created, new CreateEntryResponse(result.EntryId!.Value));
 	}
-	
+
 	[HttpGet]
-	public ActionResult<IReadOnlyList<EntryDto>> List()
-		=> StatusCode(StatusCodes.Status501NotImplemented);
-	
+	public async Task<ActionResult<IReadOnlyList<EntryDto>>> List()
+	{
+		if (!TryGetAccountId(out var accountId))
+			return Unauthorized();
+
+		var result = await _vault.ListEntriesAsync(new ListEntriesCommand(accountId));
+
+		if (!result.Success)
+		{
+			return result.Error switch
+			{
+				VaultError.InvalidCryptoBlob => BadRequest(new { message = "Invalid request." }),
+				_ => StatusCode(StatusCodes.Status500InternalServerError)
+			};
+		}
+
+		var dtos = result.Entries!.Select(e => new EntryDto(
+			e.Id,
+			e.DomainTag,
+			new EncryptedValueDto(e.Payload.Nonce, e.Payload.CipherText, e.Payload.Tag)
+		)).ToList();
+
+		return Ok(dtos);
+	}
+
+
 	[HttpGet("{id:guid}")]
 	public async Task<ActionResult<EntryDto>> Get([FromRoute] Guid id)
 	{
@@ -79,10 +102,27 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 
 		return Ok(dto);
 	}
-	
+
 	[HttpDelete("{id:guid}")]
-	public IActionResult Delete([FromRoute] Guid id)
-		=> StatusCode(StatusCodes.Status501NotImplemented);
+	public async Task<IActionResult> Delete([FromRoute] Guid id)
+	{
+		if (!TryGetAccountId(out var accountId))
+			return Unauthorized();
+
+		var result = await _vault.DeleteEntryAsync(new DeleteEntryCommand(accountId, id));
+
+		if (!result.Success)
+		{
+			return result.Error switch
+			{
+				VaultError.NotFound => NotFound(),
+				_ => StatusCode(StatusCodes.Status500InternalServerError)
+			};
+		}
+
+		return NoContent();
+	}
+
 	private bool TryGetAccountId(out Guid accountId)
 	{
 		accountId = default;

@@ -38,10 +38,22 @@ public sealed class VaultService(VaultonDbContext db) : IVaultService
 
 		return CreateEntryResult.Ok(entry.Id);
 	}
-	
-	public Task<ListEntriesResult> ListEntriesAsync(ListEntriesCommand cmd)
-		=> Task.FromResult(ListEntriesResult.Fail(VaultError.NotImplemented));
-	
+
+	public async Task<ListEntriesResult> ListEntriesAsync(ListEntriesCommand cmd)
+	{
+		if (cmd.AccountId == Guid.Empty)
+			return ListEntriesResult.Fail(VaultError.InvalidCryptoBlob);
+
+		var entries = await _db.Entries
+			.AsNoTracking()
+			.Where(e => e.UserId == cmd.AccountId)
+			.OrderByDescending(e => e.UpdatedAt)
+			.Select(e => new EntryListItem(e.Id, e.DomainTag, e.Payload))
+			.ToListAsync();
+
+		return ListEntriesResult.Ok(entries);
+	}
+
 	public async Task<GetEntryResult> GetEntryAsync(GetEntryCommand cmd)
 	{
 		if (cmd.AccountId == Guid.Empty || cmd.EntryId == Guid.Empty)
@@ -56,9 +68,20 @@ public sealed class VaultService(VaultonDbContext db) : IVaultService
 
 		return GetEntryResult.Ok(e.Id, e.DomainTag, e.Payload);
 	}
-	
-	public Task<DeleteEntryResult> DeleteEntryAsync(DeleteEntryCommand cmd)
-		=> Task.FromResult(DeleteEntryResult.Fail(VaultError.NotImplemented));
+
+	public async Task<DeleteEntryResult> DeleteEntryAsync(DeleteEntryCommand cmd)
+	{
+		if (cmd.AccountId == Guid.Empty || cmd.EntryId == Guid.Empty)
+			return DeleteEntryResult.Fail(VaultError.NotFound);
+
+		var rows = await _db.Entries
+			.Where(e => e.Id == cmd.EntryId && e.UserId == cmd.AccountId)
+			.ExecuteDeleteAsync();
+
+		return rows == 1
+			? DeleteEntryResult.Ok()
+			: DeleteEntryResult.Fail(VaultError.NotFound);
+	}
 
 	private static bool IsValidDomainTag(byte[] tag)
 		=> tag is { Length: CryptoSizes.DomainTagLen };
