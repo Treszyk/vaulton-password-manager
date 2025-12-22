@@ -1,7 +1,13 @@
-﻿using Api.DTOs.Vault;
+﻿using Api.DTOs.Crypto;
+using Api.DTOs.Vault;
 using Application.Services.Vault;
+using Application.Services.Vault.Commands;
+using Application.Services.Vault.Errors;
+using Core.Crypto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Api.Controllers;
 
@@ -13,18 +19,75 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 	private readonly IVaultService _vault = vault;
 
 	[HttpPost]
-	public ActionResult<CreateEntryResponse> Create([FromBody] CreateEntryRequest request)
-		=> StatusCode(StatusCodes.Status501NotImplemented);
+	public async Task<ActionResult<CreateEntryResponse>> Create([FromBody] CreateEntryRequest request)
+	{
+		if (!TryGetAccountId(out var accountId))
+			return Unauthorized();
 
+		var payload = new EncryptedValue
+		{
+			Nonce = request.Payload.Nonce,
+			CipherText = request.Payload.CipherText,
+			Tag = request.Payload.Tag
+		};
+
+		var cmd = new CreateEntryCommand(accountId, request.DomainTag, payload);
+		var result = await _vault.CreateEntryAsync(cmd);
+
+		if (!result.Success)
+		{
+			return result.Error switch
+			{
+				VaultError.InvalidCryptoBlob => BadRequest(new { message = "Invalid crypto blob sizes." }),
+				_ => StatusCode(StatusCodes.Status500InternalServerError)
+			};
+		}
+
+		return StatusCode(StatusCodes.Status201Created, new CreateEntryResponse(result.EntryId!.Value));
+	}
+	
 	[HttpGet]
 	public ActionResult<IReadOnlyList<EntryDto>> List()
 		=> StatusCode(StatusCodes.Status501NotImplemented);
-
+	
 	[HttpGet("{id:guid}")]
-	public ActionResult<EntryDto> Get([FromRoute] Guid id)
-		=> StatusCode(StatusCodes.Status501NotImplemented);
+	public async Task<ActionResult<EntryDto>> Get([FromRoute] Guid id)
+	{
+		if (!TryGetAccountId(out var accountId))
+			return Unauthorized();
 
+		var result = await _vault.GetEntryAsync(new GetEntryCommand(accountId, id));
+
+		if (!result.Success)
+		{
+			return result.Error switch
+			{
+				VaultError.NotFound => NotFound(),
+				_ => StatusCode(StatusCodes.Status500InternalServerError)
+			};
+		}
+
+		var dto = new EntryDto(
+			result.EntryId!.Value,
+			result.DomainTag!,
+			new EncryptedValueDto(
+				result.Payload!.Nonce,
+				result.Payload!.CipherText,
+				result.Payload!.Tag
+			)
+		);
+
+		return Ok(dto);
+	}
+	
 	[HttpDelete("{id:guid}")]
 	public IActionResult Delete([FromRoute] Guid id)
 		=> StatusCode(StatusCodes.Status501NotImplemented);
+	private bool TryGetAccountId(out Guid accountId)
+	{
+		accountId = default;
+
+		var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+		return Guid.TryParse(sub, out accountId);
+	}
 }
