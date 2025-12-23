@@ -24,12 +24,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 		if (!TryGetAccountId(out var accountId))
 			return Unauthorized();
 
-		var payload = new EncryptedValue
-		{
-			Nonce = request.Payload.Nonce,
-			CipherText = request.Payload.CipherText,
-			Tag = request.Payload.Tag
-		};
+		var payload = request.Payload.ToDomain();
 
 		var cmd = new CreateEntryCommand(accountId, request.DomainTag, payload);
 		var result = await _vault.CreateEntryAsync(cmd);
@@ -82,7 +77,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 		var dtos = result.Entries!.Select(e => new EntryDto(
 			e.Id,
 			e.DomainTag,
-			new EncryptedValueDto(e.Payload.Nonce, e.Payload.CipherText, e.Payload.Tag)
+			e.Payload.ToDto()
 		)).ToList();
 
 		return Ok(dtos);
