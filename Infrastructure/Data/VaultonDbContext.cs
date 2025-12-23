@@ -48,6 +48,7 @@ public class VaultonDbContext(DbContextOptions<VaultonDbContext> options) : DbCo
 
 			p.Property(x => x.CipherText)
 				.HasColumnName("Payload_CipherText")
+				.HasMaxLength(CryptoSizes.MaxEntryCiphertextBytes)
 				.IsRequired();
 		});
 

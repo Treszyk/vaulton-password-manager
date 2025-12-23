@@ -12,4 +12,6 @@ public static class CryptoSizes
 	public const int DomainTagLen = 32;  // HMAC-SHA-256 output (mostly for extension)
 
 	public const int PepperLen = 32;
+
+	public const int MaxEntryCiphertextBytes = 4096;
 }

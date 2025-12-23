@@ -11,7 +11,7 @@ public sealed record EncryptedValueDto(
 	byte[] Nonce,
 
 	[param: Required]
-	[param: MinLength(1)]
+	[param: Length(1, CryptoSizes.MaxEntryCiphertextBytes)]
 	[property: JsonPropertyName("CipherText")]
 	byte[] CipherText,
 

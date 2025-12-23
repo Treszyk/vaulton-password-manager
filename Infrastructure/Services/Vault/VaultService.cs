@@ -116,5 +116,5 @@ public sealed class VaultService(VaultonDbContext db) : IVaultService
 	private static bool IsValidPayload(EncryptedValue p)
 		=> p.Nonce is { Length: CryptoSizes.GcmNonceLen }
 		&& p.Tag is { Length: CryptoSizes.GcmTagLen }
-		&& p.CipherText is { Length: > 0 };
+		&& p.CipherText is { Length: > 0 and <= CryptoSizes.MaxEntryCiphertextBytes };
 }
