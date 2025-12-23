@@ -83,6 +83,28 @@ public sealed class VaultService(VaultonDbContext db) : IVaultService
 			: DeleteEntryResult.Fail(VaultError.NotFound);
 	}
 
+	public async Task<UpdateEntryResult> UpdateEntryAsync(UpdateEntryCommand cmd)
+	{
+		if (cmd.AccountId == Guid.Empty || cmd.EntryId == Guid.Empty)
+			return UpdateEntryResult.Fail(VaultError.NotFound);
+
+		if (!IsValidDomainTag(cmd.DomainTag) || !IsValidPayload(cmd.Payload))
+			return UpdateEntryResult.Fail(VaultError.InvalidCryptoBlob);
+
+		var e = await _db.Entries
+			.SingleOrDefaultAsync(x => x.Id == cmd.EntryId && x.UserId == cmd.AccountId);
+
+		if (e is null)
+			return UpdateEntryResult.Fail(VaultError.NotFound);
+
+		e.DomainTag = cmd.DomainTag;
+		e.Payload = cmd.Payload;
+		e.UpdatedAt = DateTime.UtcNow;
+
+		await _db.SaveChangesAsync();
+		return UpdateEntryResult.Ok();
+	}
+
 	private static bool IsValidDomainTag(byte[] tag)
 		=> tag is { Length: CryptoSizes.DomainTagLen };
 	private static bool IsValidPayload(EncryptedValue p)

@@ -123,6 +123,35 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 		return NoContent();
 	}
 
+	[HttpPut("{id:guid}")]
+	public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateEntryRequest request)
+	{
+		if (!TryGetAccountId(out var accountId))
+			return Unauthorized();
+
+		var payload = new EncryptedValue
+		{
+			Nonce = request.Payload.Nonce,
+			CipherText = request.Payload.CipherText,
+			Tag = request.Payload.Tag
+		};
+
+		var cmd = new UpdateEntryCommand(accountId, id, request.DomainTag, payload);
+		var result = await _vault.UpdateEntryAsync(cmd);
+
+		if (!result.Success)
+		{
+			return result.Error switch
+			{
+				VaultError.InvalidCryptoBlob => BadRequest(new { message = "Invalid crypto blob sizes." }),
+				VaultError.NotFound => NotFound(),
+				_ => StatusCode(StatusCodes.Status500InternalServerError)
+			};
+		}
+
+		return NoContent();
+	}
+
 	private bool TryGetAccountId(out Guid accountId)
 	{
 		accountId = default;

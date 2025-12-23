@@ -9,4 +9,5 @@ public interface IVaultService
 	Task<ListEntriesResult> ListEntriesAsync(ListEntriesCommand cmd);
 	Task<GetEntryResult> GetEntryAsync(GetEntryCommand cmd);
 	Task<DeleteEntryResult> DeleteEntryAsync(DeleteEntryCommand cmd);
+	Task<UpdateEntryResult> UpdateEntryAsync(UpdateEntryCommand cmd);
 }
