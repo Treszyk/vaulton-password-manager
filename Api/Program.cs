@@ -69,6 +69,7 @@ namespace Api
 			builder.Services.AddSingleton<AuthCryptoOptions>();
 			builder.Services.AddSingleton<AuthCryptoHelpers>();
 			builder.Services.AddSingleton<IAuthCommandValidator, AuthCommandValidator>();
+			builder.Services.AddSingleton<IVaultCommandValidator, VaultCommandValidator>();
 			builder.Services.AddSingleton<ILockoutPolicy, LockoutPolicy>();
 			builder.Services.AddScoped<IRefreshTokenStore, RefreshTokenStore>();
 			builder.Services.AddScoped<IAuthService, AuthService>();

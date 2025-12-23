@@ -2,24 +2,22 @@
 using Application.Services.Vault.Commands;
 using Application.Services.Vault.Errors;
 using Application.Services.Vault.Results;
-using Core.Crypto;
 using Core.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Vault;
 
-public sealed class VaultService(VaultonDbContext db) : IVaultService
+public sealed class VaultService(VaultonDbContext db, IVaultCommandValidator validator) : IVaultService
 {
 	private readonly VaultonDbContext _db = db;
+	private readonly IVaultCommandValidator _validator = validator;
 
 	public async Task<CreateEntryResult> CreateEntryAsync(CreateEntryCommand cmd)
 	{
-		if (cmd.AccountId == Guid.Empty)
-			return CreateEntryResult.Fail(VaultError.InvalidCryptoBlob);
-
-		if (!IsValidDomainTag(cmd.DomainTag) || !IsValidPayload(cmd.Payload))
-			return CreateEntryResult.Fail(VaultError.InvalidCryptoBlob);
+		var validationError = _validator.ValidateCreate(cmd);
+		if (validationError is not null)
+			return CreateEntryResult.Fail(validationError.Value);
 
 		var now = DateTime.UtcNow;
 
@@ -41,11 +39,9 @@ public sealed class VaultService(VaultonDbContext db) : IVaultService
 
 	public async Task<ListEntriesResult> ListEntriesAsync(ListEntriesCommand cmd)
 	{
-		if (cmd.AccountId == Guid.Empty)
-			return ListEntriesResult.Fail(VaultError.InvalidCryptoBlob);
-
-		if (cmd.Skip < 0 || cmd.Take <= 0)
-			return ListEntriesResult.Fail(VaultError.InvalidCryptoBlob);
+		var validationError = _validator.ValidateList(cmd);
+		if (validationError is not null)
+			return ListEntriesResult.Fail(validationError.Value);
 
 		var entries = await _db.Entries
 			.AsNoTracking()
@@ -62,8 +58,9 @@ public sealed class VaultService(VaultonDbContext db) : IVaultService
 
 	public async Task<GetEntryResult> GetEntryAsync(GetEntryCommand cmd)
 	{
-		if (cmd.AccountId == Guid.Empty || cmd.EntryId == Guid.Empty)
-			return GetEntryResult.Fail(VaultError.NotFound);
+		var validationError = _validator.ValidateGet(cmd);
+		if (validationError is not null)
+			return GetEntryResult.Fail(validationError.Value);
 
 		var e = await _db.Entries
 			.AsNoTracking()
@@ -77,8 +74,9 @@ public sealed class VaultService(VaultonDbContext db) : IVaultService
 
 	public async Task<DeleteEntryResult> DeleteEntryAsync(DeleteEntryCommand cmd)
 	{
-		if (cmd.AccountId == Guid.Empty || cmd.EntryId == Guid.Empty)
-			return DeleteEntryResult.Fail(VaultError.NotFound);
+		var validationError = _validator.ValidateDelete(cmd);
+		if (validationError is not null)
+			return DeleteEntryResult.Fail(validationError.Value);
 
 		var rows = await _db.Entries
 			.Where(e => e.Id == cmd.EntryId && e.UserId == cmd.AccountId)
@@ -91,11 +89,9 @@ public sealed class VaultService(VaultonDbContext db) : IVaultService
 
 	public async Task<UpdateEntryResult> UpdateEntryAsync(UpdateEntryCommand cmd)
 	{
-		if (cmd.AccountId == Guid.Empty || cmd.EntryId == Guid.Empty)
-			return UpdateEntryResult.Fail(VaultError.NotFound);
-
-		if (!IsValidDomainTag(cmd.DomainTag) || !IsValidPayload(cmd.Payload))
-			return UpdateEntryResult.Fail(VaultError.InvalidCryptoBlob);
+		var validationError = _validator.ValidateUpdate(cmd);
+		if (validationError is not null)
+			return UpdateEntryResult.Fail(validationError.Value);
 
 		var e = await _db.Entries
 			.SingleOrDefaultAsync(x => x.Id == cmd.EntryId && x.UserId == cmd.AccountId);
@@ -110,9 +106,4 @@ public sealed class VaultService(VaultonDbContext db) : IVaultService
 		await _db.SaveChangesAsync();
 		return UpdateEntryResult.Ok();
 	}
-
-	private static bool IsValidDomainTag(byte[] tag)
-		=> tag is { Length: CryptoSizes.DomainTagLen };
-	private static bool IsValidPayload(EncryptedValue p)
-		=> CryptoValidators.IsValidEncryptedValue(p, 1, CryptoSizes.MaxEntryCiphertextBytes);
 }
