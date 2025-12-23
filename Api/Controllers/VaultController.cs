@@ -6,8 +6,6 @@ using Application.Services.Vault.Errors;
 using Core.Crypto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace Api.Controllers;
 
@@ -21,7 +19,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 	[HttpPost]
 	public async Task<ActionResult<CreateEntryResponse>> Create([FromBody] CreateEntryRequest request)
 	{
-		if (!TryGetAccountId(out var accountId))
+		if (!User.TryGetAccountId(out var accountId))
 			return Unauthorized();
 
 		var payload = request.Payload.ToDomain();
@@ -51,7 +49,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 			[FromQuery] int take = 200
 		)
 	{
-		if (!TryGetAccountId(out var accountId))
+		if (!User.TryGetAccountId(out var accountId))
 			return Unauthorized();
 
 
@@ -87,7 +85,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 	[HttpGet("{id:guid}")]
 	public async Task<ActionResult<EntryDto>> Get([FromRoute] Guid id)
 	{
-		if (!TryGetAccountId(out var accountId))
+		if (!User.TryGetAccountId(out var accountId))
 			return Unauthorized();
 
 		var result = await _vault.GetEntryAsync(new GetEntryCommand(accountId, id));
@@ -117,7 +115,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 	[HttpDelete("{id:guid}")]
 	public async Task<IActionResult> Delete([FromRoute] Guid id)
 	{
-		if (!TryGetAccountId(out var accountId))
+		if (!User.TryGetAccountId(out var accountId))
 			return Unauthorized();
 
 		var result = await _vault.DeleteEntryAsync(new DeleteEntryCommand(accountId, id));
@@ -137,7 +135,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 	[HttpPut("{id:guid}")]
 	public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateEntryRequest request)
 	{
-		if (!TryGetAccountId(out var accountId))
+		if (!User.TryGetAccountId(out var accountId))
 			return Unauthorized();
 
 		var payload = new EncryptedValue
@@ -163,11 +161,4 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 		return NoContent();
 	}
 
-	private bool TryGetAccountId(out Guid accountId)
-	{
-		accountId = default;
-
-		var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-		return Guid.TryParse(sub, out accountId);
-	}
 }

@@ -7,8 +7,6 @@ using Core.Crypto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace Api.Controllers;
 
@@ -131,8 +129,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	[HttpPost("logout-all")]
 	public async Task<IActionResult> LogoutAll()
 	{
-		var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-		if (!Guid.TryParse(sub, out var accountId))
+		if (!User.TryGetAccountId(out var accountId))
 			return Unauthorized();
 
 		await _auth.LogoutAllAsync(accountId);
@@ -146,8 +143,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	[HttpGet("me")]
 	public ActionResult Me()
 	{
-		var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-		if (!Guid.TryParse(sub, out var accountId))
+		if (!User.TryGetAccountId(out var accountId))
 			return Unauthorized();
 
 		return Ok(new { AccountId = accountId });
