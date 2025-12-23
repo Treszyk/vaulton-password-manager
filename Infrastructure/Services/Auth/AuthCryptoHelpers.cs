@@ -22,14 +22,6 @@ namespace Infrastructure.Services.Auth
 				CryptographicOperations.ZeroMemory(input);
 			}
 		}
-
-		public static bool IsValidMkWrap(EncryptedValue w)
-		{
-			return w.Nonce is { Length: CryptoSizes.GcmNonceLen }
-				&& w.Tag is { Length: CryptoSizes.GcmTagLen }
-				&& w.CipherText is { Length: CryptoSizes.MkLen };
-		}
-
 		public static (string token, byte[] tokenHash) MintRefreshToken()
 		{
 			var raw = RandomNumberGenerator.GetBytes(64);

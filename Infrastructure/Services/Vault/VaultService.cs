@@ -114,7 +114,5 @@ public sealed class VaultService(VaultonDbContext db) : IVaultService
 	private static bool IsValidDomainTag(byte[] tag)
 		=> tag is { Length: CryptoSizes.DomainTagLen };
 	private static bool IsValidPayload(EncryptedValue p)
-		=> p.Nonce is { Length: CryptoSizes.GcmNonceLen }
-		&& p.Tag is { Length: CryptoSizes.GcmTagLen }
-		&& p.CipherText is { Length: > 0 and <= CryptoSizes.MaxEntryCiphertextBytes };
+		=> CryptoValidators.IsValidEncryptedValue(p, 1, CryptoSizes.MaxEntryCiphertextBytes);
 }

@@ -15,10 +15,10 @@ namespace Infrastructure.Services.Auth
 			if (cmd.Verifier.Length != CryptoSizes.VerifierLen || cmd.S_Pwd.Length != CryptoSizes.SaltLen)
 				return RegisterError.InvalidCryptoBlob;
 
-			if (!AuthCryptoHelpers.IsValidMkWrap(cmd.MkWrapPwd))
+			if (!CryptoValidators.IsValidEncryptedValue(cmd.MkWrapPwd, CryptoSizes.MkLen))
 				return RegisterError.InvalidCryptoBlob;
 
-			if (cmd.MkWrapRk is not null && !AuthCryptoHelpers.IsValidMkWrap(cmd.MkWrapRk))
+			if (cmd.MkWrapRk is not null && !CryptoValidators.IsValidEncryptedValue(cmd.MkWrapRk, CryptoSizes.MkLen))
 				return RegisterError.InvalidCryptoBlob;
 
 			if (cmd.KdfMode is not KdfMode.Default and not KdfMode.Strong)
