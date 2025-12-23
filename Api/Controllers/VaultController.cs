@@ -43,7 +43,11 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 			};
 		}
 
-		return StatusCode(StatusCodes.Status201Created, new CreateEntryResponse(result.EntryId!.Value));
+		return CreatedAtAction(
+			nameof(Get),
+			new { id = result.EntryId!.Value },
+			new CreateEntryResponse(result.EntryId!.Value)
+		);
 	}
 
 	[HttpGet]
