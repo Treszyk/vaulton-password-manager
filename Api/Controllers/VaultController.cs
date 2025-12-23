@@ -51,12 +51,24 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 	}
 
 	[HttpGet]
-	public async Task<ActionResult<IReadOnlyList<EntryDto>>> List()
+	public async Task<ActionResult<IReadOnlyList<EntryDto>>> List(
+			[FromQuery] int skip = 0,
+			[FromQuery] int take = 200
+		)
 	{
 		if (!TryGetAccountId(out var accountId))
 			return Unauthorized();
 
-		var result = await _vault.ListEntriesAsync(new ListEntriesCommand(accountId));
+
+		if (skip < 0)
+			return BadRequest(new { message = "skip must be >= 0." });
+
+		if (take <= 0)
+			return BadRequest(new { message = "take must be > 0." });
+
+		if (take > 500)
+			take = 500;
+		var result = await _vault.ListEntriesAsync(new ListEntriesCommand(accountId, skip, take));
 
 		if (!result.Success)
 		{

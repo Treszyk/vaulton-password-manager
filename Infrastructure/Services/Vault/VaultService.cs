@@ -44,12 +44,18 @@ public sealed class VaultService(VaultonDbContext db) : IVaultService
 		if (cmd.AccountId == Guid.Empty)
 			return ListEntriesResult.Fail(VaultError.InvalidCryptoBlob);
 
+		if (cmd.Skip < 0 || cmd.Take <= 0)
+			return ListEntriesResult.Fail(VaultError.InvalidCryptoBlob);
+
 		var entries = await _db.Entries
 			.AsNoTracking()
 			.Where(e => e.UserId == cmd.AccountId)
 			.OrderByDescending(e => e.UpdatedAt)
+			.Skip(cmd.Skip)
+			.Take(cmd.Take)
 			.Select(e => new EntryListItem(e.Id, e.DomainTag, e.Payload))
 			.ToListAsync();
+
 
 		return ListEntriesResult.Ok(entries);
 	}
