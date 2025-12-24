@@ -117,7 +117,7 @@ namespace Api
 						ip,
 						_ => new FixedWindowRateLimiterOptions
 						{
-							PermitLimit = 10,
+							PermitLimit = 999,
 							Window = TimeSpan.FromMinutes(1),
 							QueueLimit = 0,
 							AutoReplenishment = true
