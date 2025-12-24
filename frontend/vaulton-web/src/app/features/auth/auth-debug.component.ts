@@ -3,11 +3,12 @@ import { Component, effect, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthApiService } from '../../core/api/auth-api.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
+import { AuthPageComponent } from './auth-page.component';
 
 @Component({
   standalone: true,
   selector: 'app-auth-debug',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AuthPageComponent],
   template: `
     <h2>Auth Debug</h2>
 
@@ -16,6 +17,10 @@ import { AuthStateService } from '../../core/auth/auth-state.service';
       <button (click)="me()">Me (Bearer)</button>
       <button (click)="logout()">Logout (cookie)</button>
       <button (click)="clearToken()">Clear token</button>
+    </div>
+
+    <div style="border: 1px solid #ccc; padding: 12px; margin-bottom: 16px;">
+      <app-auth-page></app-auth-page>
     </div>
 
     <label style="display:block; margin-bottom:6px;">Access token (in-memory)</label>
