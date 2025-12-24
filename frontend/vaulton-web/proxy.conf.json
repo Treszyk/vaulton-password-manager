@@ -4,8 +4,24 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
-    "pathRewrite": {
-      "^/api": ""
-    }
+    "pathRewrite": { "^/api": "" }
+  },
+  "/auth": {
+    "target": "http://localhost:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/vault": {
+    "target": "http://localhost:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/swagger": {
+    "target": "http://localhost:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
   }
 }
