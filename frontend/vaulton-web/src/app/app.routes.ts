@@ -11,5 +11,5 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/vault/vault-debug.component').then((m) => m.VaultDebugComponent),
   },
-  { path: '', redirectTo: 'debug/auth', pathMatch: 'full' },
+  { path: '', redirectTo: 'debug/vault', pathMatch: 'full' },
 ];
