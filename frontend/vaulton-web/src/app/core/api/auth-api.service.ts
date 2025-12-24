@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 export type TokenResponse = { Token: string };
 type MeResponse = { accountId: string };
-type LoginRequest = { accountId: string; verifier: string };
+type LoginRequest = { AccountId: string; Verifier: string };
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {

@@ -1,7 +1,15 @@
 import { Routes } from '@angular/router';
-import { AuthDebugComponent } from './features/auth/auth-debug.component';
 
 export const routes: Routes = [
-  { path: 'debug/auth', component: AuthDebugComponent },
+  {
+    path: 'debug/auth',
+    loadComponent: () =>
+      import('./features/auth/auth-debug.component').then((m) => m.AuthDebugComponent),
+  },
+  {
+    path: 'debug/vault',
+    loadComponent: () =>
+      import('./features/vault/vault-debug.component').then((m) => m.VaultDebugComponent),
+  },
   { path: '', redirectTo: 'debug/auth', pathMatch: 'full' },
 ];
