@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-type TokenResponse = { Token: string };
+export type TokenResponse = { Token: string };
 type MeResponse = { accountId: string };
 type LoginRequest = { accountId: string; verifier: string };
 
@@ -24,9 +24,7 @@ export class AuthApiService {
     return this.http.post<void>(`${this.baseUrl}/auth/logout`, {});
   }
 
-  me(accessToken: string): Observable<MeResponse> {
-    return this.http.get<MeResponse>(`${this.baseUrl}/auth/me`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+  me(): Observable<MeResponse> {
+    return this.http.get<MeResponse>(`${this.baseUrl}/auth/me`);
   }
 }

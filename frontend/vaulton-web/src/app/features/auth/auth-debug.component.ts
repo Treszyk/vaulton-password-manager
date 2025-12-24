@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, effect, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthApiService } from '../../core/api/auth-api.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
@@ -41,7 +41,12 @@ export class AuthDebugComponent {
   tokenInput = signal('');
   result = signal('');
 
-  constructor(public readonly authState: AuthStateService, private readonly api: AuthApiService) {}
+  constructor(public readonly authState: AuthStateService, private readonly api: AuthApiService) {
+    effect(() => {
+      const t = this.authState.accessToken();
+      this.tokenInput.set(t || '');
+    });
+  }
 
   setToken(): void {
     const t = this.tokenInput().trim();
@@ -59,7 +64,6 @@ export class AuthDebugComponent {
     this.api.refresh().subscribe({
       next: (r) => {
         this.authState.setAccessToken(r.Token);
-        this.tokenInput.set(r.Token);
         this.result.set(`Refresh OK\nToken length: ${r.Token.length}`);
       },
       error: (e) => this.result.set(`Refresh FAILED\n${this.pretty(e)}`),
@@ -67,13 +71,7 @@ export class AuthDebugComponent {
   }
 
   me(): void {
-    const t = this.authState.accessToken();
-    if (!t) {
-      this.result.set('No access token set.');
-      return;
-    }
-
-    this.api.me(t).subscribe({
+    this.api.me().subscribe({
       next: (r) => this.result.set(`Me OK\nAccountId: ${r.accountId}`),
       error: (e) => this.result.set(`Me FAILED\n${this.pretty(e)}`),
     });
