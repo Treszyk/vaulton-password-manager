@@ -24,7 +24,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		Secure = !_env.IsDevelopment(),
 		SameSite = SameSiteMode.Strict,
 		Expires = new DateTimeOffset(expiresUtc),
-		Path = "/auth"
+		Path = "/" // Works for Swagger (/auth/...) and frontend (/api/auth/...) via proxy/Caddy
 	};
 
 	[HttpPost("pre-register")]
@@ -121,7 +121,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 			await _auth.LogoutAsync(rt);
 		}
 
-		Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/auth" });
+		Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/" });
 		return NoContent();
 	}
 
@@ -134,7 +134,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 
 		await _auth.LogoutAllAsync(accountId);
 
-		Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/auth" });
+		Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/" });
 		return NoContent();
 	}
 
