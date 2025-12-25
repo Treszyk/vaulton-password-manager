@@ -22,6 +22,39 @@ namespace Infrastructure.Services.Auth
 				CryptographicOperations.ZeroMemory(input);
 			}
 		}
+
+		public byte[] ComputeFakeSalt(Guid accountId)
+		{
+			ReadOnlySpan<byte> context = "Vaulton.FakeSalt.v1"u8;
+			
+			Span<byte> idBytes = stackalloc byte[16];
+			if (!accountId.TryWriteBytes(idBytes))
+			{
+				throw new InvalidOperationException("Failed to write Guid bytes.");
+			}
+
+			var inputLen = context.Length + idBytes.Length;
+			byte[] input = new byte[inputLen];
+			
+			context.CopyTo(input);
+			idBytes.CopyTo(input.AsSpan(context.Length));
+
+			try
+			{
+				using var hmac = new HMACSHA256(options.FakeSaltSecretBytes);
+				var hash = hmac.ComputeHash(input);
+
+				var result = new byte[CryptoSizes.SaltLen];
+				Buffer.BlockCopy(hash, 0, result, 0, CryptoSizes.SaltLen);
+
+				return result;
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(input);
+			}
+		}
+
 		public static (string token, byte[] tokenHash) MintRefreshToken()
 		{
 			var raw = RandomNumberGenerator.GetBytes(64);

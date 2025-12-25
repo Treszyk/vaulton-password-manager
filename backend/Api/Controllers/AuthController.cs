@@ -77,12 +77,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		var cmd = new PreLoginCommand(request.AccountId);
 		var result = await _auth.PreLoginAsync(cmd);
 
-		if (!result.Success)
-		{
-// good idea would be to probably always return Ok with a fake deterministic salt to prevent accountId enumeration
-			return NotFound(new { message = "Account not found." });
-		}
-
+		// we always return Ok to prevent accountId enumeration
 		return Ok(new PreLoginResponse(
 			result.S_Pwd!,
 			(int)result.KdfMode!,

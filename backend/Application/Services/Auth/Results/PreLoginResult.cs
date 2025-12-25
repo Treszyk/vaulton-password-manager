@@ -5,11 +5,9 @@ namespace Application.Services.Auth.Results;
 
 public record PreLoginResult(
     bool Success,
-    // Success data
     byte[]? S_Pwd = null,
     KdfMode? KdfMode = null,
     int? CryptoSchemaVer = null,
-    // Error data
     PreLoginError? Error = null
 )
 {

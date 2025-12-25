@@ -148,23 +148,27 @@ namespace Infrastructure.Services.Auth
 			var now = DateTime.UtcNow;
 			await refreshTokenStore.RevokeAsync(refreshToken, now);
 		}
-	public async Task LogoutAllAsync(Guid accountId)
+		public async Task LogoutAllAsync(Guid accountId)
 		{
 			var now = DateTime.UtcNow;
 			await refreshTokenStore.RevokeAllAsync(accountId, now);
 		}
 
-	public async Task<PreLoginResult> PreLoginAsync(PreLoginCommand cmd)
+		public async Task<PreLoginResult> PreLoginAsync(PreLoginCommand cmd)
 		{
 			var user = await db.Users
 				.Where(u => u.Id == cmd.AccountId)
 				.Select(u => new { u.S_Pwd, u.KdfMode, u.CryptoSchemaVer })
 				.SingleOrDefaultAsync();
 
-			// good idea would be to probably always return Ok with a fake deterministic salt to prevent accountId enumeration
+			// Always compute the fake salt to prevent timing attacks
+			var fakeSalt = cryptoHelpers.ComputeFakeSalt(cmd.AccountId);
+
 			if (user is null)
 			{
-				return PreLoginResult.Fail(PreLoginError.AccountNotFound);
+				// Return deterministic fake data to prevent enumeration.
+				// Client will proceed to compute proof with this salt and fail at Login.
+				return PreLoginResult.Ok(fakeSalt, KdfMode.Default, 1);
 			}
 
 			return PreLoginResult.Ok(user.S_Pwd, user.KdfMode, user.CryptoSchemaVer);

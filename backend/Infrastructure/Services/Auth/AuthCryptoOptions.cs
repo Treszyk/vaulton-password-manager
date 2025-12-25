@@ -7,6 +7,7 @@ namespace Infrastructure.Services.Auth
 	{
 		public int VerifierPbkdf2Iterations { get; }
 		public byte[] VerifierPepperBytes { get; }
+		public byte[] FakeSaltSecretBytes { get; }
 
 		public AuthCryptoOptions(IConfiguration config)
 		{
@@ -35,6 +36,22 @@ namespace Infrastructure.Services.Auth
 
 			VerifierPbkdf2Iterations = verifierPbkdf2Iterations;
 			VerifierPepperBytes = verifierPepperBytes;
+
+			var fakeSaltB64 = config["Auth:FakeSaltSecret"];
+			if (string.IsNullOrWhiteSpace(fakeSaltB64))
+				throw new InvalidOperationException("Missing Auth:FakeSaltSecret configuration.");
+
+			try
+			{
+				FakeSaltSecretBytes = Convert.FromBase64String(fakeSaltB64);
+			}
+			catch (FormatException)
+			{
+				throw new InvalidOperationException("Auth:FakeSaltSecret must be base64.");
+			}
+
+			if (FakeSaltSecretBytes.Length != 32)
+				throw new InvalidOperationException("Auth:FakeSaltSecret must decode to 32 bytes.");
 		}
 	}
 }
