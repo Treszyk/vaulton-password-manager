@@ -25,14 +25,14 @@ export class AuthCryptoService {
   async buildRegister(
     accountId: string,
     password: string,
-    kdfMode: number
+    kdfMode: number,
+    schemaVer: number
   ): Promise<{
     registerBody: RegisterRequest;
     loginBodyForSwagger: string;
   }> {
     const sPwd = crypto.getRandomValues(new Uint8Array(16));
-    const schemaVer = 1;
-    // TODO: backend should return schemaVersion in /auth/pre-register so we can build this string dynamically
+
     let aad = new TextEncoder().encode(`vaulton:mk-wrap-pwd:schema${schemaVer}:${accountId}`);
 
     let mkBytes: Uint8Array | null = null;

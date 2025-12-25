@@ -7,7 +7,7 @@ import type { RegisterRequest } from '../auth/auth-crypto.service';
 export type TokenResponse = { Token: string };
 type MeResponse = { accountId: string };
 type LoginRequest = { AccountId: string; Verifier: string };
-type PreRegisterResponse = { AccountId: string };
+type PreRegisterResponse = { AccountId: string; CryptoSchemaVer: number };
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
