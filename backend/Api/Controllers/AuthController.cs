@@ -32,7 +32,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	public async Task<ActionResult<PreRegisterResponse>> PreRegister()
 	{
 		var accountId = await _auth.PreRegisterAsync();
-		return Ok(new PreRegisterResponse(accountId));
+		return Ok(new PreRegisterResponse(accountId, 1)); // hardcoded V1 CryptoSchemaVer
 	}
 
 	[HttpPost("register")]

@@ -161,13 +161,13 @@ namespace Infrastructure.Services.Auth
 				.Select(u => new { u.S_Pwd, u.KdfMode, u.CryptoSchemaVer })
 				.SingleOrDefaultAsync();
 
-			// Always compute the fake salt to prevent timing attacks
+			// always compute the fake salt to prevent timing attacks
 			var fakeSalt = cryptoHelpers.ComputeFakeSalt(cmd.AccountId);
 
 			if (user is null)
 			{
-				// Return deterministic fake data to prevent enumeration.
-				// Client will proceed to compute proof with this salt and fail at Login.
+				// return deterministic fake data to prevent enumeration.
+				// client will proceed to compute proof with this salt and fail at Login.
 				return PreLoginResult.Ok(fakeSalt, KdfMode.Default, 1);
 			}
 
