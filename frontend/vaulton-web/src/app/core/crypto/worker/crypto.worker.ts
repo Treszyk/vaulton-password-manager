@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-import { bytesToB64 } from '../b64';
+import { bytesToB64, b64ToBytes } from '../b64';
 import { zeroize } from '../zeroize';
 import { encryptSplit } from '../aesgcm-split';
 import { hkdfAesGcm256Key, hkdfVerifierB64 } from '../hkdf';
@@ -17,8 +17,12 @@ addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRe
   try {
     switch (payload.type) {
       case 'REGISTER':
-        const result = await handleRegister(payload.payload);
-        postSuccess(id, result);
+        const regRes = await handleRegister(payload.payload);
+        postSuccess(id, regRes);
+        break;
+      case 'LOGIN':
+        const loginRes = await handleLogin(payload.payload);
+        postSuccess(id, loginRes);
         break;
       default:
         throw new Error(`Unknown message type: ${(payload as any).type}`);
@@ -95,5 +99,24 @@ async function handleRegister({
     zeroize(aad);
     zeroize(sPwd);
     if (mkBytes) zeroize(mkBytes);
+  }
+}
+
+async function handleLogin({
+  password,
+  saltB64,
+  kdfMode,
+}: {
+  password: string;
+  saltB64: string;
+  kdfMode: number;
+}) {
+  const sPwd = b64ToBytes(saltB64);
+  try {
+    const hkdfBaseKey = await kdfProvider.deriveHkdfBaseKey(password, sPwd, kdfMode);
+    const verifierB64 = await hkdfVerifierB64(hkdfBaseKey, 'vaulton/verifier');
+    return { verifier: verifierB64 };
+  } finally {
+    zeroize(sPwd);
   }
 }

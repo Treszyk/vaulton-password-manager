@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CryptoWorkerFactory } from '../crypto/worker/crypto-worker.factory';
+import type { PreLoginResponse } from '../api/auth-api.service';
 
 export type EncryptedValueDto = { Nonce: string; CipherText: string; Tag: string };
 
@@ -91,6 +92,22 @@ export class AuthCryptoService {
         loginBodyForSwagger: string;
       }>('REGISTER', { accountId, password, kdfMode, schemaVer });
       return res;
+    } finally {
+      this.isWorking = false;
+    }
+  }
+
+  async buildLogin(password: string, preLogin: PreLoginResponse): Promise<{ verifier: string }> {
+    if (this.isWorking) {
+      throw new Error('Crypto worker is busy. Please wait.');
+    }
+    this.isWorking = true;
+    try {
+      return await this.postToWorker<{ verifier: string }>('LOGIN', {
+        password,
+        saltB64: preLogin.S_Pwd,
+        kdfMode: preLogin.KdfMode,
+      });
     } finally {
       this.isWorking = false;
     }

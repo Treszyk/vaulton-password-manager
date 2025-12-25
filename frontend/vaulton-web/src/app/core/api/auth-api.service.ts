@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import type { RegisterRequest } from '../auth/auth-crypto.service';
 
 export type TokenResponse = { Token: string };
 type MeResponse = { accountId: string };
 type LoginRequest = { AccountId: string; Verifier: string };
+export type PreLoginResponse = { S_Pwd: string; KdfMode: number; CryptoSchemaVer: number };
 type PreRegisterResponse = { AccountId: string; CryptoSchemaVer: number };
 
 @Injectable({ providedIn: 'root' })
@@ -17,6 +19,18 @@ export class AuthApiService {
 
   preRegister(): Observable<PreRegisterResponse> {
     return this.http.post<PreRegisterResponse>(`${this.baseUrl}/auth/pre-register`, {});
+  }
+
+  preLogin(accountId: string): Observable<PreLoginResponse> {
+    return this.http.post<any>(`${this.baseUrl}/auth/pre-login`, { AccountId: accountId }).pipe(
+      map((res) => {
+        return {
+          S_Pwd: res.S_Pwd ?? res.s_Pwd,
+          KdfMode: res.KdfMode ?? res.kdfMode,
+          CryptoSchemaVer: res.CryptoSchemaVer ?? res.cryptoSchemaVer,
+        };
+      })
+    );
   }
 
   register(body: RegisterRequest): Observable<void> {

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { AuthApiService } from '../../core/api/auth-api.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { AuthPageComponent } from './auth-page.component';
+import { LoginDebugComponent } from './login-debug.component';
 
 @Component({
   standalone: true,
   selector: 'app-auth-debug',
-  imports: [CommonModule, FormsModule, AuthPageComponent],
+  imports: [CommonModule, FormsModule, AuthPageComponent, LoginDebugComponent],
   template: `
     <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div class="flex items-center justify-between">
@@ -25,12 +26,20 @@ import { AuthPageComponent } from './auth-page.component';
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div class="bg-white/[0.06] border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
-          <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
-            Auth Form
+          <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-4">
+             <button (click)="mode.set('register')" [class.opacity-50]="mode() !== 'register'" class="flex items-center gap-2 hover:opacity-100 transition-opacity">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+                Register
+             </button>
+             <span class="text-white/20">|</span>
+             <button (click)="mode.set('login')" [class.opacity-50]="mode() !== 'login'" class="flex items-center gap-2 hover:opacity-100 transition-opacity">
+                <span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]"></span>
+                Login
+             </button>
           </h3>
-          <div class="bg-black/40 rounded-xl border border-white/5 overflow-hidden">
-            <app-auth-page></app-auth-page>
+          <div class="bg-black/40 rounded-xl border border-white/5 overflow-hidden p-4">
+            <app-auth-page *ngIf="mode() === 'register'"></app-auth-page>
+            <app-login-debug *ngIf="mode() === 'login'"></app-login-debug>
           </div>
         </div>
 
@@ -81,6 +90,7 @@ import { AuthPageComponent } from './auth-page.component';
   `,
 })
 export class AuthDebugComponent {
+  mode = signal<'register' | 'login'>('register');
   tokenInput = signal('');
   result = signal('');
 

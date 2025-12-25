@@ -19,7 +19,9 @@ export type RegisterResult = {
   loginBodyForSwagger: string;
 };
 
-export type WorkerRequest = { type: 'REGISTER'; payload: RegisterPayload };
+export type WorkerRequest =
+  | { type: 'REGISTER'; payload: RegisterPayload }
+  | { type: 'LOGIN'; payload: { password: string; saltB64: string; kdfMode: number } };
 
 export type WorkerResponseEnvelope<T = unknown> =
   | { id: string; ok: true; result: T }
