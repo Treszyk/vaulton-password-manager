@@ -21,6 +21,6 @@ export type RegisterResult = {
 
 export type WorkerRequest = { type: 'REGISTER'; payload: RegisterPayload };
 
-export type WorkerResponse =
-  | { type: 'REGISTER_SUCCESS'; payload: RegisterResult }
-  | { type: 'ERROR'; error: string };
+export type WorkerResponseEnvelope<T = unknown> =
+  | { id: string; ok: true; result: T }
+  | { id: string; ok: false; error: string };

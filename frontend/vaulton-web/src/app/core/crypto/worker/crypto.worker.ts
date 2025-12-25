@@ -6,7 +6,7 @@ import { encryptSplit } from '../aesgcm-split';
 import { hkdfAesGcm256Key, hkdfVerifierB64 } from '../hkdf';
 import { Pbkdf2KdfProvider } from '../kdf/pbkdf2-kdf';
 import type { EncryptedValueDto, RegisterRequest } from '../../auth/auth-crypto.service';
-import type { WorkerRequest, WorkerMessage, WorkerResponse } from './crypto.worker.types';
+import type { WorkerRequest, WorkerMessage, WorkerResponseEnvelope } from './crypto.worker.types';
 import type { KdfProvider } from '../kdf/kdf';
 
 const kdfProvider: KdfProvider = new Pbkdf2KdfProvider();
@@ -18,18 +18,24 @@ addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRe
     switch (payload.type) {
       case 'REGISTER':
         const result = await handleRegister(payload.payload);
-        postResponse(id, { type: 'REGISTER_SUCCESS', payload: result });
+        postSuccess(id, result);
         break;
       default:
         throw new Error(`Unknown message type: ${(payload as any).type}`);
     }
   } catch (err: any) {
-    postResponse(id, { type: 'ERROR', error: err.message || String(err) });
+    postError(id, err.message || String(err));
   }
 });
 
-function postResponse(id: string, response: WorkerResponse) {
-  postMessage({ id, payload: response });
+function postSuccess<T>(id: string, result: T) {
+  const msg: WorkerResponseEnvelope<T> = { id, ok: true, result };
+  postMessage(msg);
+}
+
+function postError(id: string, error: string) {
+  const msg: WorkerResponseEnvelope<any> = { id, ok: false, error };
+  postMessage(msg);
 }
 
 async function handleRegister({
