@@ -9,44 +9,68 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
   selector: 'app-auth-page',
   imports: [CommonModule, FormsModule],
   template: `
-    <h2>Register</h2>
+    <div class="p-6 space-y-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white">Create Account</h2>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-white/40 font-mono italic">{{ accountId() || 'awaiting id...' }}</span>
+          <button (click)="refreshAccountId()" class="p-1.5 rounded-md hover:bg-white/10 text-white/40 hover:text-white transition-all" title="New ID">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
-    <div style="margin-bottom:8px;">
-      AccountId: <code>{{ accountId() || '(loading...)' }}</code>
-      <button style="margin-left:8px;" (click)="refreshAccountId()">New</button>
+      <div class="space-y-4">
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-white/60 ml-1">Master Password</label>
+          <input
+            type="password"
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
+            class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-white/60 ml-1">KDF Strategy</label>
+          <select 
+            [ngModel]="kdfMode()" 
+            (ngModelChange)="kdfMode.set(+$event)"
+            class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all appearance-none cursor-pointer"
+          >
+            <option [value]="0">Legacy (0)</option>
+            <option [value]="1">Standard (1)</option>
+            <option [value]="2">Hardened (2)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button 
+          (click)="register()" 
+          [disabled]="!accountId() || !password().length"
+          class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/20 disabled:text-white/20 text-white py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-blue-500/10 active:scale-[0.98]"
+        >
+          Register
+        </button>
+        <button (click)="clear()" class="px-4 py-2.5 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all text-sm font-medium">Clear</button>
+      </div>
+
+      <div *ngIf="result() || loginBodyForSwagger()" class="space-y-4 pt-4 border-t border-white/5">
+        <div *ngIf="result()" class="space-y-1.5">
+          <label class="text-xs uppercase tracking-widest font-bold text-emerald-400 ml-1">Status</label>
+          <pre class="bg-black/40 border border-white/10 p-3 rounded-lg text-xs text-emerald-400/90 font-mono leading-relaxed shadow-inner overflow-auto whitespace-pre-wrap break-all max-h-[250px]">{{ result() }}</pre>
+        </div>
+
+        <div *ngIf="loginBodyForSwagger()" class="space-y-1.5">
+          <label class="text-xs uppercase tracking-widest font-bold text-blue-400 ml-1">Swagger Payload</label>
+          <pre class="bg-black/40 border border-white/10 p-3 rounded-lg text-xs text-blue-400/90 font-mono leading-relaxed overflow-auto max-h-[150px] shadow-inner">{{ loginBodyForSwagger() }}</pre>
+        </div>
+      </div>
     </div>
-
-    <div style="margin-top:12px;">
-      <label>Password</label><br />
-      <input
-        style="width:420px;"
-        type="password"
-        [ngModel]="password()"
-        (ngModelChange)="password.set($event)"
-      />
-    </div>
-
-    <div style="margin-top:12px;">
-      <label>KdfMode</label><br />
-      <select [ngModel]="kdfMode()" (ngModelChange)="kdfMode.set(+$event)">
-        <option [value]="0">0</option>
-        <option [value]="1">1</option>
-        <option [value]="2">2</option>
-      </select>
-    </div>
-
-    <div style="margin-top:12px;">
-      <button (click)="register()" [disabled]="!accountId() || !password().length">Register</button>
-      <button style="margin-left:8px;" (click)="clear()">Clear UI</button>
-    </div>
-
-    <h3 style="margin-top:16px;">Result</h3>
-    <pre style="white-space: pre-wrap;">{{ result() }}</pre>
-
-    <h3 *ngIf="loginBodyForSwagger()" style="margin-top:16px;">Login body for Swagger</h3>
-    <pre *ngIf="loginBodyForSwagger()" style="white-space: pre-wrap;">{{
-      loginBodyForSwagger()
-    }}</pre>
   `,
 })
 export class AuthPageComponent {

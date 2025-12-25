@@ -1,89 +1,51 @@
 @if (!loading()) {
-<div class="fade-in">
-  <nav
-    style="
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 32px;
-      background: #121212;
-      border-bottom: 1px solid #222;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    "
-  >
-    <div style="display: flex; align-items: center">
-      <div
-        style="
-          font-weight: 800;
-          color: #fff;
-          letter-spacing: 0.1em;
-          font-size: 1.1rem;
-          text-transform: uppercase;
-        "
-      >
+<div class="min-h-screen transition-opacity duration-500">
+  <nav class="sticky top-0 z-50 backdrop-blur-md bg-black/40 border-b border-white/5 py-3 px-8 flex items-center justify-between shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="font-black text-2xl tracking-tighter text-white uppercase italic">
         Vaulton
       </div>
-      <div
-        style="
-          margin-left: 12px;
-          font-size: 0.7rem;
-          background: #333;
-          color: #aaa;
-          padding: 2px 8px;
-          border-radius: 4px;
-          font-weight: 600;
-          letter-spacing: 0.05em;
-        "
-      >
+      <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-xs font-bold tracking-widest border border-blue-500/20">
         DEBUG
-      </div>
+      </span>
     </div>
 
-    <div style="display: flex; gap: 32px">
+    <div class="flex items-center gap-8">
       <a
         routerLink="/debug/auth"
-        routerLinkActive
+        routerLinkActive="text-white border-b-2 border-white"
+        [routerLinkActiveOptions]="{exact: true}"
+        class="text-sm font-medium transition-all hover:text-white py-2"
+        [class.text-white/40]="!rlaAuth.isActive"
         #rlaAuth="routerLinkActive"
-        [style.color]="rlaAuth.isActive ? '#fff' : '#777'"
-        [style.border-bottom]="rlaAuth.isActive ? '2px solid #fff' : '2px solid transparent'"
-        style="
-          text-decoration: none;
-          font-size: 0.9rem;
-          font-weight: 600;
-          transition: all 0.2s;
-          padding: 4px 0;
-        "
       >
         Auth Debug
       </a>
       <a
         routerLink="/debug/vault"
-        routerLinkActive
+        routerLinkActive="text-white border-b-2 border-white"
+        [routerLinkActiveOptions]="{exact: true}"
+        class="text-sm font-medium transition-all hover:text-white py-2"
+        [class.text-white/40]="!rlaVault.isActive"
         #rlaVault="routerLinkActive"
-        [style.color]="rlaVault.isActive ? '#fff' : '#777'"
-        [style.border-bottom]="rlaVault.isActive ? '2px solid #fff' : '2px solid transparent'"
-        style="
-          text-decoration: none;
-          font-size: 0.9rem;
-          font-weight: 600;
-          transition: all 0.2s;
-          padding: 4px 0;
-        "
       >
         Vault Debug
       </a>
     </div>
 
-    <div style="width: 100px"></div>
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
+        V
+      </div>
+    </div>
   </nav>
 
-  <main style="padding: 32px; max-width: 1400px; margin: 0 auto">
+  <main class="max-w-7xl mx-auto p-8">
     <router-outlet></router-outlet>
   </main>
 </div>
 } @else {
-<div style="height: 100vh; background-color: #0b0b0b"></div>
+<div class="h-screen bg-[#050505] flex items-center justify-center">
+  <div class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+</div>
 }

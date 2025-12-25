@@ -10,36 +10,74 @@ import { AuthPageComponent } from './auth-page.component';
   selector: 'app-auth-debug',
   imports: [CommonModule, FormsModule, AuthPageComponent],
   template: `
-    <h2>Auth Debug</h2>
+    <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-3xl font-bold tracking-tight text-white mb-2">Auth Debug</h2>
+          <p class="text-white/40 text-sm">Testing and debugging authentication flows</p>
+        </div>
+        <div class="flex gap-3">
+          <button (click)="refresh()" class="bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-lg text-sm font-medium transition-all">Refresh (cookie)</button>
+          <button (click)="me()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-lg shadow-blue-500/20">Me (Bearer)</button>
+          <button (click)="logout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-4 py-2 rounded-lg text-sm font-medium transition-all">Logout</button>
+        </div>
+      </div>
 
-    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
-      <button (click)="refresh()">Refresh (cookie)</button>
-      <button (click)="me()">Me (Bearer)</button>
-      <button (click)="logout()">Logout (cookie)</button>
-      <button (click)="clearToken()">Clear token</button>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-white/[0.06] border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
+          <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+            Auth Form
+          </h3>
+          <div class="bg-black/40 rounded-xl border border-white/5 overflow-hidden">
+            <app-auth-page></app-auth-page>
+          </div>
+        </div>
+
+        <div class="space-y-8">
+          <div class="bg-white/[0.06] border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]"></span>
+                In-Memory Token
+              </h3>
+              <span class="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded border"
+                [class.bg-green-500/10]="authState.accessToken()"
+                [class.text-green-400]="authState.accessToken()"
+                [class.border-green-500/20]="authState.accessToken()"
+                [class.bg-white/5]="!authState.accessToken()"
+                [class.text-white/40]="!authState.accessToken()"
+                [class.border-white/10]="!authState.accessToken()">
+                {{ authState.accessToken() ? 'Active' : 'Missing' }}
+              </span>
+            </div>
+            
+            <textarea
+              [ngModel]="tokenInput()"
+              (ngModelChange)="tokenInput.set($event)"
+              rows="4"
+              class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-mono text-blue-300 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+              placeholder="Paste token here..."
+            ></textarea>
+
+            <div class="mt-4 flex gap-3">
+              <button (click)="setToken()" class="flex-1 bg-white/10 hover:bg-white/15 text-white py-2 rounded-lg text-sm font-medium transition-all">Update Key</button>
+              <button (click)="clearToken()" class="px-4 py-2 rounded-lg text-white/40 hover:text-white transition-all text-sm font-medium">Clear</button>
+            </div>
+          </div>
+
+          <div class="bg-white/[0.06] border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
+            <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
+              Execution Result
+            </h3>
+            <div class="bg-black/60 rounded-xl border border-white/10 p-4 overflow-auto max-h-[300px]">
+              <pre class="text-xs text-emerald-400 font-mono leading-relaxed whitespace-pre-wrap break-all">{{ result() || 'Waiting for action...' }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div style="border: 1px solid #ccc; padding: 12px; margin-bottom: 16px;">
-      <app-auth-page></app-auth-page>
-    </div>
-
-    <label style="display:block; margin-bottom:6px;">Access token (in-memory)</label>
-    <textarea
-      [ngModel]="tokenInput()"
-      (ngModelChange)="tokenInput.set($event)"
-      rows="6"
-      style="width:100%; font-family: monospace;"
-    ></textarea>
-
-    <div style="margin-top:8px;">
-      <button (click)="setToken()">Set token</button>
-      <span style="margin-left:12px;"
-        >Current token: {{ authState.accessToken() ? 'SET' : 'NULL' }}</span
-      >
-    </div>
-
-    <h3 style="margin-top:16px;">Result</h3>
-    <pre style="white-space: pre-wrap;">{{ result() }}</pre>
   `,
 })
 export class AuthDebugComponent {
