@@ -1,10 +1,5 @@
 import { Injectable } from '@angular/core';
-import { bytesToB64 } from '../crypto/b64';
-import { zeroize } from '../crypto/zeroize';
-import { encryptSplit } from '../crypto/aesgcm-split';
-import { hkdfAesGcm256Key, hkdfVerifierB64 } from '../crypto/hkdf';
-import type { KdfProvider } from '../crypto/kdf/kdf';
-import { Pbkdf2KdfProvider } from '../crypto/kdf/pbkdf2-kdf';
+import { CryptoWorkerFactory } from '../crypto/worker/crypto-worker.factory';
 
 export type EncryptedValueDto = { Nonce: string; CipherText: string; Tag: string };
 
@@ -20,7 +15,27 @@ export type RegisterRequest = {
 
 @Injectable({ providedIn: 'root' })
 export class AuthCryptoService {
-  private readonly kdf: KdfProvider = new Pbkdf2KdfProvider();
+  private worker: Worker;
+  private pendingRequests = new Map<
+    string,
+    { resolve: (val: any) => void; reject: (err: any) => void }
+  >();
+
+  constructor(private workerFactory: CryptoWorkerFactory) {
+    this.worker = this.workerFactory.create();
+    this.worker.onmessage = ({ data }: MessageEvent<{ id: string; payload: any }>) => {
+      const { id, payload } = data;
+      const pending = this.pendingRequests.get(id);
+      if (pending) {
+        if (payload.type === 'ERROR') {
+          pending.reject(new Error(payload.error));
+        } else {
+          pending.resolve(payload.payload);
+        }
+        this.pendingRequests.delete(id);
+      }
+    };
+  }
 
   async buildRegister(
     accountId: string,
@@ -31,53 +46,14 @@ export class AuthCryptoService {
     registerBody: RegisterRequest;
     loginBodyForSwagger: string;
   }> {
-    const sPwd = crypto.getRandomValues(new Uint8Array(16));
+    return this.postToWorker('REGISTER', { accountId, password, kdfMode, schemaVer });
+  }
 
-    let aad = new TextEncoder().encode(`vaulton:mk-wrap-pwd:schema${schemaVer}:${accountId}`);
-
-    let mkBytes: Uint8Array | null = null;
-
-    try {
-      const hkdfBaseKey = await this.kdf.deriveHkdfBaseKey(password, sPwd, kdfMode);
-      const verifierB64 = await hkdfVerifierB64(hkdfBaseKey, 'vaulton/verifier');
-      const kekKey = await hkdfAesGcm256Key(hkdfBaseKey, 'vaulton/kek');
-
-      mkBytes = crypto.getRandomValues(new Uint8Array(32));
-      const wrap = await encryptSplit(kekKey, mkBytes, aad);
-      zeroize(mkBytes);
-      mkBytes = null;
-
-      const mkWrapPwd: EncryptedValueDto = {
-        Nonce: bytesToB64(wrap.Nonce),
-        CipherText: bytesToB64(wrap.CipherText),
-        Tag: bytesToB64(wrap.Tag),
-      };
-
-      zeroize(wrap.Nonce);
-      zeroize(wrap.CipherText);
-      zeroize(wrap.Tag);
-
-      const sPwdB64 = bytesToB64(sPwd);
-      const registerBody: RegisterRequest = {
-        AccountId: accountId,
-        Verifier: verifierB64,
-        S_Pwd: sPwdB64,
-        KdfMode: kdfMode,
-        MKWrapPwd: mkWrapPwd,
-        MKWrapRk: null,
-        CryptoSchemaVer: schemaVer,
-      };
-
-      const loginBodyForSwagger = JSON.stringify(
-        { AccountId: accountId, Verifier: verifierB64 },
-        null,
-        2
-      );
-      return { registerBody, loginBodyForSwagger };
-    } finally {
-      zeroize(aad);
-      zeroize(sPwd);
-      if (mkBytes) zeroize(mkBytes);
-    }
+  private postToWorker<T>(type: string, payload: any): Promise<T> {
+    const id = crypto.randomUUID();
+    return new Promise((resolve, reject) => {
+      this.pendingRequests.set(id, { resolve, reject });
+      this.worker.postMessage({ id, payload: { type, payload } });
+    });
   }
 }
