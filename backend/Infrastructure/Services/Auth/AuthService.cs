@@ -148,10 +148,26 @@ namespace Infrastructure.Services.Auth
 			var now = DateTime.UtcNow;
 			await refreshTokenStore.RevokeAsync(refreshToken, now);
 		}
-		public async Task LogoutAllAsync(Guid accountId)
+	public async Task LogoutAllAsync(Guid accountId)
 		{
 			var now = DateTime.UtcNow;
 			await refreshTokenStore.RevokeAllAsync(accountId, now);
+		}
+
+	public async Task<PreLoginResult> PreLoginAsync(PreLoginCommand cmd)
+		{
+			var user = await db.Users
+				.Where(u => u.Id == cmd.AccountId)
+				.Select(u => new { u.S_Pwd, u.KdfMode, u.CryptoSchemaVer })
+				.SingleOrDefaultAsync();
+
+			// good idea would be to probably always return Ok with a fake deterministic salt to prevent accountId enumeration
+			if (user is null)
+			{
+				return PreLoginResult.Fail(PreLoginError.AccountNotFound);
+			}
+
+			return PreLoginResult.Ok(user.S_Pwd, user.KdfMode, user.CryptoSchemaVer);
 		}
 
 		// helps with attackers trying to guess if an AccountId exists

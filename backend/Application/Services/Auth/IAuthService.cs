@@ -11,5 +11,5 @@ public interface IAuthService
 	Task<RefreshResult> RefreshAsync(RefreshCommand cmd);
 	Task LogoutAsync(string refreshToken);
 	Task LogoutAllAsync(Guid accountId);
-
+	Task<PreLoginResult> PreLoginAsync(PreLoginCommand cmd);
 }

@@ -70,7 +70,25 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		return StatusCode(StatusCodes.Status201Created, new RegisterResponse(result.AccountId!.Value));
 	}
 
+	[HttpPost("pre-login")]
+	[EnableRateLimiting("AuthPolicy")]
+	public async Task<ActionResult<PreLoginResponse>> PreLogin([FromBody] PreLoginRequest request)
+	{
+		var cmd = new PreLoginCommand(request.AccountId);
+		var result = await _auth.PreLoginAsync(cmd);
 
+		if (!result.Success)
+		{
+// good idea would be to probably always return Ok with a fake deterministic salt to prevent accountId enumeration
+			return NotFound(new { message = "Account not found." });
+		}
+
+		return Ok(new PreLoginResponse(
+			result.S_Pwd!,
+			(int)result.KdfMode!,
+			result.CryptoSchemaVer!.Value
+		));
+	}
 	[HttpPost("login")]
 	[EnableRateLimiting("AuthPolicy")]
 	public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
