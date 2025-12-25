@@ -87,6 +87,7 @@ export class LoginDebugComponent {
       });
 
       const { verifier } = await this.crypto.buildLogin(this.password(), preLogin);
+      this.password.set('');
 
       const tokenRes = await new Promise<any>((resolve, reject) => {
         this.api
@@ -96,7 +97,6 @@ export class LoginDebugComponent {
 
       this.state.setAccessToken(tokenRes.Token);
       this.accountId.set('');
-      this.password.set('');
     } catch (e: any) {
       this.error.set(e.message || JSON.stringify(e));
     } finally {

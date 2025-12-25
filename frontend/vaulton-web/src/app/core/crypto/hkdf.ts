@@ -15,11 +15,14 @@ export async function hkdfVerifierB64(hkdfBaseKey: CryptoKey, info: string): Pro
     256
   );
 
-  const bytes = new Uint8Array(buf);
+  let bytes: Uint8Array | null = new Uint8Array(buf);
   try {
-    return bytesToB64(bytes);
+    return bytesToB64(bytes as Uint8Array);
   } finally {
-    zeroize(bytes);
+    if (bytes) {
+      zeroize(bytes);
+      bytes = null;
+    }
   }
 }
 

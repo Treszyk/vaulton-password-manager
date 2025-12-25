@@ -10,17 +10,20 @@ const PBKDF2_ITERS_BY_MODE: Record<number, number> = {
 };
 
 export class Pbkdf2KdfProvider implements KdfProvider {
-  async deriveHkdfBaseKey(password: string, sPwd: Uint8Array, kdfMode: number): Promise<CryptoKey> {
-    const pwdBytes = new TextEncoder().encode(password);
+  async deriveHkdfBaseKey(
+    password: Uint8Array,
+    sPwd: Uint8Array,
+    kdfMode: number
+  ): Promise<CryptoKey> {
     let pbkdf2BaseKey: CryptoKey;
 
-    try {
-      pbkdf2BaseKey = await crypto.subtle.importKey('raw', pwdBytes, { name: 'PBKDF2' }, false, [
-        'deriveBits',
-      ]);
-    } finally {
-      zeroize(pwdBytes);
-    }
+    pbkdf2BaseKey = await crypto.subtle.importKey(
+      'raw',
+      password as BufferSource,
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits']
+    );
 
     const mode = kdfMode in PBKDF2_ITERS_BY_MODE ? kdfMode : 1;
     const iterations = PBKDF2_ITERS_BY_MODE[mode];
@@ -31,14 +34,17 @@ export class Pbkdf2KdfProvider implements KdfProvider {
       256
     );
 
-    const ikmBytes = new Uint8Array(ikmBuf);
+    let ikmBytes: Uint8Array | null = new Uint8Array(ikmBuf);
     try {
-      return await crypto.subtle.importKey('raw', ikmBytes, 'HKDF', false, [
+      return await crypto.subtle.importKey('raw', ikmBytes as BufferSource, 'HKDF', false, [
         'deriveBits',
         'deriveKey',
       ]);
     } finally {
-      zeroize(ikmBytes);
+      if (ikmBytes) {
+        zeroize(ikmBytes);
+        ikmBytes = null;
+      }
     }
   }
 }

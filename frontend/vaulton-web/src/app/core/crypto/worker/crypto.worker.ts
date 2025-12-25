@@ -12,23 +12,40 @@ import type { KdfProvider } from '../kdf/kdf';
 const kdfProvider: KdfProvider = new Pbkdf2KdfProvider();
 
 addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRequest>>) => {
-  const { id, payload } = data;
+  const { id, payload: request } = data;
+  let pwdBytes: Uint8Array | null = null;
 
   try {
-    switch (payload.type) {
+    const { passwordBuffer } = request.payload;
+    if (!(passwordBuffer instanceof ArrayBuffer)) {
+      throw new Error('Invalid payload: passwordBuffer missing');
+    }
+    pwdBytes = new Uint8Array(passwordBuffer);
+
+    switch (request.type) {
       case 'REGISTER':
-        const regRes = await handleRegister(payload.payload);
+        const regRes = await handleRegister({
+          ...request.payload,
+          password: pwdBytes,
+        });
         postSuccess(id, regRes);
         break;
       case 'LOGIN':
-        const loginRes = await handleLogin(payload.payload);
+        const loginRes = await handleLogin({
+          ...request.payload,
+          password: pwdBytes,
+        });
         postSuccess(id, loginRes);
         break;
       default:
-        throw new Error(`Unknown message type: ${(payload as any).type}`);
+        throw new Error(`Unknown message type: ${(request as any).type}`);
     }
   } catch (err: any) {
     postError(id, err.message || String(err));
+  } finally {
+    if (pwdBytes) {
+      zeroize(pwdBytes);
+    }
   }
 });
 
@@ -49,7 +66,7 @@ async function handleRegister({
   schemaVer,
 }: {
   accountId: string;
-  password: string;
+  password: Uint8Array;
   kdfMode: number;
   schemaVer: number;
 }) {
@@ -107,7 +124,7 @@ async function handleLogin({
   saltB64,
   kdfMode,
 }: {
-  password: string;
+  password: Uint8Array;
   saltB64: string;
   kdfMode: number;
 }) {

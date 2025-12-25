@@ -86,13 +86,23 @@ export class AuthCryptoService {
       throw new Error('Crypto worker is busy. Please wait.');
     }
     this.isWorking = true;
+    let pwdBytes: Uint8Array | null = new TextEncoder().encode(password);
+    const passwordBuffer = pwdBytes.buffer;
+    password = ''; // best effort to clear string reference
+
     try {
       const res = await this.postToWorker<{
         registerBody: RegisterRequest;
         loginBodyForSwagger: string;
-      }>('REGISTER', { accountId, password, kdfMode, schemaVer });
+      }>('REGISTER', { accountId, passwordBuffer, kdfMode, schemaVer }, [passwordBuffer]);
       return res;
     } finally {
+      if (pwdBytes) {
+        try {
+          pwdBytes.fill(0);
+        } catch {}
+        pwdBytes = null;
+      }
       this.isWorking = false;
     }
   }
@@ -102,18 +112,32 @@ export class AuthCryptoService {
       throw new Error('Crypto worker is busy. Please wait.');
     }
     this.isWorking = true;
+    let pwdBytes: Uint8Array | null = new TextEncoder().encode(password);
+    const passwordBuffer = pwdBytes.buffer;
+    password = ''; // best effort to clear string reference
     try {
-      return await this.postToWorker<{ verifier: string }>('LOGIN', {
-        password,
-        saltB64: preLogin.S_Pwd,
-        kdfMode: preLogin.KdfMode,
-      });
+      const res = await this.postToWorker<{ verifier: string }>(
+        'LOGIN',
+        {
+          passwordBuffer,
+          saltB64: preLogin.S_Pwd,
+          kdfMode: preLogin.KdfMode,
+        },
+        [passwordBuffer]
+      );
+      return res;
     } finally {
+      if (pwdBytes) {
+        try {
+          pwdBytes.fill(0);
+        } catch {}
+        pwdBytes = null;
+      }
       this.isWorking = false;
     }
   }
 
-  private postToWorker<T>(type: string, payload: any): Promise<T> {
+  private postToWorker<T>(type: string, payload: any, transfer?: Transferable[]): Promise<T> {
     if (!this.worker) {
       this.initWorker();
     }
@@ -127,7 +151,7 @@ export class AuthCryptoService {
       }, 60000); // 60s timeout
 
       this.pendingRequests.set(id, { resolve, reject, timeoutId });
-      this.worker!.postMessage({ id, payload: { type, payload } });
+      this.worker!.postMessage({ id, payload: { type, payload } }, transfer || []);
     });
   }
 }

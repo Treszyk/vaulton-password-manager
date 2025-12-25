@@ -1,6 +1,9 @@
 export function bytesToB64(u8: Uint8Array): string {
   let bin = '';
-  for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
+  const chunk = 8192;
+  for (let i = 0; i < u8.length; i += chunk) {
+    bin += String.fromCharCode(...u8.subarray(i, i + chunk));
+  }
   return btoa(bin);
 }
 

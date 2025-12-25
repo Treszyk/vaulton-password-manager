@@ -138,11 +138,11 @@ export class AuthPageComponent {
     this.crypto
       .buildRegister(accountId, password, kdfMode, schemaVer)
       .then(({ registerBody, loginBodyForSwagger }) => {
+        this.password.set('');
         this.api.register(registerBody).subscribe({
           next: () => {
             this.result.set('Register OK');
             this.loginBodyForSwagger.set(loginBodyForSwagger);
-            this.password.set('');
           },
           error: (e) => this.result.set(`Register FAILED\n${this.pretty(e)}`),
         });

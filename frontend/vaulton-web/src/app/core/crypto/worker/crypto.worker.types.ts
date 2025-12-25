@@ -9,9 +9,15 @@ export type WorkerMessage<T = unknown> = {
 
 export type RegisterPayload = {
   accountId: string;
-  password: string;
+  passwordBuffer: ArrayBuffer;
   kdfMode: number;
   schemaVer: number;
+};
+
+export type LoginPayload = {
+  passwordBuffer: ArrayBuffer;
+  saltB64: string;
+  kdfMode: number;
 };
 
 export type RegisterResult = {
@@ -21,7 +27,7 @@ export type RegisterResult = {
 
 export type WorkerRequest =
   | { type: 'REGISTER'; payload: RegisterPayload }
-  | { type: 'LOGIN'; payload: { password: string; saltB64: string; kdfMode: number } };
+  | { type: 'LOGIN'; payload: LoginPayload };
 
 export type WorkerResponseEnvelope<T = unknown> =
   | { id: string; ok: true; result: T }
