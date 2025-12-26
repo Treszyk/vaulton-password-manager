@@ -30,7 +30,7 @@ function getWorkerPolicy(): any {
         },
       });
     } catch (e) {
-      console.warn('Re-creating trusted type policy failed', e);
+      // Re-creating trusted type policy failed
     }
   }
   return workerPolicy;

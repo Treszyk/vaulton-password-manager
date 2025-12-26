@@ -52,6 +52,8 @@ export type CreateVaultEntryRequest = EncryptedEntryResult & {
   EntryId: string;
 };
 
+export type UpdateVaultEntryRequest = EncryptedEntryResult;
+
 export type PreCreateEntryResponse = {
   EntryId: string;
 };

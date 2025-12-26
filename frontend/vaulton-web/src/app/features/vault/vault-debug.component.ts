@@ -56,7 +56,7 @@ type DebugEntry = {
           >
             <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-              Create New Entry
+              {{ editingId() ? 'Update Entry' : 'Create New Entry' }}
             </h3>
 
             <div class="space-y-4">
@@ -124,13 +124,28 @@ type DebugEntry = {
                 </div>
               </div>
 
-              <button
-                [disabled]="isBusy() || !mk.isReady()"
-                (click)="save()"
-                class="w-full bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-3 rounded-xl transition-all shadow-lg mt-2"
-              >
-                {{ isBusy() ? 'Encrypting...' : 'Securely Save Entry' }}
-              </button>
+              <div class="flex gap-3 mt-4">
+                <button
+                  *ngIf="editingId()"
+                  (click)="cancelEdit()"
+                  class="flex-1 bg-white/10 text-white hover:bg-white/20 font-bold py-3 rounded-xl transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  [disabled]="isBusy() || !mk.isReady()"
+                  (click)="submit()"
+                  class="flex-1 bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-3 rounded-xl transition-all shadow-lg"
+                >
+                  {{
+                    isBusy()
+                      ? 'Processing...'
+                      : editingId()
+                      ? 'Update Entry'
+                      : 'Securely Save Entry'
+                  }}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -194,6 +209,13 @@ type DebugEntry = {
                 </div>
                 <div class="flex gap-2 shrink-0">
                   <button
+                    *ngIf="e.plain"
+                    (click)="edit(e)"
+                    class="bg-indigo-500/20 hover:bg-indigo-500 text-indigo-400 hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition-all border border-indigo-500/20"
+                  >
+                    Edit
+                  </button>
+                  <button
                     *ngIf="!e.plain"
                     [disabled]="e.decrypting || !mk.isReady()"
                     (click)="decrypt(e)"
@@ -253,6 +275,7 @@ export class VaultDebugComponent {
   isBusy = signal(false);
   result = signal('');
   entryIdPreview = signal('');
+  editingId = signal<string | null>(null);
 
   form = {
     title: '',
@@ -275,7 +298,6 @@ export class VaultDebugComponent {
       await this.mk.ensureKey();
       this.result.set('Enclave UNLOCKED');
     } catch (e: any) {
-      console.error('Unlock error:', e);
       this.result.set(`Unlock FAILED: ${e.message}`);
     } finally {
       this.isBusy.set(false);
@@ -296,54 +318,96 @@ export class VaultDebugComponent {
     }
   }
 
-  async save() {
-    if (!this.form.title || !this.form.password) {
-      this.result.set('Validation FAILED: Title and Password required');
-      return;
+  edit(entry: DebugEntry) {
+    if (!entry.plain) return;
+    this.form = { ...entry.plain };
+    this.editingId.set(entry.dto.Id);
+    this.entryIdPreview.set(entry.dto.Id);
+    this.result.set(`Editing Entry: ${entry.dto.Id}`);
+  }
+
+  async submit() {
+    if (this.editingId()) {
+      await this.update();
+    } else {
+      await this.create();
     }
+  }
+
+  async create() {
+    if (!this.validate()) return;
 
     try {
       this.isBusy.set(true);
 
-      // Step 1: Pre-allocate EntryId from Backend
       this.result.set('Allocating Entry ID...');
       const pre = await firstValueFrom(this.api.preCreate());
       const entryId = pre.EntryId;
       this.entryIdPreview.set(entryId);
 
-      const plain: PlainEntry = {
-        title: this.form.title,
-        website: this.form.website,
-        username: this.form.username,
-        password: this.form.password,
-        notes: this.form.notes,
-      };
+      const sealed = await this.sealEntry(entryId);
 
-      // Step 2: Encrypt with sound AAD binding (User + Record ID)
-      const accountId = this.state.accountId() || 'GUEST-DEBUG';
-      const boundAad = `vaulton:v1:entry:${accountId}:${entryId}`;
-
-      this.result.set(`Encrypting...\nAAD: ${boundAad}`);
-
-      const sealed = await this.crypto.encryptEntry(
-        plain,
-        this.form.website || 'default',
-        boundAad
-      );
-
-      // Step 3: Create Entry with already sealed payload
       const r = await firstValueFrom(this.api.create({ ...sealed, EntryId: entryId }));
 
-      this.result.set(`Save OK\nEntryId: ${r.EntryId}\nBound to: ${accountId}:${entryId}`);
+      this.result.set(`Save OK\nEntryId: ${r.EntryId}\nBound to: ${this.getAad(entryId)}`);
       this.resetForm();
-      this.entryIdPreview.set('');
       await this.list();
     } catch (e: any) {
-      console.error('Save error:', e);
-      this.result.set(`Save FAILED: ${e.message}`);
+      this.result.set(`Create FAILED: ${e.message}`);
     } finally {
       this.isBusy.set(false);
     }
+  }
+
+  async update() {
+    if (!this.validate()) return;
+
+    const entryId = this.editingId();
+    if (!entryId) return;
+
+    try {
+      this.isBusy.set(true);
+
+      const sealed = await this.sealEntry(entryId);
+
+      await firstValueFrom(this.api.update(entryId, sealed));
+      this.result.set(`Update OK\nEntryId: ${entryId}\nBound to: ${this.getAad(entryId)}`);
+
+      this.resetForm();
+      await this.list();
+    } catch (e: any) {
+      this.result.set(`Update FAILED: ${e.message}`);
+    } finally {
+      this.isBusy.set(false);
+    }
+  }
+
+  private validate(): boolean {
+    if (!this.form.title || !this.form.password) {
+      this.result.set('Validation FAILED: Title and Password required');
+      return false;
+    }
+    return true;
+  }
+
+  private async sealEntry(entryId: string) {
+    const plain: PlainEntry = {
+      title: this.form.title,
+      website: this.form.website,
+      username: this.form.username,
+      password: this.form.password,
+      notes: this.form.notes,
+    };
+
+    const aad = this.getAad(entryId);
+    this.result.set(`Encrypting...\nAAD: ${aad}`);
+
+    return await this.crypto.encryptEntry(plain, this.form.website || 'default', aad);
+  }
+
+  private getAad(entryId: string): string {
+    const accountId = this.state.accountId() || 'GUEST-DEBUG';
+    return `vaulton:v1:entry:${accountId}:${entryId}`;
   }
 
   async decrypt(entry: DebugEntry) {
@@ -370,7 +434,6 @@ export class VaultDebugComponent {
 
       this.result.set(`Decryption OK\nAccount Binding Validated`);
     } catch (e: any) {
-      console.error('Decryption error:', e);
       this.result.set(`Decryption FAILED: ${e.message}`);
       this.entries.update((list) => {
         const item = list.find((i) => i.dto.Id === entry.dto.Id);
@@ -395,6 +458,13 @@ export class VaultDebugComponent {
 
   private resetForm() {
     this.form = { title: '', website: '', username: '', password: '', notes: '' };
+    this.editingId.set(null);
+    this.entryIdPreview.set('');
+  }
+
+  cancelEdit() {
+    this.resetForm();
+    this.result.set('Edit Cancelled');
   }
 
   private pretty(e: any): string {

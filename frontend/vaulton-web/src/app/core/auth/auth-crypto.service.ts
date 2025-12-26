@@ -34,13 +34,11 @@ export class AuthCryptoService {
     };
 
     this.worker.onerror = (err) => {
-      console.error('Crypto Worker Error:', err);
       this.rejectAllPending(new Error('Crypto Worker crashed'));
       this.terminate();
     };
 
     this.worker.onmessageerror = (err) => {
-      console.error('Crypto Worker Message Error:', err);
       this.rejectAllPending(new Error('Crypto Worker serialization failed'));
     };
   }

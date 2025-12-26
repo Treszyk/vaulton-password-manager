@@ -6,6 +6,7 @@ import {
   CreateVaultEntryRequest,
   EntryDto,
   PreCreateEntryResponse,
+  UpdateVaultEntryRequest,
 } from '../crypto/worker/crypto.worker.types';
 
 @Injectable({ providedIn: 'root' })
@@ -26,6 +27,10 @@ export class VaultApiService {
 
   create(req: CreateVaultEntryRequest): Observable<{ EntryId: string }> {
     return this.http.post<{ EntryId: string }>(`${this.baseUrl}/vault/entries`, req);
+  }
+
+  update(id: string, req: UpdateVaultEntryRequest): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/vault/entries/${id}`, req);
   }
 
   delete(id: string): Observable<void> {
