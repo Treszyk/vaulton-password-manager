@@ -43,9 +43,17 @@ export type PlainEntry = {
   notes: string;
 };
 
-export type CreateVaultEntryRequest = {
+export type EncryptedEntryResult = {
   DomainTag: string;
   Payload: EncryptedValueDto;
+};
+
+export type CreateVaultEntryRequest = EncryptedEntryResult & {
+  EntryId: string;
+};
+
+export type PreCreateEntryResponse = {
+  EntryId: string;
 };
 
 export type EntryDto = {

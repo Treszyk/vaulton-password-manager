@@ -131,12 +131,21 @@ export class AuthCryptoService {
   }
 
   async encryptEntry(
-    plaintext: string,
+    plaintextOrBuffer: string | ArrayBuffer,
     aadB64: string,
     domain?: string
   ): Promise<{ DomainTag: string; Payload: { Nonce: string; CipherText: string; Tag: string } }> {
-    let ptBytes: Uint8Array | null = new TextEncoder().encode(plaintext);
-    const plaintextBuffer = ptBytes.buffer;
+    let ptBytes: Uint8Array | null;
+    let plaintextBuffer: ArrayBuffer;
+
+    if (typeof plaintextOrBuffer === 'string') {
+      ptBytes = new TextEncoder().encode(plaintextOrBuffer);
+      plaintextBuffer = ptBytes.buffer as ArrayBuffer;
+    } else {
+      ptBytes = null;
+      plaintextBuffer = plaintextOrBuffer;
+    }
+
     try {
       return await this.postToWorker<{
         DomainTag: string;

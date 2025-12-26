@@ -118,7 +118,9 @@ type DebugEntry = {
                   <span class="text-[10px] text-emerald-400 font-bold uppercase">Automatic</span>
                 </div>
                 <div class="text-[10px] text-blue-400 truncate font-mono">
-                  vaulton:v1:entry:{{ state.accountId() || 'GUEST-DEBUG' }}
+                  vaulton:v1:entry:{{ state.accountId() || 'GUEST-DEBUG' }}:{{
+                    entryIdPreview() || 'PENDING-ID'
+                  }}
                 </div>
               </div>
 
@@ -250,6 +252,7 @@ export class VaultDebugComponent {
   entries = signal<DebugEntry[]>([]);
   isBusy = signal(false);
   result = signal('');
+  entryIdPreview = signal('');
 
   form = {
     title: '',
@@ -301,6 +304,13 @@ export class VaultDebugComponent {
 
     try {
       this.isBusy.set(true);
+
+      // Step 1: Pre-allocate EntryId from Backend
+      this.result.set('Allocating Entry ID...');
+      const pre = await firstValueFrom(this.api.preCreate());
+      const entryId = pre.EntryId;
+      this.entryIdPreview.set(entryId);
+
       const plain: PlainEntry = {
         title: this.form.title,
         website: this.form.website,
@@ -309,16 +319,24 @@ export class VaultDebugComponent {
         notes: this.form.notes,
       };
 
+      // Step 2: Encrypt with sound AAD binding (User + Record ID)
       const accountId = this.state.accountId() || 'GUEST-DEBUG';
-      const boundAad = `vaulton:v1:entry:${accountId}`;
+      const boundAad = `vaulton:v1:entry:${accountId}:${entryId}`;
 
       this.result.set(`Encrypting...\nAAD: ${boundAad}`);
 
-      const req = await this.crypto.encryptEntry(plain, this.form.website || 'default', boundAad);
+      const sealed = await this.crypto.encryptEntry(
+        plain,
+        this.form.website || 'default',
+        boundAad
+      );
 
-      const r = await firstValueFrom(this.api.create(req));
-      this.result.set(`Save OK\nEntryId: ${r.EntryId}\nBound to Account: ${accountId}`);
+      // Step 3: Create Entry with already sealed payload
+      const r = await firstValueFrom(this.api.create({ ...sealed, EntryId: entryId }));
+
+      this.result.set(`Save OK\nEntryId: ${r.EntryId}\nBound to: ${accountId}:${entryId}`);
       this.resetForm();
+      this.entryIdPreview.set('');
       await this.list();
     } catch (e: any) {
       console.error('Save error:', e);
@@ -337,7 +355,7 @@ export class VaultDebugComponent {
       });
 
       const accountId = this.state.accountId() || 'GUEST-DEBUG';
-      const boundAad = `vaulton:v1:entry:${accountId}`;
+      const boundAad = `vaulton:v1:entry:${accountId}:${entry.dto.Id}`;
 
       const res = await this.crypto.decryptEntry(entry.dto.Payload, boundAad);
 

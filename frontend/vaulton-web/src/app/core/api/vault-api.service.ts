@@ -2,7 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { CreateVaultEntryRequest, EntryDto } from '../crypto/worker/crypto.worker.types';
+import {
+  CreateVaultEntryRequest,
+  EntryDto,
+  PreCreateEntryResponse,
+} from '../crypto/worker/crypto.worker.types';
 
 @Injectable({ providedIn: 'root' })
 export class VaultApiService {
@@ -14,6 +18,10 @@ export class VaultApiService {
     return this.http.get<EntryDto[]>(`${this.baseUrl}/vault/entries`, {
       params: { skip, take },
     });
+  }
+
+  preCreate(): Observable<PreCreateEntryResponse> {
+    return this.http.post<PreCreateEntryResponse>(`${this.baseUrl}/vault/entries/pre-create`, {});
   }
 
   create(req: CreateVaultEntryRequest): Observable<{ EntryId: string }> {
