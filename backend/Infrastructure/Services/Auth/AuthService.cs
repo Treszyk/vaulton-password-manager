@@ -108,7 +108,7 @@ namespace Infrastructure.Services.Auth
 
 				var refreshIssue = await refreshTokenStore.MintAsync(user.Id, now);
 				var accessToken = tokenIssuer.IssueToken(user.Id);
-				return LoginResult.Ok(accessToken, refreshIssue.Token, refreshIssue.ExpiresAt);
+				return LoginResult.Ok(accessToken, refreshIssue.Token, refreshIssue.ExpiresAt, user.MkWrapPwd, user.MkWrapRk);
 			}
 			finally
 			{

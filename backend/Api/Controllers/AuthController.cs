@@ -102,7 +102,13 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 			RefreshCookieOptions(result.RefreshExpiresAt!.Value)
 		);
 
-		return Ok(new LoginResponse(result.Token!));
+		return Ok(new LoginResponse(
+			result.Token!,
+			new EncryptedValueDto(result.MkWrapPwd!.Nonce, result.MkWrapPwd.CipherText, result.MkWrapPwd.Tag),
+			result.MkWrapRk is not null 
+				? new EncryptedValueDto(result.MkWrapRk.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag) 
+				: null
+		));
 	}
 
 	[HttpPost("refresh")]
@@ -123,7 +129,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 			RefreshCookieOptions(result.RefreshExpiresAt!.Value)
 		);
 
-		return Ok(new LoginResponse(result.AccessToken!));
+		return Ok(new LoginResponse(result.AccessToken!, null, null));
 	}
 
 	[HttpPost("logout")]
