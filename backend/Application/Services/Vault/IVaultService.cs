@@ -5,6 +5,7 @@ namespace Application.Services.Vault;
 
 public interface IVaultService
 {
+	Task<Guid> PreCreateEntryAsync();
 	Task<CreateEntryResult> CreateEntryAsync(CreateEntryCommand cmd);
 	Task<ListEntriesResult> ListEntriesAsync(ListEntriesCommand cmd);
 	Task<GetEntryResult> GetEntryAsync(GetEntryCommand cmd);

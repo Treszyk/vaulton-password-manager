@@ -7,6 +7,10 @@ namespace Api.DTOs.Vault;
 
 public sealed record CreateEntryRequest(
 	[param: Required]
+	[property: JsonPropertyName("EntryId")]
+	Guid EntryId,
+
+	[param: Required]
 	[param: Length(CryptoSizes.DomainTagLen, CryptoSizes.DomainTagLen)]
 	[property: JsonPropertyName("DomainTag")]
 	byte[] DomainTag,

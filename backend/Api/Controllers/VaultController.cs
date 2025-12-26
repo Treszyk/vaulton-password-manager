@@ -16,6 +16,13 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 {
 	private readonly IVaultService _vault = vault;
 
+	[HttpPost("pre-create")]
+	public async Task<ActionResult<PreCreateEntryResponse>> PreCreate()
+	{
+		var entryId = await _vault.PreCreateEntryAsync();
+		return Ok(new PreCreateEntryResponse(entryId));
+	}
+
 	[HttpPost]
 	public async Task<ActionResult<CreateEntryResponse>> Create([FromBody] CreateEntryRequest request)
 	{
@@ -24,7 +31,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 
 		var payload = request.Payload.ToDomain();
 
-		var cmd = new CreateEntryCommand(accountId, request.DomainTag, payload);
+		var cmd = new CreateEntryCommand(accountId, request.EntryId, request.DomainTag, payload);
 		var result = await _vault.CreateEntryAsync(cmd);
 
 		if (!result.Success)
@@ -32,6 +39,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 			return result.Error switch
 			{
 				VaultError.InvalidCryptoBlob => BadRequest(new { message = "Invalid crypto blob sizes." }),
+				VaultError.EntryExists => BadRequest(new { message = "Entry cannot be created." }),
 				_ => StatusCode(StatusCodes.Status500InternalServerError)
 			};
 		}

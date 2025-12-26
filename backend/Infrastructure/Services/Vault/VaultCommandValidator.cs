@@ -9,7 +9,7 @@ public sealed class VaultCommandValidator : IVaultCommandValidator
 {
 	public VaultError? ValidateCreate(CreateEntryCommand cmd)
 	{
-		if (cmd.AccountId == Guid.Empty)
+		if (cmd.AccountId == Guid.Empty || cmd.EntryId == Guid.Empty)
 			return VaultError.InvalidCryptoBlob;
 
 		if (!IsValidDomainTag(cmd.DomainTag) || !IsValidPayload(cmd.Payload))

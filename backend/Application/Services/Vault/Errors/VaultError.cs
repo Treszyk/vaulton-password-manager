@@ -4,5 +4,6 @@ public enum VaultError
 {
 	NotImplemented,
 	InvalidCryptoBlob,
-	NotFound
+	NotFound,
+	EntryExists
 }

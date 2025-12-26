@@ -13,6 +13,17 @@ public sealed class VaultService(VaultonDbContext db, IVaultCommandValidator val
 	private readonly VaultonDbContext _db = db;
 	private readonly IVaultCommandValidator _validator = validator;
 
+	public async Task<Guid> PreCreateEntryAsync()
+	{
+		var entryId = Guid.NewGuid();
+		var exists = await _db.Entries.AnyAsync(e => e.Id == entryId);
+		if (exists)
+		{
+			throw new InvalidOperationException("Failed to generate unique EntryId.");
+		}
+		return entryId;
+	}
+
 	public async Task<CreateEntryResult> CreateEntryAsync(CreateEntryCommand cmd)
 	{
 		var validationError = _validator.ValidateCreate(cmd);
@@ -21,9 +32,12 @@ public sealed class VaultService(VaultonDbContext db, IVaultCommandValidator val
 
 		var now = DateTime.UtcNow;
 
+		if (await _db.Entries.AnyAsync(e => e.Id == cmd.EntryId))
+			return CreateEntryResult.Fail(VaultError.EntryExists);
+
 		var entry = new Entry
 		{
-			Id = Guid.NewGuid(),
+			Id = cmd.EntryId,
 			UserId = cmd.AccountId,
 			DomainTag = cmd.DomainTag,
 			Payload = cmd.Payload,
