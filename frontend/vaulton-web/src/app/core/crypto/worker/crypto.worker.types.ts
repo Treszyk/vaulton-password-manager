@@ -12,6 +12,24 @@ export type RegisterRequest = {
   CryptoSchemaVer: number;
 };
 
+export type FinalizeLoginRequest = {
+  MkWrapPwd: EncryptedValueDto;
+  CryptoSchemaVer: number;
+  AccountId: string;
+};
+
+export type ClearKeysRequest = Record<string, never>;
+
+export type CheckStatusResponse = {
+  isUnlocked: boolean;
+};
+
+export type UnlockRequest = {
+  MkWrapPwd: EncryptedValueDto;
+  CryptoSchemaVer: number;
+  AccountId: string;
+} & LoginPayload; // Reuse passwordBuffer, saltB64, kdfMode
+
 export type WorkerMessage<T = unknown> = {
   id: RequestId;
   payload: T;
@@ -67,6 +85,10 @@ export type EntryDto = {
 export type WorkerRequest =
   | { type: 'REGISTER'; payload: RegisterPayload }
   | { type: 'LOGIN'; payload: LoginPayload }
+  | { type: 'FINALIZE_LOGIN'; payload: FinalizeLoginRequest }
+  | { type: 'CLEAR_KEYS'; payload: ClearKeysRequest }
+  | { type: 'CHECK_STATUS'; payload: Record<string, never> }
+  | { type: 'UNLOCK'; payload: UnlockRequest }
   | { type: 'GENERATE_DEBUG_KEY'; payload: {} }
   | {
       type: 'ENCRYPT_ENTRY';

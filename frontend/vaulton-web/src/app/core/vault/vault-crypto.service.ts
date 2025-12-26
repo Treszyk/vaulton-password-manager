@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AuthCryptoService } from '../auth/auth-crypto.service';
-import { MkStateService } from './mk-state.service';
+
 import { EncryptedEntryResult, EncryptedValueDto } from '../crypto/worker/crypto.worker.types';
 import { bytesToB64 } from '../crypto/b64';
 
@@ -14,17 +14,13 @@ export type PlainEntry = {
 
 @Injectable({ providedIn: 'root' })
 export class VaultCryptoService {
-  constructor(
-    private readonly authCrypto: AuthCryptoService,
-    private readonly mk: MkStateService
-  ) {}
+  constructor(private readonly authCrypto: AuthCryptoService) {}
 
   async encryptEntry(
     entry: PlainEntry,
     domain: string,
     aadStr: string
   ): Promise<EncryptedEntryResult> {
-    await this.mk.ensureKey();
     const json = JSON.stringify(entry);
     const aadB64 = bytesToB64(new TextEncoder().encode(aadStr));
 
@@ -39,7 +35,6 @@ export class VaultCryptoService {
   }
 
   async decryptEntry(dto: EncryptedValueDto, aadStr: string): Promise<PlainEntry> {
-    await this.mk.ensureKey();
     const aadB64 = bytesToB64(new TextEncoder().encode(aadStr));
     const json = await this.authCrypto.decryptEntry(dto, aadB64);
     return JSON.parse(json) as PlainEntry;

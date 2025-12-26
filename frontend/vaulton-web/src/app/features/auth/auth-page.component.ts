@@ -3,6 +3,7 @@ import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthApiService } from '../../core/api/auth-api.service';
 import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
+import type { RegisterRequest } from '../../core/crypto/worker/crypto.worker.types';
 
 @Component({
   standalone: true,
@@ -137,17 +138,25 @@ export class AuthPageComponent {
 
     this.crypto
       .buildRegister(accountId, password, kdfMode, schemaVer)
-      .then(({ registerBody, loginBodyForSwagger }) => {
-        this.password.set('');
-        this.api.register(registerBody).subscribe({
-          next: () => {
-            this.result.set('Register OK');
-            this.loginBodyForSwagger.set(loginBodyForSwagger);
-          },
-          error: (e) => this.result.set(`Register FAILED\n${this.pretty(e)}`),
-        });
-      })
-      .catch((e) => this.result.set(`Build FAILED\n${String(e)}`));
+      .then(
+        ({
+          registerBody,
+          loginBodyForSwagger,
+        }: {
+          registerBody: RegisterRequest;
+          loginBodyForSwagger: string;
+        }) => {
+          this.password.set('');
+          this.api.register(registerBody).subscribe({
+            next: () => {
+              this.result.set('Register OK');
+              this.loginBodyForSwagger.set(loginBodyForSwagger);
+            },
+            error: (e) => this.result.set(`Register FAILED\n${this.pretty(e)}`),
+          });
+        }
+      )
+      .catch((e: Error | any) => this.result.set(`Build FAILED\n${String(e)}`));
   }
 
   clear(): void {

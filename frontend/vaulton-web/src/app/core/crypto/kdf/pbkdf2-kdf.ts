@@ -1,8 +1,6 @@
 import type { KdfProvider } from './kdf';
 import { zeroize } from '../zeroize';
 
-// I will use Argon2id in the future
-
 const PBKDF2_ITERS_BY_MODE: Record<number, number> = {
   0: 200_000,
   1: 400_000,

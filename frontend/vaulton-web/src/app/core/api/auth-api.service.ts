@@ -5,11 +5,16 @@ import { map } from 'rxjs/operators';
 
 import type { RegisterRequest } from '../crypto/worker/crypto.worker.types';
 
-export type TokenResponse = { Token: string };
+export type TokenResponse = {
+  Token: string;
+  MkWrapPwd?: EncryptedValueDto;
+  MkWrapRk?: EncryptedValueDto | null;
+};
 type MeResponse = { accountId: string };
 type LoginRequest = { AccountId: string; Verifier: string };
 export type PreLoginResponse = { S_Pwd: string; KdfMode: number; CryptoSchemaVer: number };
 type PreRegisterResponse = { AccountId: string; CryptoSchemaVer: number };
+import type { EncryptedValueDto } from '../crypto/worker/crypto.worker.types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {

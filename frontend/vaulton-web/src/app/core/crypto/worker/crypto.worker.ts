@@ -17,6 +17,7 @@ import type { KdfProvider } from '../kdf/kdf';
 const kdfProvider: KdfProvider = new Pbkdf2KdfProvider();
 let vaultKey: CryptoKey | null = null;
 let domainTagKey: CryptoKey | null = null;
+let pendingLoginBaseKey: CryptoKey | null = null;
 
 addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRequest>>) => {
   const { id, payload: request } = data;
@@ -40,6 +41,33 @@ addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRe
         try {
           const res = await handleLogin({ ...request.payload, password: pwdBytes });
           postSuccess(id, res);
+        } finally {
+          zeroize(pwdBytes);
+        }
+        break;
+      }
+      case 'FINALIZE_LOGIN': {
+        await handleFinalizeLogin(request.payload);
+        postSuccess(id, { ok: true });
+        break;
+      }
+      case 'CLEAR_KEYS': {
+        handleClearKeys();
+        postSuccess(id, { ok: true });
+        break;
+      }
+      case 'CHECK_STATUS': {
+        const isUnlocked = !!vaultKey;
+        postSuccess(id, { isUnlocked });
+        break;
+      }
+      case 'UNLOCK': {
+        const { passwordBuffer } = request.payload;
+        const pwdBytes = new Uint8Array(passwordBuffer);
+        try {
+          await handleLogin({ ...request.payload, password: pwdBytes });
+          await handleFinalizeLogin(request.payload as any);
+          postSuccess(id, { ok: true });
         } finally {
           zeroize(pwdBytes);
         }
@@ -111,7 +139,7 @@ async function handleRegister({
   try {
     const hkdfBaseKey = await kdfProvider.deriveHkdfBaseKey(password, sPwd, kdfMode);
     const verifierB64 = await hkdfVerifierB64(hkdfBaseKey, 'vaulton/verifier');
-    const kekKey = await hkdfAesGcm256Key(hkdfBaseKey, 'vaulton/kek');
+    const kekKey = await hkdfAesGcm256Key(hkdfBaseKey, 'vaulton/kek', ['encrypt']);
 
     mkBytes = crypto.getRandomValues(new Uint8Array(32));
     const wrap = await encryptSplit(kekKey, mkBytes, aad);
@@ -163,13 +191,66 @@ async function handleLogin({
   kdfMode: number;
 }) {
   const sPwd = b64ToBytes(saltB64);
+
+  if (pendingLoginBaseKey) {
+    pendingLoginBaseKey = null;
+  }
+
   try {
     const hkdfBaseKey = await kdfProvider.deriveHkdfBaseKey(password, sPwd, kdfMode);
+
+    pendingLoginBaseKey = hkdfBaseKey;
+
     const verifierB64 = await hkdfVerifierB64(hkdfBaseKey, 'vaulton/verifier');
     return { verifier: verifierB64 };
+  } catch (e) {
+    pendingLoginBaseKey = null;
+    throw e;
   } finally {
     zeroize(sPwd);
   }
+}
+
+async function handleFinalizeLogin({
+  MkWrapPwd,
+  CryptoSchemaVer,
+  AccountId,
+}: {
+  MkWrapPwd: EncryptedValueDto;
+  CryptoSchemaVer: number;
+  AccountId: string;
+}) {
+  if (!pendingLoginBaseKey) {
+    throw new Error('No pending login key found. Please login again.');
+  }
+
+  vaultKey = null;
+  domainTagKey = null;
+
+  const aadString = `vaulton:mk-wrap-pwd:schema${CryptoSchemaVer}:${AccountId}`;
+  const aad = new TextEncoder().encode(aadString);
+
+  try {
+    const kekKey = await hkdfAesGcm256Key(pendingLoginBaseKey, 'vaulton/kek', ['unwrapKey']);
+
+    const mk = await unwrapMk(kekKey, MkWrapPwd, aad);
+
+    vaultKey = await hkdfAesGcm256Key(mk, 'vaulton/vault-enc', ['encrypt', 'decrypt']);
+    domainTagKey = await hkdfHmacSha256Key(mk, 'vaulton/vault-tag');
+  } catch (e) {
+    vaultKey = null;
+    domainTagKey = null;
+    throw e;
+  } finally {
+    pendingLoginBaseKey = null;
+    zeroize(aad);
+  }
+}
+
+function handleClearKeys() {
+  vaultKey = null;
+  domainTagKey = null;
+  pendingLoginBaseKey = null;
 }
 
 async function handleEncryptEntry({

@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { CryptoWorkerFactory } from '../crypto/worker/crypto-worker.factory';
 import type { PreLoginResponse } from '../api/auth-api.service';
-import type { EncryptedValueDto, RegisterRequest } from '../crypto/worker/crypto.worker.types';
+import type {
+  RegisterRequest,
+  EncryptedValueDto,
+  CheckStatusResponse,
+} from '../crypto/worker/crypto.worker.types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthCryptoService {
@@ -174,6 +178,72 @@ export class AuthCryptoService {
       try {
         ptBytes.fill(0);
       } catch {}
+    }
+  }
+
+  async finalizeLogin(
+    mkWrapPwd: EncryptedValueDto,
+    schemaVer: number,
+    accountId: string
+  ): Promise<void> {
+    await this.postToWorker('FINALIZE_LOGIN', {
+      MkWrapPwd: mkWrapPwd,
+      CryptoSchemaVer: schemaVer,
+      AccountId: accountId,
+    });
+  }
+
+  async clearKeys(): Promise<void> {
+    await this.postToWorker('CLEAR_KEYS', {});
+  }
+
+  async checkStatus(): Promise<boolean> {
+    try {
+      const res = await this.postToWorker<CheckStatusResponse>('CHECK_STATUS', {});
+      return res.isUnlocked;
+    } catch {
+      return false;
+    }
+  }
+
+  async unlock(
+    password: string,
+    bundle: {
+      S_Pwd: string;
+      KdfMode: number;
+      MkWrapPwd: EncryptedValueDto;
+      CryptoSchemaVer: number;
+      AccountId: string;
+    }
+  ): Promise<void> {
+    if (this.isWorking) {
+      throw new Error('Crypto worker is busy.');
+    }
+    this.isWorking = true;
+    let pwdBytes: Uint8Array | null = new TextEncoder().encode(password);
+    const passwordBuffer = pwdBytes.buffer;
+
+    try {
+      await this.postToWorker(
+        'UNLOCK',
+        {
+          passwordBuffer,
+          saltB64: bundle.S_Pwd,
+          kdfMode: bundle.KdfMode,
+          MkWrapPwd: bundle.MkWrapPwd,
+          CryptoSchemaVer: bundle.CryptoSchemaVer,
+          AccountId: bundle.AccountId,
+        },
+        [passwordBuffer]
+      );
+    } finally {
+      if (pwdBytes) {
+        try {
+          pwdBytes.fill(0);
+        } catch {}
+        pwdBytes = null;
+      }
+      this.isWorking = false;
     }
   }
 

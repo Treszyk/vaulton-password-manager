@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { AuthApiService } from '../../core/api/auth-api.service';
 import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
+import { AuthPersistenceService } from '../../core/auth/auth-persistence.service';
+
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-debug',
@@ -16,7 +19,8 @@ import { AuthStateService } from '../../core/auth/auth-state.service';
           >Account ID</label
         >
         <input
-          [(ngModel)]="accountId"
+          [ngModel]="accountId()"
+          (ngModelChange)="accountId.set($event)"
           type="text"
           class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-mono"
           placeholder="e.g. user@example.com"
@@ -28,7 +32,8 @@ import { AuthStateService } from '../../core/auth/auth-state.service';
           >Password</label
         >
         <input
-          [(ngModel)]="password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
           type="password"
           class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-mono"
           placeholder="••••••••"
@@ -70,7 +75,9 @@ export class LoginDebugComponent {
   constructor(
     private api: AuthApiService,
     private crypto: AuthCryptoService,
-    private state: AuthStateService
+    private state: AuthStateService,
+    private persistence: AuthPersistenceService,
+    private router: Router
   ) {}
 
   async login() {
@@ -97,9 +104,26 @@ export class LoginDebugComponent {
 
       this.state.setAccessToken(tokenRes.Token);
       this.state.setAccountId(acc);
-      this.accountId.set('');
+
+      // 4. Persist Bundle (Offline Session)
+      if (tokenRes.MkWrapPwd) {
+        await this.persistence.saveBundle({
+          S_Pwd: preLogin.S_Pwd,
+          KdfMode: preLogin.KdfMode,
+          CryptoSchemaVer: preLogin.CryptoSchemaVer,
+          MkWrapPwd: tokenRes.MkWrapPwd,
+          MkWrapRk: tokenRes.MkWrapRk,
+          AccountId: acc,
+        });
+
+        // 5. Finalize Login (Unwrap MK in Worker)
+        await this.crypto.finalizeLogin(tokenRes.MkWrapPwd, preLogin.CryptoSchemaVer, acc);
+      }
+
+      this.router.navigate(['/debug/vault']);
     } catch (e: any) {
-      this.error.set(e.message || JSON.stringify(e));
+      this.error.set(e.message || 'Login failed');
+      console.error(e);
     } finally {
       this.loading.set(false);
     }

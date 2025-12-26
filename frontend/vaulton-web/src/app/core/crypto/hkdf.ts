@@ -26,7 +26,11 @@ export async function hkdfVerifierB64(hkdfBaseKey: CryptoKey, info: string): Pro
   }
 }
 
-export function hkdfAesGcm256Key(hkdfBaseKey: CryptoKey, info: string): Promise<CryptoKey> {
+export function hkdfAesGcm256Key(
+  hkdfBaseKey: CryptoKey,
+  info: string,
+  keyUsages: KeyUsage[] = ['encrypt', 'decrypt']
+): Promise<CryptoKey> {
   return crypto.subtle.deriveKey(
     {
       name: 'HKDF',
@@ -37,7 +41,7 @@ export function hkdfAesGcm256Key(hkdfBaseKey: CryptoKey, info: string): Promise<
     hkdfBaseKey,
     { name: 'AES-GCM', length: 256 },
     false,
-    ['encrypt', 'decrypt']
+    keyUsages
   );
 }
 
