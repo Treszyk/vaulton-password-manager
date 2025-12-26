@@ -46,11 +46,15 @@ addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRe
         break;
       }
       case 'GENERATE_DEBUG_KEY': {
-        const rawMk = crypto.getRandomValues(new Uint8Array(32));
+        const rawMk = new Uint8Array(32).fill(0x42);
         try {
-          const mkBaseKey = await crypto.subtle.importKey('raw', rawMk, { name: 'HKDF' }, false, [
-            'deriveKey',
-          ]);
+          const mkBaseKey = await crypto.subtle.importKey(
+            'raw',
+            rawMk as BufferSource,
+            { name: 'HKDF' },
+            false,
+            ['deriveKey']
+          );
 
           vaultKey = await hkdfAesGcm256Key(mkBaseKey, 'vaulton/vault-enc');
           domainTagKey = await hkdfHmacSha256Key(mkBaseKey, 'vaulton/vault-tag');
@@ -114,18 +118,15 @@ async function handleRegister({
     zeroize(mkBytes);
     mkBytes = null;
 
-    let mkWrapPwd: EncryptedValueDto;
-    try {
-      mkWrapPwd = {
-        Nonce: bytesToB64(wrap.Nonce),
-        CipherText: bytesToB64(wrap.CipherText),
-        Tag: bytesToB64(wrap.Tag),
-      };
-    } finally {
-      zeroize(wrap.Nonce);
-      zeroize(wrap.CipherText);
-      zeroize(wrap.Tag);
-    }
+    const mkWrapPwd: EncryptedValueDto = {
+      Nonce: bytesToB64(wrap.Nonce),
+      CipherText: bytesToB64(wrap.CipherText),
+      Tag: bytesToB64(wrap.Tag),
+    };
+
+    zeroize(wrap.Nonce);
+    zeroize(wrap.CipherText);
+    zeroize(wrap.Tag);
 
     const sPwdB64 = bytesToB64(sPwd);
     const registerBody: RegisterRequest = {
@@ -133,7 +134,7 @@ async function handleRegister({
       Verifier: verifierB64,
       S_Pwd: sPwdB64,
       KdfMode: kdfMode,
-      MKWrapPwd: mkWrapPwd!,
+      MKWrapPwd: mkWrapPwd,
       MKWrapRk: null,
       CryptoSchemaVer: schemaVer,
     };
@@ -194,7 +195,12 @@ async function handleEncryptEntry({
 
     try {
       const hmacBuf = await crypto.subtle.sign({ name: 'HMAC' }, domainTagKey, domainBytes);
-      domainTag = bytesToB64(new Uint8Array(hmacBuf));
+      const hmacBytes = new Uint8Array(hmacBuf);
+      try {
+        domainTag = bytesToB64(hmacBytes);
+      } finally {
+        zeroize(hmacBytes);
+      }
     } finally {
       zeroize(domainBytes);
     }
@@ -216,8 +222,12 @@ async function handleEncryptEntry({
       zeroize(split.Tag);
     }
   } finally {
-    zeroize(ptBytes);
-    zeroize(aad);
+    try {
+      zeroize(ptBytes);
+    } catch {}
+    try {
+      zeroize(aad);
+    } catch {}
   }
 }
 
@@ -242,15 +252,43 @@ async function handleDecryptEntry({ dto, aadB64 }: { dto: EncryptedValueDto; aad
       ctTag as BufferSource
     );
 
-    const ptBytes = new Uint8Array(ptBuf);
-    const ptBuffer = ptBytes.buffer;
-
-    return { result: { ptBuffer }, transfer: [ptBuffer] };
+    return { result: { ptBuffer: ptBuf }, transfer: [ptBuf] };
   } finally {
     zeroize(nonce);
     zeroize(ct);
     zeroize(tag);
     zeroize(aad);
     if (ctTag) zeroize(ctTag);
+  }
+}
+
+async function unwrapMk(
+  kek: CryptoKey,
+  dto: EncryptedValueDto,
+  aad: Uint8Array
+): Promise<CryptoKey> {
+  const nonce = b64ToBytes(dto.Nonce);
+  const ct = b64ToBytes(dto.CipherText);
+  const tag = b64ToBytes(dto.Tag);
+
+  const wrappedBytes = new Uint8Array(ct.length + tag.length);
+  wrappedBytes.set(ct, 0);
+  wrappedBytes.set(tag, ct.length);
+
+  try {
+    return await crypto.subtle.unwrapKey(
+      'raw',
+      wrappedBytes as BufferSource,
+      kek,
+      { name: 'AES-GCM', iv: nonce as BufferSource, additionalData: aad as BufferSource },
+      { name: 'HKDF' },
+      false,
+      ['deriveKey']
+    );
+  } finally {
+    zeroize(nonce);
+    zeroize(ct);
+    zeroize(tag);
+    zeroize(wrappedBytes);
   }
 }
