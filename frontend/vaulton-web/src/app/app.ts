@@ -20,7 +20,7 @@ export class App {
       const currentPath = window.location.pathname;
 
       if (ok && (currentPath === '/' || currentPath === '')) {
-        this.router.navigateByUrl('/debug/vault').then(() => this.loading.set(false));
+        this.router.navigateByUrl('/vault').then(() => this.loading.set(false));
       } else {
         this.loading.set(false);
       }

@@ -1,17 +1,17 @@
 import { Routes } from '@angular/router';
-import { AuthDebugComponent } from './features/auth/auth-debug.component';
-import { VaultDebugComponent } from './features/vault/vault-debug.component';
 import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   {
-    path: 'debug/auth',
-    component: AuthDebugComponent,
+    path: 'auth',
+    loadComponent: () =>
+      import('./features/auth/auth-page.component').then((m) => m.AuthPageComponent),
   },
   {
-    path: 'debug/vault',
-    component: VaultDebugComponent,
+    path: 'vault',
     canActivate: [authGuard],
+    children: [],
   },
-  { path: '', redirectTo: 'debug/auth', pathMatch: 'full' },
+  { path: '', redirectTo: 'auth', pathMatch: 'full' },
+  { path: '**', redirectTo: 'auth' },
 ];

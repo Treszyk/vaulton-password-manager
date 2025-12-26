@@ -50,7 +50,6 @@ export type LoginPayload = {
 
 export type RegisterResult = {
   registerBody: RegisterRequest;
-  loginBodyForSwagger: string;
 };
 
 export type PlainEntry = {
@@ -89,7 +88,6 @@ export type WorkerRequest =
   | { type: 'CLEAR_KEYS'; payload: ClearKeysRequest }
   | { type: 'CHECK_STATUS'; payload: Record<string, never> }
   | { type: 'UNLOCK'; payload: UnlockRequest }
-  | { type: 'GENERATE_DEBUG_KEY'; payload: {} }
   | {
       type: 'ENCRYPT_ENTRY';
       payload: { plaintextBuffer: ArrayBuffer; aadB64: string; domain?: string };

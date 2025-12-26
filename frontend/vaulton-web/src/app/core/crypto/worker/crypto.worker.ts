@@ -73,26 +73,6 @@ addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRe
         }
         break;
       }
-      case 'GENERATE_DEBUG_KEY': {
-        const rawMk = new Uint8Array(32).fill(0x42);
-        try {
-          const mkBaseKey = await crypto.subtle.importKey(
-            'raw',
-            rawMk as BufferSource,
-            { name: 'HKDF' },
-            false,
-            ['deriveKey']
-          );
-
-          vaultKey = await hkdfAesGcm256Key(mkBaseKey, 'vaulton/vault-enc');
-          domainTagKey = await hkdfHmacSha256Key(mkBaseKey, 'vaulton/vault-tag');
-
-          postSuccess(id, { ok: true });
-        } finally {
-          zeroize(rawMk);
-        }
-        break;
-      }
       case 'ENCRYPT_ENTRY': {
         const { result } = await handleEncryptEntry(request.payload);
         postSuccess(id, result);
@@ -167,13 +147,7 @@ async function handleRegister({
       CryptoSchemaVer: schemaVer,
     };
 
-    const loginBodyForSwagger = JSON.stringify(
-      { AccountId: accountId, Verifier: verifierB64 },
-      null,
-      2
-    );
-
-    return { registerBody, loginBodyForSwagger };
+    return { registerBody };
   } finally {
     zeroize(aad);
     zeroize(sPwd);

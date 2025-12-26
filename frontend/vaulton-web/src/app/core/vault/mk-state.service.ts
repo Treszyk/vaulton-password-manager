@@ -10,9 +10,11 @@ export class MkStateService {
 
   async ensureKey(): Promise<void> {
     if (this._isReady()) return;
-
-    await this.authCrypto.generateDebugVaultKey();
-    this._isReady.set(true);
+    // this service only tracks if the worker has keys
+    const unlocked = await this.authCrypto.checkStatus();
+    if (unlocked) {
+      this._isReady.set(true);
+    }
   }
 
   clear(): void {

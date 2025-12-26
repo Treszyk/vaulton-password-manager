@@ -1,40 +1,21 @@
 @if (!loading()) {
 <div class="min-h-screen transition-opacity duration-500">
-  <nav class="sticky top-0 z-50 backdrop-blur-md bg-black/40 border-b border-white/5 py-3 px-8 flex items-center justify-between shadow-lg">
+  <nav
+    class="sticky top-0 z-50 backdrop-blur-md bg-black/40 border-b border-white/5 py-3 px-8 flex items-center justify-between shadow-lg"
+  >
     <div class="flex items-center gap-3">
-      <div class="font-black text-2xl tracking-tighter text-white uppercase italic">
-        Vaulton
-      </div>
-      <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-xs font-bold tracking-widest border border-blue-500/20">
-        DEBUG
-      </span>
+      <div class="font-black text-2xl tracking-tighter text-white uppercase italic">Vaulton</div>
     </div>
 
-    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-8">
-      <a
-        routerLink="/debug/auth"
-        routerLinkActive="text-white border-b-2 border-white"
-        [routerLinkActiveOptions]="{exact: true}"
-        class="text-sm font-medium transition-all hover:text-white py-2"
-        [class.text-white/40]="!rlaAuth.isActive"
-        #rlaAuth="routerLinkActive"
-      >
-        Auth Debug
-      </a>
-      <a
-        routerLink="/debug/vault"
-        routerLinkActive="text-white border-b-2 border-white"
-        [routerLinkActiveOptions]="{exact: true}"
-        class="text-sm font-medium transition-all hover:text-white py-2"
-        [class.text-white/40]="!rlaVault.isActive"
-        #rlaVault="routerLinkActive"
-      >
-        Vault Debug
-      </a>
-    </div>
+    <!-- Production Navigation Placeholder -->
+    <div
+      class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-8"
+    ></div>
 
     <div class="flex items-center gap-4">
-      <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
+      <div
+        class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20"
+      >
         V
       </div>
     </div>
@@ -46,6 +27,8 @@
 </div>
 } @else {
 <div class="h-screen bg-[#050505] flex items-center justify-center">
-  <div class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+  <div
+    class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"
+  ></div>
 </div>
 }

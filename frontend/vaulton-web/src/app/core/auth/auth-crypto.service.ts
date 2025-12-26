@@ -71,7 +71,6 @@ export class AuthCryptoService {
     schemaVer: number
   ): Promise<{
     registerBody: RegisterRequest;
-    loginBodyForSwagger: string;
   }> {
     if (this.isWorking) {
       throw new Error('Crypto worker is busy. Please wait.');
@@ -126,10 +125,6 @@ export class AuthCryptoService {
       }
       this.isWorking = false;
     }
-  }
-
-  async generateDebugVaultKey(): Promise<void> {
-    await this.postToWorker('GENERATE_DEBUG_KEY', {});
   }
 
   async encryptEntry(

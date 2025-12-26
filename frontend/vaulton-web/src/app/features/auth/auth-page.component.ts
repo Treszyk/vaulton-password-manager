@@ -69,10 +69,10 @@ import type { RegisterRequest } from '../../core/crypto/worker/crypto.worker.typ
       <div class="flex gap-3 pt-2">
         <button
           (click)="register()"
-          [disabled]="!accountId() || !password().length"
+          [disabled]="!accountId() || !password().length || isWorking()"
           class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/20 disabled:text-white/20 text-white py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-blue-500/10 active:scale-[0.98]"
         >
-          Register
+          {{ isWorking() ? 'Working...' : 'Register' }}
         </button>
         <button
           (click)="clear()"
@@ -82,26 +82,16 @@ import type { RegisterRequest } from '../../core/crypto/worker/crypto.worker.typ
         </button>
       </div>
 
-      <div *ngIf="result() || loginBodyForSwagger()" class="space-y-4 pt-4 border-t border-white/5">
-        <div *ngIf="result()" class="space-y-1.5">
-          <label class="text-xs uppercase tracking-widest font-bold text-emerald-400 ml-1"
-            >Status</label
-          >
-          <pre
-            class="bg-black/40 border border-white/10 p-3 rounded-lg text-xs text-emerald-400/90 font-mono leading-relaxed shadow-inner overflow-auto whitespace-pre-wrap break-all max-h-[250px]"
-            >{{ result() }}</pre
-          >
-        </div>
-
-        <div *ngIf="loginBodyForSwagger()" class="space-y-1.5">
-          <label class="text-xs uppercase tracking-widest font-bold text-blue-400 ml-1"
-            >Swagger Payload</label
-          >
-          <pre
-            class="bg-black/40 border border-white/10 p-3 rounded-lg text-xs text-blue-400/90 font-mono leading-relaxed overflow-auto max-h-[150px] shadow-inner"
-            >{{ loginBodyForSwagger() }}</pre
-          >
-        </div>
+      <div *ngIf="statusMessage()" class="pt-4 border-t border-white/5">
+        <p
+          class="text-sm font-medium transition-all"
+          [ngClass]="{
+            'text-emerald-400': isSuccess(),
+            'text-rose-400': !isSuccess()
+          }"
+        >
+          {{ statusMessage() }}
+        </p>
       </div>
     </div>
   `,
@@ -111,26 +101,36 @@ export class AuthPageComponent {
   password = signal<string>('');
   kdfMode = signal<number>(1);
   cryptoSchemaVer = signal<number>(1);
-  result = signal<string>('');
-  loginBodyForSwagger = signal<string>('');
+
+  statusMessage = signal<string>('');
+  isSuccess = signal<boolean>(false);
+  isWorking = signal<boolean>(false);
 
   constructor(private readonly api: AuthApiService, private readonly crypto: AuthCryptoService) {
+    this.init();
+  }
+
+  private init(): void {
     this.refreshAccountId();
   }
 
   refreshAccountId(): void {
-    this.result.set('');
-    this.loginBodyForSwagger.set('');
+    this.statusMessage.set('');
     this.api.preRegister().subscribe({
       next: (r) => {
         this.accountId.set(r.AccountId);
         this.cryptoSchemaVer.set(r.CryptoSchemaVer);
       },
-      error: (e) => this.result.set(`Pre-register FAILED\n${this.pretty(e)}`),
+      error: () => this.reportError('Failed to initialize registration. Please try again.'),
     });
   }
 
   register(): void {
+    if (this.isWorking()) return;
+
+    this.isWorking.set(true);
+    this.statusMessage.set('');
+
     const accountId = this.accountId();
     const password = this.password();
     const kdfMode = this.kdfMode();
@@ -138,38 +138,33 @@ export class AuthPageComponent {
 
     this.crypto
       .buildRegister(accountId, password, kdfMode, schemaVer)
-      .then(
-        ({
-          registerBody,
-          loginBodyForSwagger,
-        }: {
-          registerBody: RegisterRequest;
-          loginBodyForSwagger: string;
-        }) => {
-          this.password.set('');
-          this.api.register(registerBody).subscribe({
-            next: () => {
-              this.result.set('Register OK');
-              this.loginBodyForSwagger.set(loginBodyForSwagger);
-            },
-            error: (e) => this.result.set(`Register FAILED\n${this.pretty(e)}`),
-          });
-        }
-      )
-      .catch((e: Error | any) => this.result.set(`Build FAILED\n${String(e)}`));
+      .then(({ registerBody }) => {
+        this.password.set('');
+        this.api.register(registerBody).subscribe({
+          next: () => {
+            this.isSuccess.set(true);
+            this.statusMessage.set('Account created successfully!');
+            this.isWorking.set(false);
+          },
+          error: (e) => {
+            this.reportError(`Server registration failed: ${e.statusText || 'Unknown error'}`);
+          },
+        });
+      })
+      .catch((e) => {
+        this.reportError(`Encryption failed: ${String(e)}`);
+      });
   }
 
   clear(): void {
-    this.result.set('');
-    this.loginBodyForSwagger.set('');
+    this.statusMessage.set('');
     this.password.set('');
+    this.isSuccess.set(false);
   }
 
-  private pretty(e: any): string {
-    return JSON.stringify(
-      { status: e?.status, statusText: e?.statusText, error: e?.error },
-      null,
-      2
-    );
+  private reportError(msg: string): void {
+    this.isSuccess.set(false);
+    this.statusMessage.set(msg);
+    this.isWorking.set(false);
   }
 }
