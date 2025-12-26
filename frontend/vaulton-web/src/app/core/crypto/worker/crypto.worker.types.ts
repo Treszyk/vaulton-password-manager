@@ -1,6 +1,16 @@
-import type { RegisterRequest } from '../../auth/auth-crypto.service';
-
 export type RequestId = string;
+
+export type EncryptedValueDto = { Nonce: string; CipherText: string; Tag: string };
+
+export type RegisterRequest = {
+  AccountId: string;
+  Verifier: string;
+  S_Pwd: string;
+  KdfMode: number;
+  MKWrapPwd: EncryptedValueDto;
+  MKWrapRk: null;
+  CryptoSchemaVer: number;
+};
 
 export type WorkerMessage<T = unknown> = {
   id: RequestId;
@@ -25,9 +35,23 @@ export type RegisterResult = {
   loginBodyForSwagger: string;
 };
 
+export type PlainEntry = { title: string; username: string; password: string; notes: string };
+
+export type CreateVaultEntryRequest = {
+  DomainTag: string;
+  Payload: EncryptedValueDto;
+};
+
 export type WorkerRequest =
   | { type: 'REGISTER'; payload: RegisterPayload }
-  | { type: 'LOGIN'; payload: LoginPayload };
+  | { type: 'LOGIN'; payload: LoginPayload }
+  | { type: 'GENERATE_DEBUG_KEY'; payload: {} }
+  | {
+      type: 'ENCRYPT_ENTRY';
+      payload: { plaintextBuffer: ArrayBuffer; aadB64: string; domain?: string };
+    }
+  | { type: 'DECRYPT_ENTRY'; payload: { dto: EncryptedValueDto; aadB64: string } }
+  | { type: 'CREATE_VAULT_ENTRY'; payload: CreateVaultEntryRequest };
 
 export type WorkerResponseEnvelope<T = unknown> =
   | { id: string; ok: true; result: T }

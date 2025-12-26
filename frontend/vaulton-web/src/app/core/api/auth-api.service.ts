@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import type { RegisterRequest } from '../auth/auth-crypto.service';
+import type { RegisterRequest } from '../crypto/worker/crypto.worker.types';
 
 export type TokenResponse = { Token: string };
 type MeResponse = { accountId: string };

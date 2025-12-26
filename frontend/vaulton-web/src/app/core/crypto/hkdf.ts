@@ -40,3 +40,18 @@ export function hkdfAesGcm256Key(hkdfBaseKey: CryptoKey, info: string): Promise<
     ['encrypt', 'decrypt']
   );
 }
+
+export function hkdfHmacSha256Key(hkdfBaseKey: CryptoKey, info: string): Promise<CryptoKey> {
+  return crypto.subtle.deriveKey(
+    {
+      name: 'HKDF',
+      hash: 'SHA-256',
+      salt: new Uint8Array(0) as BufferSource,
+      info: enc.encode(info) as BufferSource,
+    },
+    hkdfBaseKey,
+    { name: 'HMAC', hash: 'SHA-256', length: 256 },
+    false,
+    ['sign']
+  );
+}

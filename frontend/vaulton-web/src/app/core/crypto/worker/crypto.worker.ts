@@ -3,55 +3,85 @@
 import { bytesToB64, b64ToBytes } from '../b64';
 import { zeroize } from '../zeroize';
 import { encryptSplit } from '../aesgcm-split';
-import { hkdfAesGcm256Key, hkdfVerifierB64 } from '../hkdf';
+import { hkdfAesGcm256Key, hkdfHmacSha256Key, hkdfVerifierB64 } from '../hkdf';
 import { Pbkdf2KdfProvider } from '../kdf/pbkdf2-kdf';
-import type { EncryptedValueDto, RegisterRequest } from '../../auth/auth-crypto.service';
-import type { WorkerRequest, WorkerMessage, WorkerResponseEnvelope } from './crypto.worker.types';
+import type {
+  WorkerRequest,
+  WorkerMessage,
+  WorkerResponseEnvelope,
+  EncryptedValueDto,
+  RegisterRequest,
+} from './crypto.worker.types';
 import type { KdfProvider } from '../kdf/kdf';
 
 const kdfProvider: KdfProvider = new Pbkdf2KdfProvider();
+let vaultKey: CryptoKey | null = null;
+let domainTagKey: CryptoKey | null = null;
 
 addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRequest>>) => {
   const { id, payload: request } = data;
-  let pwdBytes: Uint8Array | null = null;
 
   try {
-    const { passwordBuffer } = request.payload;
-    if (!(passwordBuffer instanceof ArrayBuffer)) {
-      throw new Error('Invalid payload: passwordBuffer missing');
-    }
-    pwdBytes = new Uint8Array(passwordBuffer);
-
     switch (request.type) {
-      case 'REGISTER':
-        const regRes = await handleRegister({
-          ...request.payload,
-          password: pwdBytes,
-        });
-        postSuccess(id, regRes);
+      case 'REGISTER': {
+        const { passwordBuffer } = request.payload;
+        const pwdBytes = new Uint8Array(passwordBuffer);
+        try {
+          const res = await handleRegister({ ...request.payload, password: pwdBytes });
+          postSuccess(id, res);
+        } finally {
+          zeroize(pwdBytes);
+        }
         break;
-      case 'LOGIN':
-        const loginRes = await handleLogin({
-          ...request.payload,
-          password: pwdBytes,
-        });
-        postSuccess(id, loginRes);
+      }
+      case 'LOGIN': {
+        const { passwordBuffer } = request.payload;
+        const pwdBytes = new Uint8Array(passwordBuffer);
+        try {
+          const res = await handleLogin({ ...request.payload, password: pwdBytes });
+          postSuccess(id, res);
+        } finally {
+          zeroize(pwdBytes);
+        }
         break;
+      }
+      case 'GENERATE_DEBUG_KEY': {
+        const rawMk = crypto.getRandomValues(new Uint8Array(32));
+        try {
+          const mkBaseKey = await crypto.subtle.importKey('raw', rawMk, { name: 'HKDF' }, false, [
+            'deriveKey',
+          ]);
+
+          vaultKey = await hkdfAesGcm256Key(mkBaseKey, 'vaulton/vault-enc');
+          domainTagKey = await hkdfHmacSha256Key(mkBaseKey, 'vaulton/vault-tag');
+
+          postSuccess(id, { ok: true });
+        } finally {
+          zeroize(rawMk);
+        }
+        break;
+      }
+      case 'ENCRYPT_ENTRY': {
+        const { result } = await handleEncryptEntry(request.payload);
+        postSuccess(id, result);
+        break;
+      }
+      case 'DECRYPT_ENTRY': {
+        const { result, transfer } = await handleDecryptEntry(request.payload);
+        postSuccess(id, result, transfer);
+        break;
+      }
       default:
         throw new Error(`Unknown message type: ${(request as any).type}`);
     }
   } catch (err: any) {
     postError(id, err.message || String(err));
-  } finally {
-    if (pwdBytes) {
-      zeroize(pwdBytes);
-    }
   }
 });
 
-function postSuccess<T>(id: string, result: T) {
+function postSuccess<T>(id: string, result: T, transfer?: Transferable[]) {
   const msg: WorkerResponseEnvelope<T> = { id, ok: true, result };
-  postMessage(msg);
+  postMessage(msg, transfer ?? []);
 }
 
 function postError(id: string, error: string) {
@@ -138,5 +168,89 @@ async function handleLogin({
     return { verifier: verifierB64 };
   } finally {
     zeroize(sPwd);
+  }
+}
+
+async function handleEncryptEntry({
+  plaintextBuffer,
+  aadB64,
+  domain,
+}: {
+  plaintextBuffer: ArrayBuffer;
+  aadB64: string;
+  domain?: string;
+}) {
+  if (!vaultKey || !domainTagKey) throw new Error('Vault key not initialized');
+
+  const ptBytes = new Uint8Array(plaintextBuffer);
+  const aad = b64ToBytes(aadB64);
+
+  try {
+    const split = await encryptSplit(vaultKey, ptBytes, aad);
+
+    const domainInput = domain ?? '';
+    const domainBytes = new TextEncoder().encode(domainInput);
+    let domainTag = '';
+
+    try {
+      const hmacBuf = await crypto.subtle.sign({ name: 'HMAC' }, domainTagKey, domainBytes);
+      domainTag = bytesToB64(new Uint8Array(hmacBuf));
+    } finally {
+      zeroize(domainBytes);
+    }
+
+    try {
+      return {
+        result: {
+          DomainTag: domainTag,
+          Payload: {
+            Nonce: bytesToB64(split.Nonce),
+            CipherText: bytesToB64(split.CipherText),
+            Tag: bytesToB64(split.Tag),
+          },
+        },
+      };
+    } finally {
+      zeroize(split.Nonce);
+      zeroize(split.CipherText);
+      zeroize(split.Tag);
+    }
+  } finally {
+    zeroize(ptBytes);
+    zeroize(aad);
+  }
+}
+
+async function handleDecryptEntry({ dto, aadB64 }: { dto: EncryptedValueDto; aadB64: string }) {
+  if (!vaultKey) throw new Error('Vault key not initialized');
+
+  const nonce = b64ToBytes(dto.Nonce);
+  const ct = b64ToBytes(dto.CipherText);
+  const tag = b64ToBytes(dto.Tag);
+  const aad = b64ToBytes(aadB64);
+
+  let ctTag: Uint8Array | null = null;
+
+  try {
+    ctTag = new Uint8Array(ct.length + tag.length);
+    ctTag.set(ct, 0);
+    ctTag.set(tag, ct.length);
+
+    const ptBuf = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: nonce as BufferSource, additionalData: aad as BufferSource },
+      vaultKey,
+      ctTag as BufferSource
+    );
+
+    const ptBytes = new Uint8Array(ptBuf);
+    const ptBuffer = ptBytes.buffer;
+
+    return { result: { ptBuffer }, transfer: [ptBuffer] };
+  } finally {
+    zeroize(nonce);
+    zeroize(ct);
+    zeroize(tag);
+    zeroize(aad);
+    if (ctTag) zeroize(ctTag);
   }
 }

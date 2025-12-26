@@ -1,18 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CryptoWorkerFactory } from '../crypto/worker/crypto-worker.factory';
 import type { PreLoginResponse } from '../api/auth-api.service';
-
-export type EncryptedValueDto = { Nonce: string; CipherText: string; Tag: string };
-
-export type RegisterRequest = {
-  AccountId: string;
-  Verifier: string;
-  S_Pwd: string;
-  KdfMode: number;
-  MKWrapPwd: EncryptedValueDto;
-  MKWrapRk: null;
-  CryptoSchemaVer: number;
-};
+import type { EncryptedValueDto, RegisterRequest } from '../crypto/worker/crypto.worker.types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthCryptoService {
@@ -134,6 +123,50 @@ export class AuthCryptoService {
         pwdBytes = null;
       }
       this.isWorking = false;
+    }
+  }
+
+  async generateDebugVaultKey(): Promise<void> {
+    await this.postToWorker('GENERATE_DEBUG_KEY', {});
+  }
+
+  async encryptEntry(
+    plaintext: string,
+    aadB64: string,
+    domain?: string
+  ): Promise<{ DomainTag: string; Payload: { Nonce: string; CipherText: string; Tag: string } }> {
+    let ptBytes: Uint8Array | null = new TextEncoder().encode(plaintext);
+    const plaintextBuffer = ptBytes.buffer;
+    try {
+      return await this.postToWorker<{
+        DomainTag: string;
+        Payload: { Nonce: string; CipherText: string; Tag: string };
+      }>('ENCRYPT_ENTRY', { plaintextBuffer, aadB64, domain }, [plaintextBuffer]);
+    } finally {
+      if (ptBytes) {
+        try {
+          ptBytes.fill(0);
+        } catch {}
+        ptBytes = null;
+      }
+    }
+  }
+
+  async decryptEntry(
+    dto: { Nonce: string; CipherText: string; Tag: string },
+    aadB64: string
+  ): Promise<string> {
+    const res = await this.postToWorker<{ ptBuffer: ArrayBuffer }>('DECRYPT_ENTRY', {
+      dto,
+      aadB64,
+    });
+    const ptBytes = new Uint8Array(res.ptBuffer);
+    try {
+      return new TextDecoder().decode(ptBytes);
+    } finally {
+      try {
+        ptBytes.fill(0);
+      } catch {}
     }
   }
 
