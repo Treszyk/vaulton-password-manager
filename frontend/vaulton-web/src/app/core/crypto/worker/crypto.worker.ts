@@ -84,15 +84,18 @@ async function handleRegister({
     zeroize(mkBytes);
     mkBytes = null;
 
-    const mkWrapPwd: EncryptedValueDto = {
-      Nonce: bytesToB64(wrap.Nonce),
-      CipherText: bytesToB64(wrap.CipherText),
-      Tag: bytesToB64(wrap.Tag),
-    };
-
-    zeroize(wrap.Nonce);
-    zeroize(wrap.CipherText);
-    zeroize(wrap.Tag);
+    let mkWrapPwd: EncryptedValueDto;
+    try {
+      mkWrapPwd = {
+        Nonce: bytesToB64(wrap.Nonce),
+        CipherText: bytesToB64(wrap.CipherText),
+        Tag: bytesToB64(wrap.Tag),
+      };
+    } finally {
+      zeroize(wrap.Nonce);
+      zeroize(wrap.CipherText);
+      zeroize(wrap.Tag);
+    }
 
     const sPwdB64 = bytesToB64(sPwd);
     const registerBody: RegisterRequest = {
@@ -100,7 +103,7 @@ async function handleRegister({
       Verifier: verifierB64,
       S_Pwd: sPwdB64,
       KdfMode: kdfMode,
-      MKWrapPwd: mkWrapPwd,
+      MKWrapPwd: mkWrapPwd!,
       MKWrapRk: null,
       CryptoSchemaVer: schemaVer,
     };

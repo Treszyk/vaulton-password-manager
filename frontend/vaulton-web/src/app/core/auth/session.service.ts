@@ -14,10 +14,12 @@ export class SessionService {
     return this.authApi.refresh().pipe(
       map((r) => {
         this.authState.setAccessToken(r.Token);
+        this.authState.setInitialized(true);
         return true;
       }),
       catchError(() => {
         this.authState.setAccessToken(null);
+        this.authState.setInitialized(true);
         return of(false);
       })
     );
