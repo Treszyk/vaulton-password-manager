@@ -2,24 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-type EncryptedValueDto = {
-  Nonce: string;
-  CipherText: string;
-  Tag: string;
-};
-
-export type EntryDto = {
-  Id: string;
-  DomainTag: string;
-  Payload: EncryptedValueDto;
-};
-
-type CreateEntryRequest = {
-  DomainTag: string;
-  Payload: EncryptedValueDto;
-};
-
-type CreateEntryResponse = { EntryId: string };
+import { CreateVaultEntryRequest, EntryDto } from '../crypto/worker/crypto.worker.types';
 
 @Injectable({ providedIn: 'root' })
 export class VaultApiService {
@@ -33,8 +16,8 @@ export class VaultApiService {
     });
   }
 
-  create(req: CreateEntryRequest): Observable<CreateEntryResponse> {
-    return this.http.post<CreateEntryResponse>(`${this.baseUrl}/vault/entries`, req);
+  create(req: CreateVaultEntryRequest): Observable<{ EntryId: string }> {
+    return this.http.post<{ EntryId: string }>(`${this.baseUrl}/vault/entries`, req);
   }
 
   delete(id: string): Observable<void> {

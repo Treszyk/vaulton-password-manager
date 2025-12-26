@@ -77,7 +77,7 @@ export class AuthCryptoService {
     this.isWorking = true;
     let pwdBytes: Uint8Array | null = new TextEncoder().encode(password);
     const passwordBuffer = pwdBytes.buffer;
-    password = ''; // best effort to clear string reference
+    password = '';
 
     try {
       const res = await this.postToWorker<{
@@ -103,7 +103,7 @@ export class AuthCryptoService {
     this.isWorking = true;
     let pwdBytes: Uint8Array | null = new TextEncoder().encode(password);
     const passwordBuffer = pwdBytes.buffer;
-    password = ''; // best effort to clear string reference
+    password = '';
     try {
       const res = await this.postToWorker<{ verifier: string }>(
         'LOGIN',
@@ -181,7 +181,7 @@ export class AuthCryptoService {
           this.pendingRequests.get(id)?.reject(new Error('Crypto operation timed out'));
           this.pendingRequests.delete(id);
         }
-      }, 60000); // 60s timeout
+      }, 60000);
 
       this.pendingRequests.set(id, { resolve, reject, timeoutId });
       this.worker!.postMessage({ id, payload: { type, payload } }, transfer || []);

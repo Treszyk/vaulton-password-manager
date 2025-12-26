@@ -4,7 +4,13 @@ import { MkStateService } from './mk-state.service';
 import { CreateVaultEntryRequest, EncryptedValueDto } from '../crypto/worker/crypto.worker.types';
 import { bytesToB64 } from '../crypto/b64';
 
-export type PlainEntry = { title: string; username: string; password: string; notes: string };
+export type PlainEntry = {
+  title: string;
+  website: string;
+  username: string;
+  password: string;
+  notes: string;
+};
 
 @Injectable({ providedIn: 'root' })
 export class VaultCryptoService {

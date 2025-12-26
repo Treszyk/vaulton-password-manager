@@ -96,6 +96,7 @@ export class LoginDebugComponent {
       });
 
       this.state.setAccessToken(tokenRes.Token);
+      this.state.setAccountId(acc);
       this.accountId.set('');
     } catch (e: any) {
       this.error.set(e.message || JSON.stringify(e));

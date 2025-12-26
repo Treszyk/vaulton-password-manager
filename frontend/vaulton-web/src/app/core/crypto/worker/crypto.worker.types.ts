@@ -35,9 +35,21 @@ export type RegisterResult = {
   loginBodyForSwagger: string;
 };
 
-export type PlainEntry = { title: string; username: string; password: string; notes: string };
+export type PlainEntry = {
+  title: string;
+  website: string;
+  username: string;
+  password: string;
+  notes: string;
+};
 
 export type CreateVaultEntryRequest = {
+  DomainTag: string;
+  Payload: EncryptedValueDto;
+};
+
+export type EntryDto = {
+  Id: string;
   DomainTag: string;
   Payload: EncryptedValueDto;
 };

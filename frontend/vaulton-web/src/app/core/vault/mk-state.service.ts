@@ -1,25 +1,21 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { AuthCryptoService } from '../auth/auth-crypto.service';
 
 @Injectable({ providedIn: 'root' })
 export class MkStateService {
-  private _isReady = false;
+  private readonly _isReady = signal(false);
+  public readonly isReady = this._isReady.asReadonly();
 
   constructor(private authCrypto: AuthCryptoService) {}
 
   async ensureKey(): Promise<void> {
-    if (this._isReady) return;
+    if (this._isReady()) return;
 
     await this.authCrypto.generateDebugVaultKey();
-    this._isReady = true;
-  }
-
-  get isReady(): boolean {
-    return this._isReady;
+    this._isReady.set(true);
   }
 
   clear(): void {
-    this._isReady = false;
-    // clear vaultkey later
+    this._isReady.set(false);
   }
 }

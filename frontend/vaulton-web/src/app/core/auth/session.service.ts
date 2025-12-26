@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { catchError, map, of, Observable } from 'rxjs';
+import { catchError, map, of, Observable, switchMap } from 'rxjs';
 import { AuthApiService } from '../api/auth-api.service';
 import { AuthStateService } from './auth-state.service';
 
@@ -12,13 +12,23 @@ export class SessionService {
 
   tryRestore(): Observable<boolean> {
     return this.authApi.refresh().pipe(
-      map((r) => {
+      switchMap((r) => {
         this.authState.setAccessToken(r.Token);
-        this.authState.setInitialized(true);
-        return true;
+        return this.authApi.me().pipe(
+          map((me) => {
+            this.authState.setAccountId(me.accountId);
+            this.authState.setInitialized(true);
+            return true;
+          }),
+          catchError(() => {
+            this.authState.clear();
+            this.authState.setInitialized(true);
+            return of(false);
+          })
+        );
       }),
       catchError(() => {
-        this.authState.setAccessToken(null);
+        this.authState.clear();
         this.authState.setInitialized(true);
         return of(false);
       })
