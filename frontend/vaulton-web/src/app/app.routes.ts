@@ -10,7 +10,17 @@ export const routes: Routes = [
   {
     path: 'vault',
     canActivate: [authGuard],
-    children: [],
+    loadComponent: () =>
+      import('./features/shell/vaulton-shell.component').then((m) => m.VaultonShellComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/vault/vault-dashboard.component').then(
+            (m) => m.VaultDashboardComponent
+          ),
+      },
+    ],
   },
   { path: '', redirectTo: 'auth', pathMatch: 'full' },
   { path: '**', redirectTo: 'auth' },

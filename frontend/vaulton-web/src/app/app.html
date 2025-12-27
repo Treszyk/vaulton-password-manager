@@ -7,21 +7,22 @@
     [class.absolute]="router.url.includes('/auth') || router.url === '/' || router.url === ''"
     [class.sticky]="!router.url.includes('/auth') && router.url !== '/' && router.url !== ''"
     [class.top-0]="true"
-    [class.glass]="!router.url.includes('/auth') && router.url !== '/' && router.url !== ''"
-    [class.border-b]="!router.url.includes('/auth') && router.url !== '/' && router.url !== ''"
-    [class.border-white/5]="!router.url.includes('/auth') && router.url !== '/' && router.url !== ''"
   >
     <div class="flex items-center gap-8">
-      <span class="text-xl font-black tracking-tighter cursor-pointer animate-slide-in-left" (click)="router.navigate(['/'])">
+      <span
+        class="text-xl font-black tracking-tighter cursor-pointer animate-slide-in-left"
+        (click)="router.navigate(['/'])"
+      >
         Vaulton<span class="text-vault-purple">.</span>
       </span>
     </div>
 
-
     @if (router.url.includes('/vault')) {
-      <div class="flex items-center gap-4 animate-fade-in">
-        <button class="btn-secondary !py-2 !px-4 !text-xs" (click)="router.navigate(['/auth'])">Lock Vault</button>
-      </div>
+    <div class="flex items-center gap-4 animate-fade-in">
+      <button class="btn-secondary !py-2 !px-4 !text-xs" (click)="router.navigate(['/auth'])">
+        Lock Vault
+      </button>
+    </div>
     }
   </nav>
 
