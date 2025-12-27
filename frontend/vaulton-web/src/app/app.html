@@ -2,29 +2,7 @@
 <div
   class="h-full transition-opacity duration-500 selection:bg-vault-purple/30 selection:text-vault-purple-bright flex flex-col"
 >
-  <nav
-    class="z-50 w-full px-8 py-6 flex items-center justify-between transition-all duration-700"
-    [class.absolute]="router.url.includes('/auth') || router.url === '/' || router.url === ''"
-    [class.sticky]="!router.url.includes('/auth') && router.url !== '/' && router.url !== ''"
-    [class.top-0]="true"
-  >
-    <div class="flex items-center gap-8">
-      <span
-        class="text-xl font-black tracking-tighter cursor-pointer animate-slide-in-left"
-        (click)="router.navigate(['/'])"
-      >
-        Vaulton<span class="text-vault-purple">.</span>
-      </span>
-    </div>
-
-    @if (router.url.includes('/vault')) {
-    <div class="flex items-center gap-4 animate-fade-in">
-      <button class="btn-secondary !py-2 !px-4 !text-xs" (click)="router.navigate(['/auth'])">
-        Lock Vault
-      </button>
-    </div>
-    }
-  </nav>
+  <app-vaulton-nav></app-vaulton-nav>
 
   <main
     class="w-full h-full flex flex-col"

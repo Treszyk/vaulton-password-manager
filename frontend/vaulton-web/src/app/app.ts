@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { SessionService } from './core/auth/session.service';
+import { VaultonNavComponent } from './features/shell/vaulton-nav.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, VaultonNavComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
