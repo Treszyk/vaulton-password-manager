@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StarfieldComponent } from '../../shared/ui/starfield/starfield.component';
@@ -18,15 +18,17 @@ import { WipeConfirmationComponent } from './wipe-confirmation.component';
     UnlockOverlayComponent,
     WipeConfirmationComponent,
   ],
+  host: {
+    class: 'flex-1 min-h-0 flex flex-col',
+  },
   template: `
-    <div class="relative w-full h-full overflow-hidden">
+    <div class="relative w-full h-full overflow-hidden flex flex-col">
       <app-starfield></app-starfield>
 
-      <div class="relative z-10 w-full h-full">
+      <div class="relative z-10 w-full flex-1 min-h-0 flex flex-col">
         <router-outlet></router-outlet>
       </div>
 
-      <!-- System Overlays (Unlock / Wipe) -->
       <div
         *ngIf="(authState.isInitialized() && !crypto.isUnlocked()) || session.showWipeConfirm()"
         class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in"
@@ -45,6 +47,7 @@ import { WipeConfirmationComponent } from './wipe-confirmation.component';
       </div>
     </div>
   `,
+  encapsulation: ViewEncapsulation.None,
 })
 export class VaultonShellComponent {
   protected readonly crypto = inject(AuthCryptoService);

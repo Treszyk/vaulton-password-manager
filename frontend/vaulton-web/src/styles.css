@@ -262,6 +262,45 @@ button.btn-secondary {
   }
 }
 
+@keyframes slideUpMobile {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDownMobile {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-slide-up-mobile {
+  animation: slideUpMobile 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-down-mobile {
+  animation: slideDownMobile 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
 .auth-layout {
   @apply items-center justify-center;
 }
@@ -290,4 +329,83 @@ button.btn-secondary {
 .animate-slide-in-left {
   animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
+}
+
+/* Record Card Peek Animation */
+.revealed-text {
+  display: inline-block !important;
+  width: fit-content !important;
+  background: linear-gradient(to right, #7c3aed 50%, #4b5563 50%);
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: drain 8s linear forwards;
+}
+
+@keyframes drain {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 100% 0%;
+  }
+}
+
+.trash-btn {
+  @apply relative z-50 transition-all cursor-pointer !important;
+  color: #ff4444 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.edit-btn {
+  @apply relative z-50 transition-all cursor-pointer !important;
+  color: #a78bfa !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.trash-btn:hover {
+  @apply bg-red-500/20 !important;
+  color: #ff0000 !important;
+}
+
+.edit-btn:hover {
+  @apply bg-vault-purple/20 !important;
+  color: #ffffff !important;
+}
+
+.trash-btn svg,
+.edit-btn svg {
+  @apply w-5 h-5 !important;
+}
+
+.overlay-card {
+  @apply bg-[#0D0D0E] border border-white/10 shadow-2xl;
+}
+
+.modal-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }

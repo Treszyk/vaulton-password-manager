@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
@@ -13,9 +13,7 @@ import { firstValueFrom } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div
-      class="w-full max-w-md p-8 rounded-3xl bg-white/[0.03] border border-white/5 shadow-2xl animate-slide-up"
-    >
+    <div class="w-full max-w-md p-8 rounded-3xl overlay-card animate-slide-up">
       <div class="flex flex-col items-center text-center mb-8">
         <div
           class="w-16 h-16 rounded-full bg-vault-purple/20 flex items-center justify-center mb-4"
@@ -86,6 +84,7 @@ import { firstValueFrom } from 'rxjs';
       </form>
     </div>
   `,
+  encapsulation: ViewEncapsulation.None,
 })
 export class UnlockOverlayComponent {
   private readonly crypto = inject(AuthCryptoService);

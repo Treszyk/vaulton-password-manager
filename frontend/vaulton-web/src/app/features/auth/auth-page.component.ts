@@ -246,7 +246,7 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
           <p class="text-[10px] text-white/20 uppercase tracking-[0.6em] font-black pointer-events-none">
             <span class="block sm:inline">ZERO-KNOWLEDGE</span>
             <span class="mx-3 text-vault-purple/30 hidden sm:inline">•</span>
-            <span class="block sm:inline">ANONYMOUS</span>
+            <span class="block sm:inline">PRIVACY-FIRST</span>
           </p>
         </div>
       </div>
