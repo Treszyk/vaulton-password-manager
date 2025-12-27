@@ -388,12 +388,11 @@ export class AuthPageComponent {
           .then(({ verifier }) => {
             this.api.login({ AccountId: accountId, Verifier: verifier }).subscribe({
               next: (res) => {
-                this.authState.setAccessToken(res.Token);
-                this.authState.setAccountId(accountId);
-
                 this.crypto
                   .finalizeLogin(res.MkWrapPwd!, pre.CryptoSchemaVer, accountId)
                   .then(() => {
+                    this.authState.setAccessToken(res.Token);
+                    this.authState.setAccountId(accountId);
                     this.persistence.saveAccountId(accountId);
                     this.persistence
                       .saveBundle({
@@ -409,7 +408,10 @@ export class AuthPageComponent {
                         this.router.navigate(['/vault']);
                       });
                   })
-                  .catch((e) => this.reportError('Finalization Failed'));
+                  .catch((e) => {
+                    this.authState.clear();
+                    this.reportError('Finalization Failed');
+                  });
               },
               error: () => this.reportError('Invalid Credentials'),
             });

@@ -3,6 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthStateService } from './auth-state.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter, map, take } from 'rxjs';
+import { AuthCryptoService } from './auth-crypto.service';
 
 export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthStateService);
@@ -15,6 +16,7 @@ export const authGuard: CanActivateFn = () => {
       if (auth.accessToken()) {
         return true;
       }
+
       router.navigateByUrl('/auth');
       return false;
     })

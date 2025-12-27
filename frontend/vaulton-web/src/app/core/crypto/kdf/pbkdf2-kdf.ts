@@ -3,8 +3,8 @@ import { zeroize } from '../zeroize';
 
 const PBKDF2_ITERS_BY_MODE: Record<number, number> = {
   0: 200_000,
-  1: 400_000,
-  2: 600_000,
+  1: 600_000,
+  2: 800_000,
 };
 
 export class Pbkdf2KdfProvider implements KdfProvider {

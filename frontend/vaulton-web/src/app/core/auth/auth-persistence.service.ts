@@ -40,4 +40,8 @@ export class AuthPersistenceService {
   async getAccountId(): Promise<string | undefined> {
     return await get<string>(ID_KEY);
   }
+
+  async clearAll(): Promise<void> {
+    await clear();
+  }
 }

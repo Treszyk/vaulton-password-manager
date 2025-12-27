@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { CryptoWorkerFactory } from '../crypto/worker/crypto-worker.factory';
 import type { PreLoginResponse } from '../api/auth-api.service';
 import type {
@@ -15,6 +15,7 @@ export class AuthCryptoService {
     { resolve: (val: any) => void; reject: (err: any) => void; timeoutId: any }
   >();
   private isWorking = false;
+  readonly isUnlocked = signal(false);
 
   constructor(private workerFactory: CryptoWorkerFactory) {}
 
@@ -186,10 +187,12 @@ export class AuthCryptoService {
       CryptoSchemaVer: schemaVer,
       AccountId: accountId,
     });
+    this.isUnlocked.set(true);
   }
 
   async clearKeys(): Promise<void> {
     await this.postToWorker('CLEAR_KEYS', {});
+    this.isUnlocked.set(false);
   }
 
   async checkStatus(): Promise<boolean> {
@@ -231,6 +234,7 @@ export class AuthCryptoService {
         },
         [passwordBuffer]
       );
+      this.isUnlocked.set(true);
     } finally {
       if (pwdBytes) {
         try {
