@@ -1,34 +1,44 @@
 @if (!loading()) {
-<div class="min-h-screen transition-opacity duration-500">
+<div
+  class="h-full transition-opacity duration-500 selection:bg-vault-purple/30 selection:text-vault-purple-bright flex flex-col"
+>
   <nav
-    class="sticky top-0 z-50 backdrop-blur-md bg-black/40 border-b border-white/5 py-3 px-8 flex items-center justify-between shadow-lg"
+    class="z-50 w-full px-8 py-6 flex items-center justify-between transition-all duration-700"
+    [class.absolute]="router.url.includes('/auth') || router.url === '/' || router.url === ''"
+    [class.sticky]="!router.url.includes('/auth') && router.url !== '/' && router.url !== ''"
+    [class.top-0]="true"
+    [class.glass]="!router.url.includes('/auth') && router.url !== '/' && router.url !== ''"
+    [class.border-b]="!router.url.includes('/auth') && router.url !== '/' && router.url !== ''"
+    [class.border-white/5]="!router.url.includes('/auth') && router.url !== '/' && router.url !== ''"
   >
-    <div class="flex items-center gap-3">
-      <div class="font-black text-2xl tracking-tighter text-white uppercase italic">Vaulton</div>
+    <div class="flex items-center gap-8">
+      <span class="text-xl font-black tracking-tighter cursor-pointer animate-slide-in-left" (click)="router.navigate(['/'])">
+        Vaulton<span class="text-vault-purple">.</span>
+      </span>
     </div>
 
-    <!-- Production Navigation Placeholder -->
-    <div
-      class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-8"
-    ></div>
 
-    <div class="flex items-center gap-4">
-      <div
-        class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20"
-      >
-        V
+    @if (router.url.includes('/vault')) {
+      <div class="flex items-center gap-4 animate-fade-in">
+        <button class="btn-secondary !py-2 !px-4 !text-xs" (click)="router.navigate(['/auth'])">Lock Vault</button>
       </div>
-    </div>
+    }
   </nav>
 
-  <main class="max-w-7xl mx-auto p-8">
+  <main
+    class="w-full h-full flex flex-col"
+    [class.auth-layout]="router.url.includes('/auth') || router.url === '/' || router.url === ''"
+    [class.max-w-7xl]="router.url.includes('/vault')"
+    [class.mx-auto]="router.url.includes('/vault')"
+    [class.py-8]="router.url.includes('/vault')"
+  >
     <router-outlet></router-outlet>
   </main>
 </div>
 } @else {
-<div class="h-screen bg-[#050505] flex items-center justify-center">
+<div class="h-screen bg-vault-black flex items-center justify-center">
   <div
-    class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"
+    class="w-12 h-12 border-4 border-vault-purple/20 border-t-vault-purple rounded-full animate-spin"
   ></div>
 </div>
 }

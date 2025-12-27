@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 :root {
   --v-black: #050505;
   --v-dark: #0a0a0a;
@@ -21,18 +17,18 @@ html,
 body {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  height: 100%;
+  min-width: 340px;
   background-color: var(--v-black);
   color: #fafafa;
   font-family: var(--font-inter);
-  background-image: radial-gradient(
-      circle at 50% -20%,
-      rgba(124, 58, 237, 0.08) 0%,
-      transparent 60%
-    ),
-    radial-gradient(circle at 0% 100%, rgba(124, 58, 237, 0.03) 0%, transparent 40%);
-  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+app-root {
+  display: block;
+  height: 100%;
 }
 
 * {
@@ -48,14 +44,226 @@ textarea {
 }
 
 button.btn-primary {
-  @apply bg-vault-purple hover:bg-vault-purple-glow text-white px-6 py-3 rounded-xl 
-         font-bold shadow-lg shadow-vault-purple/20 transition-all 
+  @apply bg-vault-purple hover:brightness-110 text-white px-6 py-3 rounded-xl 
+         font-black uppercase tracking-widest transition-all 
          active:scale-[0.98] disabled:opacity-30 disabled:pointer-events-none;
 }
 
 button.btn-secondary {
   @apply bg-white/5 hover:bg-white/10 text-white/70 hover:text-white px-6 py-3 
          rounded-xl font-semibold transition-all active:scale-[0.98];
+}
+
+.glass {
+  @apply bg-white/[0.03] backdrop-blur-xl border border-white/5;
+}
+
+.auth-panel {
+  @apply bg-transparent border-0;
+}
+
+@media (max-width: 640px) {
+  .auth-panel {
+    background: transparent !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    padding: 1.5rem 1rem !important;
+    box-shadow: none !important;
+  }
+
+  .auth-panel h1 {
+    font-size: 2.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .animate-slide-up {
+    animation-duration: 0.6s !important;
+  }
+}
+
+@media (max-width: 440px) and (max-height: 700px) {
+  .auth-panel h1 {
+    display: none !important;
+  }
+
+  .footer-container {
+    display: none !important;
+  }
+
+  .auth-panel {
+    padding-top: 0 !important;
+  }
+
+  nav {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  nav > div:first-child {
+    margin: 0 auto !important;
+  }
+}
+
+[data-auth-mode='LOGIN'] .mode-indicator {
+  transform: translateX(0);
+}
+
+[data-auth-mode='REGISTER'] .mode-indicator {
+  transform: translateX(calc(100% + 3px));
+}
+
+.form-view {
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.form-view.active {
+  opacity: 1;
+  transition-delay: 150ms;
+}
+
+.kdf-container {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kdf-container.expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.header-text {
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.header-text.active {
+  opacity: 1;
+}
+
+.kdf-option {
+  @apply flex-1 p-4 rounded-xl bg-white/[0.05] border border-white/10 
+         text-center cursor-pointer transition-all hover:bg-white/[0.08]
+         flex flex-col gap-1 items-center;
+}
+
+.kdf-option.active {
+  @apply bg-vault-purple/[0.15] border-vault-purple/50 ring-2 ring-vault-purple/10;
+}
+
+.kdf-option .grade-title {
+  @apply text-[11px] font-black uppercase tracking-widest text-white/60;
+}
+
+.kdf-option.active .grade-title {
+  color: var(--v-purple-bright);
+}
+
+.kdf-option .grade-desc {
+  @apply text-[9px] font-bold text-white/30 uppercase tracking-tight;
+}
+
+.kdf-option.active .grade-desc {
+  @apply text-white/50;
+}
+
+.tooltip-trigger {
+  position: relative;
+}
+
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  @apply px-4 py-2 rounded-xl bg-vault-grey border border-white/10 text-[10px] 
+         font-bold text-white/70 opacity-0 pointer-events-none 
+         transition-all duration-300 z-[100] backdrop-blur-xl shadow-2xl
+         text-center leading-relaxed;
+  min-width: max-content;
+}
+
+[data-tooltip]:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.tooltip-bottom::before {
+  bottom: auto !important;
+  top: calc(100% + 8px) !important;
+  transform: translateX(-50%) translateY(-5px) !important;
+}
+
+.tooltip-bottom:hover::before {
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+.tooltip-full::before {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: none !important;
+}
+
+.footer-container {
+  animation: fadeIn 0.8s ease-out forwards;
+  animation-delay: 400ms;
+  opacity: 0;
+  transition: opacity 0.7s;
+}
+
+.footer-container:hover {
+  opacity: 0.25;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-centered {
+  animation: slideUpCentered 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpCentered {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.auth-layout {
+  @apply items-center justify-center;
 }
 
 ::-webkit-scrollbar {
@@ -68,25 +276,18 @@ button.btn-secondary {
   @apply bg-white/10 rounded-full hover:bg-white/20 transition-all;
 }
 
-.glass {
-  @apply bg-white/[0.03] backdrop-blur-xl border border-white/5;
-}
-
-.glass-purple {
-  @apply bg-vault-purple/[0.03] backdrop-blur-xl border border-vault-purple/10;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes slideUp {
+@keyframes slideInLeft {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateX(-20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
 }

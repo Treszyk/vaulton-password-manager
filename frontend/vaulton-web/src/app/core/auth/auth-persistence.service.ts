@@ -12,6 +12,7 @@ export interface VaultBundle {
 }
 
 const STORAGE_KEY = 'vaulton_bundle';
+const ID_KEY = 'vaulton_last_id';
 
 @Injectable({ providedIn: 'root' })
 export class AuthPersistenceService {
@@ -30,5 +31,13 @@ export class AuthPersistenceService {
   async hasBundle(): Promise<boolean> {
     const bundle = await this.getBundle();
     return !!bundle;
+  }
+
+  async saveAccountId(id: string): Promise<void> {
+    await set(ID_KEY, id);
+  }
+
+  async getAccountId(): Promise<string | undefined> {
+    return await get<string>(ID_KEY);
   }
 }

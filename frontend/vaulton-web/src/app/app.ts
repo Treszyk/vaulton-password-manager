@@ -13,7 +13,7 @@ export class App {
   protected readonly title = signal('vaulton-web');
   loading = signal(true);
   private readonly session = inject(SessionService);
-  private readonly router = inject(Router);
+  public readonly router = inject(Router);
 
   constructor() {
     this.session.tryRestore().subscribe((ok: boolean) => {
