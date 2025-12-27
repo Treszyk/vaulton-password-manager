@@ -386,6 +386,7 @@ export class AuthPageComponent {
         this.crypto
           .buildLogin(password, pre)
           .then(({ verifier }) => {
+            this.password.set('');
             this.api.login({ AccountId: accountId, Verifier: verifier }).subscribe({
               next: (res) => {
                 this.crypto

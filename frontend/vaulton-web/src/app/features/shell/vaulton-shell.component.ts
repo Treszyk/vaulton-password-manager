@@ -26,15 +26,23 @@ import { WipeConfirmationComponent } from './wipe-confirmation.component';
         <router-outlet></router-outlet>
       </div>
 
-      <app-unlock-overlay
-        *ngIf="authState.isInitialized() && !crypto.isUnlocked() && !session.showWipeConfirm()"
-      ></app-unlock-overlay>
+      <!-- System Overlays (Unlock / Wipe) -->
+      <div
+        *ngIf="(authState.isInitialized() && !crypto.isUnlocked()) || session.showWipeConfirm()"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in"
+      >
+        <app-unlock-overlay
+          *ngIf="!session.showWipeConfirm()"
+          class="w-full flex justify-center"
+        ></app-unlock-overlay>
 
-      <app-wipe-confirmation
-        *ngIf="session.showWipeConfirm()"
-        (confirmWipe)="session.wipeDevice()"
-        (cancel)="session.cancelWipeConfirm()"
-      ></app-wipe-confirmation>
+        <app-wipe-confirmation
+          *ngIf="session.showWipeConfirm()"
+          (confirmWipe)="session.wipeDevice()"
+          (cancel)="session.cancelWipeConfirm()"
+          class="w-full flex justify-center"
+        ></app-wipe-confirmation>
+      </div>
     </div>
   `,
 })
