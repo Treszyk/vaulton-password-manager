@@ -36,14 +36,11 @@ export class VaultDataService {
             id: entry.Id,
             ...data,
           });
-        } catch (e) {
-          console.error(`Failed to decrypt entry ${entry.Id}`, e);
-        }
+        } catch (e) {}
       }
 
       this.records.set(decryptedRecords);
     } catch (e) {
-      console.error('Failed to load vault records', e);
     } finally {
       this.isLoading.set(false);
     }
@@ -69,7 +66,7 @@ export class VaultDataService {
       id: EntryId,
       ...input,
     };
-    this.records.update((prev) => [...prev, newRecord]);
+    this.records.update((prev) => [newRecord, ...prev]);
   }
 
   async deleteRecord(id: string) {
@@ -80,7 +77,6 @@ export class VaultDataService {
       await firstValueFrom(this.api.delete(id));
     } catch (e) {
       this.records.set(previous);
-      console.error('Failed to delete record', e);
       throw e;
     }
   }

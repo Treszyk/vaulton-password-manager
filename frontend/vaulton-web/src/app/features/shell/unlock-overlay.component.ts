@@ -46,7 +46,7 @@ import { firstValueFrom } from 'rxjs';
             [(ngModel)]="password"
             name="password"
             placeholder="Master Password"
-            class="w-full !bg-white/5 !border-white/10 focus:!border-vault-purple/50 !rounded-2xl !py-4 transition-all"
+            class="w-full !bg-white/5 !border-white/15 focus:!border-vault-purple/50 !rounded-2xl !py-4 transition-all"
             [disabled]="isWorking()"
             autofocus
           />
@@ -62,13 +62,13 @@ import { firstValueFrom } from 'rxjs';
           >
           <div
             *ngIf="isWorking()"
-            class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+            class="w-5 h-5 border-2 border-white/15 border-t-white rounded-full animate-spin"
           ></div>
         </button>
 
         <button
           type="button"
-          class="w-full py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-red-400 transition-all active:scale-[0.98]"
+          class="w-full py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-red-400 transition-all active:scale-[0.98]"
           (click)="triggerWipe()"
           [disabled]="isWorking()"
         >
@@ -103,6 +103,7 @@ export class UnlockOverlayComponent {
     this.error.set(null);
 
     const password = this.password();
+    this.password.set('');
 
     try {
       let bundle = await this.persistence.getBundle();
@@ -123,7 +124,6 @@ export class UnlockOverlayComponent {
 
         const pre = await firstValueFrom(this.api.preLogin(accountId));
         const { verifier } = await this.crypto.buildLogin(password, pre);
-        this.password.set('');
         const res = await firstValueFrom(
           this.api.login({ AccountId: accountId, Verifier: verifier })
         );
@@ -145,7 +145,6 @@ export class UnlockOverlayComponent {
         });
       } else {
         await this.crypto.unlock(password, bundle);
-        this.password.set('');
       }
     } catch (e: any) {
       if (e.status === 401 || e.message?.includes('401')) {

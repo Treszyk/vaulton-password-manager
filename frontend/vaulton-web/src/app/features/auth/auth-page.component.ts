@@ -71,14 +71,14 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
                 
                 <div class="space-y-2">
                   <header class="flex items-center justify-between px-1">
-                     <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20">Account Identifier</label>
+                     <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Account Identifier</label>
                   </header>
                   <div class="relative group">
                     <input
                       type="text"
                       [ngModel]="accountId()"
                       (ngModelChange)="accountId.set($event)"
-                      class="w-full pl-5 pr-12 py-4 bg-white/5 border border-white/5 hover:bg-white/[0.08] focus:bg-white/[0.1] focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
+                      class="w-full pl-5 pr-12 py-4 bg-white/5 border border-white/10 hover:bg-white/[0.08] focus:bg-white/[0.1] focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
                       placeholder="vault-xxxx-xxxx"
                       (keyup.enter)="onSubmit()"
                     />
@@ -86,7 +86,7 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
                     <button 
                       *ngIf="accountId()"
                       (click)="copyToClipboard(accountId())"
-                      class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white/20 hover:text-vault-purple hover:bg-white/10 transition-all animate-fade-in"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white/55 hover:text-vault-purple hover:bg-white/10 transition-all animate-fade-in"
                       title="Copy ID"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -94,7 +94,7 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
                       </svg>
                     </button>
                     
-                    <div *ngIf="!accountId()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/10 pointer-events-none transition-colors">
+                    <div *ngIf="!accountId()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
@@ -103,17 +103,17 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
                 </div>
 
                 <div class="space-y-2">
-                  <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20 ml-1">Master Password</label>
+                  <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Master Password</label>
                   <div class="relative group">
                     <input
                       type="password"
                       [ngModel]="password()"
                       (ngModelChange)="password.set($event)"
-                      class="w-full pl-5 pr-11 py-4 bg-white/5 border border-white/5 hover:bg-white/[0.08] focus:bg-white/[0.1] focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
+                      class="w-full pl-5 pr-11 py-4 bg-white/5 border border-white/10 hover:bg-white/[0.08] focus:bg-white/[0.1] focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
                       placeholder="••••••••••••"
                       (keyup.enter)="onSubmit()"
                     />
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-vault-purple/40 transition-colors">
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/35 group-focus-within:text-vault-purple/40 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
@@ -130,8 +130,8 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
                   <div class="flex items-center justify-between px-1">
                     <div class="flex items-center gap-1.5 group/info cursor-help tooltip-bottom tooltip-full" 
                          data-tooltip="Anonymous opaque identifier used for platform login.">
-                      <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20">Account ID</label>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/10 group-hover/info:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Account ID</label>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/info:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
@@ -147,20 +147,20 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
                       type="text"
                       [ngModel]="accountId()"
                       readonly
-                      class="w-full pl-5 pr-12 py-4 bg-white/[0.03] border border-white/5 rounded-2xl transition-all text-white/60"
+                      class="w-full pl-5 pr-12 py-4 bg-white/[0.03] border border-white/10 rounded-2xl transition-all text-white/60"
                       placeholder="Generating..."
                     />
                     <button 
                       *ngIf="accountId()"
                       (click)="copyToClipboard(accountId())"
-                      class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white/20 hover:text-vault-purple hover:bg-white/10 transition-all animate-fade-in"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white/55 hover:text-vault-purple hover:bg-white/10 transition-all animate-fade-in"
                       title="Copy ID"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                       </svg>
                     </button>
-                    <div *ngIf="!accountId()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/10 pointer-events-none transition-colors">
+                    <div *ngIf="!accountId()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
@@ -169,16 +169,16 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
                 </div>
 
                 <div class="space-y-2">
-                  <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20 ml-1">Master Password</label>
+                  <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Master Password</label>
                   <div class="relative group">
                     <input
                       type="password"
                       [ngModel]="password()"
                       (ngModelChange)="password.set($event)"
-                      class="w-full pl-5 pr-11 py-4 bg-white/5 border border-white/5 hover:bg-white/[0.08] focus:bg-white/[0.1] focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
+                      class="w-full pl-5 pr-11 py-4 bg-white/5 border border-white/10 hover:bg-white/[0.08] focus:bg-white/[0.1] focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
                       placeholder="••••••••••••"
                     />
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-vault-purple/40 transition-colors">
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/35 group-focus-within:text-vault-purple/40 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
@@ -188,7 +188,7 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
 
                 <div class="kdf-container mt-2" [class.expanded]="mode() === 'REGISTER'">
                   <div class="min-h-0 space-y-3">
-                    <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20 ml-1">Vault Hardening Grade</label>
+                    <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Vault Hardening Grade</label>
                     <div class="flex gap-2">
                       <div class="kdf-option group/kdf tooltip-trigger tooltip-full" 
                            [class.active]="kdfMode() === 1"
@@ -196,7 +196,7 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
                            data-tooltip="Balanced performance and security.">
                         <div class="flex items-center gap-1.5">
                           <span class="grade-title">Standard</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/10 group-hover/kdf:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/kdf:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
@@ -208,7 +208,7 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
                            data-tooltip="Stronger security (Recommended). May take longer on slower devices.">
                         <div class="flex items-center gap-1.5">
                           <span class="grade-title">Hardened</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/10 group-hover/kdf:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/kdf:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
@@ -243,7 +243,7 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
         </div>
 
         <div class="mt-[2px] sm:mt-[2px] text-center footer-container">
-          <p class="text-[10px] text-white/20 uppercase tracking-[0.6em] font-black pointer-events-none">
+          <p class="text-[10px] text-white/55 uppercase tracking-[0.6em] font-black pointer-events-none">
             <span class="block sm:inline">ZERO-KNOWLEDGE</span>
             <span class="mx-3 text-vault-purple/30 hidden sm:inline">•</span>
             <span class="block sm:inline">PRIVACY-FIRST</span>
@@ -380,13 +380,13 @@ export class AuthPageComponent {
 
     const accountId = this.accountId();
     const password = this.password();
+    this.password.set('');
 
     this.api.preLogin(accountId).subscribe({
       next: (pre) => {
         this.crypto
           .buildLogin(password, pre)
           .then(({ verifier }) => {
-            this.password.set('');
             this.api.login({ AccountId: accountId, Verifier: verifier }).subscribe({
               next: (res) => {
                 this.crypto
@@ -419,7 +419,7 @@ export class AuthPageComponent {
           })
           .catch(() => this.reportError('Crypto Failure'));
       },
-      error: () => this.reportError('Account Not Found'),
+      error: () => this.reportError('Invalid Credentials'),
     });
   }
 
@@ -430,14 +430,14 @@ export class AuthPageComponent {
 
     const accountId = this.accountId();
     const password = this.password();
+    this.password.set('');
+
     const kdfMode = this.kdfMode();
     const schemaVer = this.cryptoSchemaVer();
 
     this.crypto
       .buildRegister(accountId, password, kdfMode, schemaVer)
       .then(({ registerBody }) => {
-        this.password.set('');
-
         this.api.register(registerBody).subscribe({
           next: () => {
             this.persistence.saveAccountId(accountId);

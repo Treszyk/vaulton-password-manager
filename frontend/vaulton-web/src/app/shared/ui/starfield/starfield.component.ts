@@ -19,6 +19,8 @@ interface Star {
   twinkleSpeed: number;
   birthTime: number;
   fadeSpeed: number;
+  color?: string;
+  blur?: number;
 }
 
 @Component({
@@ -40,7 +42,6 @@ export class StarfieldComponent implements AfterViewInit, OnDestroy {
   private currentX = 0;
   private currentY = 0;
 
-  private readonly STAR_COUNT = 80;
   private readonly FLICKER_SPEED = 0.002;
 
   constructor(private readonly ngZone: NgZone) {}
@@ -57,12 +58,22 @@ export class StarfieldComponent implements AfterViewInit, OnDestroy {
 
   private generateStars() {
     this.stars = [];
-    this.addStars(40, 1, 3, 0.002);
-    this.addStars(25, 2, 4, 0.008);
-    this.addStars(15, 2, 5, 0.015);
+    this.addStars(60, 0.5, 1.2, 0.001);
+    this.addStars(38, 1, 2, 0.005);
+    this.addStars(23, 1.5, 3, 0.015, '#a78bfa33');
+    this.addStars(23, 2, 4, 0.03);
+    this.addStars(8, 4, 7, 0.06, '#ffffff44', 2);
+    this.addStars(6, 2, 4, 0.12, '#7c3aed');
   }
 
-  private addStars(count: number, minSize: number, maxSize: number, depth: number) {
+  private addStars(
+    count: number,
+    minSize: number,
+    maxSize: number,
+    depth: number,
+    color?: string,
+    blur?: number
+  ) {
     for (let i = 0; i < count; i++) {
       this.stars.push({
         x: Math.random(),
@@ -73,6 +84,8 @@ export class StarfieldComponent implements AfterViewInit, OnDestroy {
         twinkleSpeed: 0.5 + Math.random() * 1.5,
         birthTime: Math.random() * 2000,
         fadeSpeed: 1 + Math.random(),
+        color,
+        blur,
       });
     }
   }
@@ -117,6 +130,7 @@ export class StarfieldComponent implements AfterViewInit, OnDestroy {
         this.currentY += (this.mouseY - this.currentY) * 0.025;
 
         ctx.clearRect(0, 0, width, height);
+
         this.stars.forEach((star) => {
           let alphaMultiplier = 0;
           if (elapsed > star.birthTime) {
@@ -129,16 +143,47 @@ export class StarfieldComponent implements AfterViewInit, OnDestroy {
           let posX = star.x * width + this.currentX * star.depth * -1;
           let posY = star.y * height + this.currentY * star.depth * -1;
 
+          if (posX < 0) posX += width;
+          if (posX > width) posX -= width;
+          if (posY < 0) posY += height;
+          if (posY > height) posY -= height;
+
           ctx.beginPath();
+
+          if (star.blur) {
+            ctx.shadowBlur = star.blur;
+            ctx.shadowColor = star.color || 'white';
+          } else {
+            ctx.shadowBlur = 0;
+          }
+
           ctx.arc(posX, posY, star.size / 2, 0, Math.PI * 2);
 
           const twinkle = Math.sin(
             time * this.FLICKER_SPEED * star.twinkleSpeed + star.twinkleOffset
           );
+
           const rawAlpha = 0.25 + twinkle * 0.15;
           const finalAlpha = rawAlpha * alphaMultiplier;
 
-          ctx.fillStyle = `rgba(255, 255, 255, ${finalAlpha})`;
+          if (star.color) {
+            ctx.fillStyle =
+              star.color.length > 7 ? star.color : `rgba(124, 58, 237, ${finalAlpha})`;
+            if (star.color.startsWith('#')) {
+              if (star.color.length === 7) {
+                ctx.fillStyle = `${star.color}${Math.floor(finalAlpha * 255)
+                  .toString(16)
+                  .padStart(2, '0')}`;
+              } else {
+                ctx.fillStyle = star.color;
+              }
+            } else {
+              ctx.fillStyle = star.color;
+            }
+          } else {
+            ctx.fillStyle = `rgba(255, 255, 255, ${finalAlpha})`;
+          }
+
           ctx.fill();
         });
 

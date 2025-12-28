@@ -15,28 +15,28 @@ import { VaultRecordInput } from './vault-record.model';
       (click)="triggerClose()"
     >
       <div
-        class="w-full md:max-w-lg bg-zinc-950 border-t md:border border-white/10 rounded-t-[2rem] md:rounded-3xl shadow-[0_-20px_60px_-15px_black] md:shadow-2xl overflow-hidden flex flex-col max-h-[85vh] relative !z-[9001]"
+        class="w-full md:max-w-lg bg-transparent md:bg-zinc-950 border-none md:border border-white/15 rounded-t-[2rem] md:rounded-3xl shadow-none md:shadow-2xl overflow-hidden flex flex-col max-h-[85vh] relative !z-[9001]"
         [class.animate-slide-up-mobile]="!isClosing()"
         [class.animate-slide-down-mobile]="isClosing()"
         [class.md:animate-slide-up]="!isClosing()"
         (click)="$event.stopPropagation()"
       >
         <div
-          class="flex-none p-5 md:p-6 border-b border-white/5 flex items-center justify-between bg-zinc-950"
+          class="flex-none p-5 md:p-6 border-b border-transparent md:border-white/10 flex items-center justify-between bg-transparent md:bg-zinc-950"
         >
           <div>
             <h2 class="text-base md:text-lg font-black uppercase tracking-[0.2em] text-white/90">
-              Add New Secret
+              Add a New Secret
             </h2>
             <p
-              class="text-[7px] md:text-[8px] text-white/20 uppercase tracking-[0.3em] mt-0.5 italic"
+              class="text-[7px] md:text-[8px] text-white/55 uppercase tracking-[0.3em] mt-0.5 italic"
             >
               Locally Encrypted Before Transit
             </p>
           </div>
           <button
             (click)="triggerClose()"
-            class="p-2 md:p-3 rounded-full hover:bg-white/5 text-white/10 hover:text-white transition-all outline-none"
+            class="p-2 md:p-3 rounded-full hover:bg-white/5 text-white/35 hover:text-white transition-all outline-none"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +59,7 @@ import { VaultRecordInput } from './vault-record.model';
           <form (submit)="submit()" class="space-y-5">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 ml-1"
+                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/55 ml-1"
                   >Title</label
                 >
                 <input
@@ -68,12 +68,12 @@ import { VaultRecordInput } from './vault-record.model';
                   [(ngModel)]="form.title"
                   required
                   placeholder="e.g. My Google Account"
-                  class="w-full !bg-white/[0.02] !border-white/5 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs transition-all"
+                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs transition-all"
                 />
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 ml-1"
+                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/55 ml-1"
                   >Website</label
                 >
                 <input
@@ -81,12 +81,12 @@ import { VaultRecordInput } from './vault-record.model';
                   name="website"
                   [(ngModel)]="form.website"
                   placeholder="e.g. google.com"
-                  class="w-full !bg-white/[0.02] !border-white/5 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs transition-all"
+                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs transition-all"
                 />
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 ml-1"
+                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/55 ml-1"
                   >Username / Email</label
                 >
                 <input
@@ -95,12 +95,12 @@ import { VaultRecordInput } from './vault-record.model';
                   [(ngModel)]="form.username"
                   required
                   placeholder="email@example.com"
-                  class="w-full !bg-white/[0.02] !border-white/5 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs transition-all"
+                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs transition-all"
                 />
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 ml-1"
+                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/55 ml-1"
                   >Password</label
                 >
                 <div class="relative group">
@@ -110,12 +110,12 @@ import { VaultRecordInput } from './vault-record.model';
                     [(ngModel)]="form.password"
                     required
                     placeholder="••••••••••••"
-                    class="w-full !bg-white/[0.02] !border-white/5 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !pr-10 !text-xs transition-all"
+                    class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !pr-10 !text-xs transition-all"
                   />
                   <button
                     type="button"
                     (click)="showPwd.set(!showPwd())"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-white/10 hover:text-white transition-all"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-white/35 hover:text-white transition-all"
                   >
                     <svg
                       *ngIf="!showPwd()"
@@ -158,15 +158,15 @@ import { VaultRecordInput } from './vault-record.model';
                 <button
                   type="button"
                   (click)="generatePassword()"
-                  class="text-[7px] font-black uppercase tracking-[0.3em] text-vault-purple/40 hover:text-vault-purple/80 transition-all pt-1.5 block"
+                  class="w-full text-center text-[7px] font-black uppercase tracking-[0.3em] text-vault-purple/70 hover:text-vault-purple transition-all pt-1.5 block"
                 >
-                  Auto-Generate Key
+                  Auto-Generate Password
                 </button>
               </div>
             </div>
 
             <div class="space-y-1.5">
-              <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 ml-1"
+              <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/55 ml-1"
                 >Notes</label
               >
               <textarea
@@ -174,11 +174,13 @@ import { VaultRecordInput } from './vault-record.model';
                 [(ngModel)]="form.notes"
                 rows="2"
                 placeholder="Private annotations..."
-                class="w-full !bg-white/[0.02] !border-white/5 focus:!border-vault-purple/30 !rounded-xl !py-3.5 transition-all resize-none !text-xs"
+                class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 transition-all resize-none !text-xs"
               ></textarea>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/5">
+            <div
+              class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-transparent md:border-white/10"
+            >
               <button
                 type="submit"
                 [disabled]="isSubmitting() || !isValid()"
@@ -186,7 +188,7 @@ import { VaultRecordInput } from './vault-record.model';
               >
                 <div
                   *ngIf="isSubmitting()"
-                  class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                  class="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin"
                 ></div>
                 <span *ngIf="!isSubmitting()" class="font-black uppercase tracking-[0.3em] text-sm"
                   >Save Secret</span
@@ -195,7 +197,7 @@ import { VaultRecordInput } from './vault-record.model';
               <button
                 type="button"
                 (click)="triggerClose()"
-                class="w-full py-3 rounded-xl border border-white/5 bg-white/[0.02] text-sm font-black uppercase tracking-[0.3em] text-white/20 hover:text-white transition-all shadow-inner hidden md:block"
+                class="w-full py-3 rounded-xl border border-white/10 bg-white/[0.02] text-sm font-black uppercase tracking-[0.3em] text-white/55 hover:text-white transition-all shadow-inner hidden md:block"
               >
                 Discard
               </button>

@@ -23,31 +23,35 @@ import { CommonModule } from '@angular/common';
 
       <h2 class="text-2xl font-black uppercase tracking-[0.2em] text-white/90 mb-4">Destructive Wipe</h2>
       <p class="text-sm text-white/40 mb-8 font-medium leading-relaxed">
-        This will permanently remove your <span class="text-white/60">Vault Bundle</span>, 
-        <span class="text-white/60">Account ID</span>, and all local session data.
+        This will permanently remove your <span class="text-white/70">Vault Bundle</span>, 
+        <span class="text-white/70">Account ID</span>, and all local session data.
         <br><br>
         <span class="text-red-400">Only use this on public or shared computers.</span>
       </p>
 
       <div class="flex flex-col gap-4">
         <div 
-          class="relative h-16 rounded-2xl overflow-hidden group cursor-pointer"
-          (mouseenter)="startWipeTimer()"
-          (mouseleave)="cancelWipeTimer()"
+          class="relative h-16 rounded-2xl overflow-hidden group cursor-pointer select-none border border-white/15 hover:border-red-500/50 transition-all"
+          [class.unstable-shake]="isHolding()"
+          [style.--shake-intensity]="shakeIntensity()"
+          (mousedown)="startHold()"
+          (mouseup)="cancelHold()"
+          (mouseleave)="cancelHold()"
+          (touchstart)="$event.preventDefault(); startHold()"
+          (touchend)="cancelHold()"
+          (touchcancel)="cancelHold()"
         >
           <div 
-            class="absolute inset-0 bg-red-500/20 w-0 transition-none"
-            [class.wipe-fill]="isHovering()"
+            class="wipe-progress"
+            [style.width.%]="progress()"
           ></div>
           
           <button
-            class="absolute inset-0 w-full h-full flex items-center justify-center gap-3 border border-white/5 group-hover:border-red-500/30 transition-all"
-            [class.pointer-events-none]="!isReady()"
-            (click)="confirm()"
+            class="absolute inset-0 w-full h-full flex items-center justify-center gap-3 transition-all pointer-events-none"
           >
             <span class="font-black uppercase tracking-[0.2em] text-xs transition-all"
-                  [class.text-red-400]="isHovering()"
-                  [class.text-white/60]="!isHovering()">
+                  [class.text-red-400]="isHolding()"
+                  [class.text-white/70]="!isHolding()">
               {{ buttonLabel() }}
             </span>
           </button>
@@ -55,7 +59,7 @@ import { CommonModule } from '@angular/common';
 
         <button 
           (click)="cancel.emit()"
-          class="py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all"
+          class="py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-white transition-all"
         >
           Go Back
         </button>
@@ -68,38 +72,60 @@ export class WipeConfirmationComponent implements OnDestroy {
   @Output() confirmWipe = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
 
-  isReady = signal(false);
-  isHovering = signal(false);
-  private timer: any;
+  progress = signal(0);
+  isHolding = signal(false);
+  private interval: any;
 
-  buttonLabel = computed(() => {
-    if (this.isReady()) return 'Click to Confirm Wipe';
-    if (this.isHovering()) return 'Hold to Wipe...';
-    return 'Wipe this Device';
+  shakeIntensity = computed(() => {
+    const p = this.progress();
+    if (p < 20) return 0;
+    return 0.3 + ((p - 20) / 80) * 2.2;
   });
 
-  startWipeTimer() {
-    this.isHovering.set(true);
-    this.timer = setTimeout(() => {
-      this.isReady.set(true);
-    }, 3000);
+  buttonLabel = computed(() => {
+    if (this.progress() >= 100) return 'PURGING...';
+    if (this.isHolding()) return `HOLDING... ${Math.ceil(5 - (this.progress() * 5) / 100)}S`;
+    return 'Hold to Wipe Device (5s)';
+  });
+
+  startHold() {
+    if (this.progress() >= 100) return;
+    this.isHolding.set(true);
+
+    this.interval = setInterval(() => {
+      this.progress.update((p) => {
+        const next = p + 1;
+        if (next >= 100) {
+          this.triggerWipe();
+          return 100;
+        }
+        return next;
+      });
+    }, 50);
   }
 
-  cancelWipeTimer() {
-    this.isHovering.set(false);
-    this.isReady.set(false);
-    if (this.timer) {
-      clearTimeout(this.timer);
+  cancelHold() {
+    this.isHolding.set(false);
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+    if (this.progress() < 100) {
+      this.progress.set(0);
     }
   }
 
-  confirm() {
-    if (this.isReady()) {
+  private triggerWipe() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+    setTimeout(() => {
       this.confirmWipe.emit();
-    }
+    }, 500);
   }
 
   ngOnDestroy() {
-    this.cancelWipeTimer();
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
   }
 }

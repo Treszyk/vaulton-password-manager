@@ -23,26 +23,31 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
     class: 'flex-1 min-h-0 flex flex-col',
   },
   template: `
-    <div class="p-4 md:p-8 max-w-7xl mx-auto flex-1 min-h-0 flex flex-col w-full">
+    <div class="p-4 pb-0 md:p-8 md:pb-0 max-w-7xl mx-auto flex-1 min-h-0 flex flex-col w-full">
       <div
         class="flex-none mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8 px-4"
       >
         <div>
-          <h2 class="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-1">
+          <h2 class="text-[10px] font-black uppercase tracking-[0.4em] text-white/55 mb-1">
             Encrypted Archive
           </h2>
           <div class="flex items-center gap-3">
             <span class="text-4xl font-black text-white/90">{{ filteredRecords().length }}</span>
-            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-1.5"
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-white/55 mb-1.5"
               >Results</span
             >
           </div>
         </div>
         <div class="relative w-full md:w-80 group">
-          <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+          <div class="absolute left-6 inset-y-0 flex items-center pointer-events-none">
+            <div
+              *ngIf="isSearching()"
+              class="w-4 h-4 border-2 border-vault-purple/30 border-t-vault-purple rounded-full animate-spin"
+            ></div>
             <svg
+              *ngIf="!isSearching()"
               xmlns="http://www.w3.org/2000/svg"
-              class="w-4 h-4 text-white/10 group-focus-within:text-vault-purple transition-colors"
+              class="w-5 h-5 text-white/20"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -61,7 +66,7 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
             [ngClass]="{
               'text-vault-purple bg-vault-purple/10 border border-vault-purple/20':
                 searchScope() === 'titles',
-              'text-white/20 hover:text-white/40 hover:bg-white/5 border border-transparent':
+              'text-white/55 hover:text-white/40 hover:bg-white/5 border border-transparent':
                 searchScope() === 'all'
             }"
           >
@@ -70,9 +75,9 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 
           <input
             type="text"
-            [(ngModel)]="searchQuery"
+            [(ngModel)]="searchQueryInput"
             placeholder="Search Vault..."
-            class="w-full !bg-white/[0.02] !border-white/5 focus:!border-vault-purple/30 !rounded-2xl !py-4 !pl-14 !pr-6 !text-xs !tracking-[0.1em] !font-bold transition-all placeholder:text-white/5"
+            class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-2xl !py-4 !pl-14 !pr-6 !text-xs !tracking-[0.1em] !font-bold transition-all placeholder:text-white/5"
           />
         </div>
       </div>
@@ -81,9 +86,9 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
         class="flex-none flex flex-col items-center justify-center py-20 animate-fade-in text-center"
       >
         <div
-          class="w-12 h-12 border-2 border-white/5 border-t-white/40 rounded-full animate-spin mb-4"
+          class="w-12 h-12 border-2 border-white/10 border-t-white/40 rounded-full animate-spin mb-4"
         ></div>
-        <p class="text-white/20 text-[9px] font-black uppercase tracking-[0.4em]">
+        <p class="text-white/55 text-[9px] font-black uppercase tracking-[0.4em]">
           Deciphering Neural Storage...
         </p>
       </div>
@@ -91,26 +96,18 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
         *ngIf="!vault.isLoading()"
         class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth pb-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch animate-fade-in px-1"
       >
-        <app-record-card
-          *ngFor="let record of filteredRecords(); let i = index; trackBy: trackByQuery"
-          [style.animation-delay]="i * 100 + 'ms'"
-          class="animate-scale-in"
-          [record]="record"
-          (onDelete)="vault.deleteRecord($event)"
-          (onEdit)="editRecord($event)"
-          (onShowMemo)="activeMemo.set($event)"
-        ></app-record-card>
         <button
           *ngIf="!searchQuery()"
           (click)="showAddModal.set(true)"
-          class="group relative h-[240px] flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white/[0.01] border-2 border-dashed border-white/5 hover:border-vault-purple/40 hover:bg-white/[0.02] transition-all duration-500"
+          class="group relative h-[240px] flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white/[0.01] border-2 border-dashed border-white/10 hover:border-vault-purple/40 hover:bg-white/[0.02] transition-all duration-500 animate-scale-in"
+          [style.animation-delay]="'0ms'"
         >
           <div
-            class="w-16 h-16 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-vault-purple/10 group-hover:border-vault-purple/20 transition-all duration-500"
+            class="w-16 h-16 rounded-full bg-white/[0.02] border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-vault-purple/10 group-hover:border-vault-purple/20 transition-all duration-500"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="w-6 h-6 text-white/20 group-hover:text-vault-purple"
+              class="w-6 h-6 text-white/55 group-hover:text-vault-purple"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -124,15 +121,25 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
             </svg>
           </div>
           <span
-            class="text-[11px] font-black uppercase tracking-[0.4em] text-white/30 group-hover:text-white/60 transition-colors"
-            >Add New Entry</span
+            class="text-[11px] font-black uppercase tracking-[0.4em] text-white/70 group-hover:text-white/60 transition-colors"
+            >Add a New Entry</span
           >
         </button>
+
+        <app-record-card
+          *ngFor="let record of filteredRecords(); let i = index; trackBy: trackByQuery"
+          [style.animation-delay]="(i < 10 ? (i + (searchQuery() ? 0 : 1)) * 100 : 1000) + 'ms'"
+          class="animate-scale-in"
+          [record]="record"
+          (onDelete)="vault.deleteRecord($event)"
+          (onEdit)="editRecord($event)"
+          (onShowMemo)="activeMemo.set($event)"
+        ></app-record-card>
         <div
           *ngIf="filteredRecords().length === 0 && searchQuery()"
           class="col-span-full py-20 text-center"
         >
-          <p class="text-white/10 text-[10px] font-black uppercase tracking-[0.5em]">
+          <p class="text-white/35 text-[10px] font-black uppercase tracking-[0.5em]">
             No matching secrets found
           </p>
         </div>
@@ -155,7 +162,9 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 export class VaultDashboardComponent {
   showAddModal = signal(false);
   activeMemo = signal<VaultRecord | null>(null);
+  searchQueryInput = signal('');
   searchQuery = signal('');
+  isSearching = signal(false);
   searchScope = signal<'titles' | 'all'>('titles');
 
   constructor(
@@ -167,6 +176,24 @@ export class VaultDashboardComponent {
       if (this.crypto.isUnlocked() && this.router.url.includes('/vault')) {
         this.vault.loadRecords();
       }
+    });
+
+    // debounce
+    effect((onCleanup) => {
+      const input = this.searchQueryInput();
+      if (!input) {
+        this.searchQuery.set('');
+        this.isSearching.set(false);
+        return;
+      }
+
+      this.isSearching.set(true);
+      const timeout = setTimeout(() => {
+        this.searchQuery.set(input);
+        this.isSearching.set(false);
+      }, 300);
+
+      onCleanup(() => clearTimeout(timeout));
     });
   }
 
@@ -197,9 +224,7 @@ export class VaultDashboardComponent {
     try {
       await this.vault.addRecord(input);
       this.showAddModal.set(false);
-    } catch (e) {
-      console.error('Failed to add record', e);
-    }
+    } catch (e) {}
   }
 
   editRecord(record: VaultRecord) {}

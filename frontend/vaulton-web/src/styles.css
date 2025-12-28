@@ -4,10 +4,10 @@
 
 :root {
   --v-black: #050505;
-  --v-dark: #0a0a0a;
-  --v-grey: #171717;
-  --v-grey-light: #262626;
-  --v-grey-lighter: #404040;
+  --v-dark: #0f0f10;
+  --v-grey: #1c1c1e;
+  --v-grey-light: #2c2c2e;
+  --v-grey-lighter: #5c5c5e;
   --v-purple: #7c3aed;
   --v-purple-bright: #a78bfa;
   --font-inter: 'Inter', system-ui, -apple-system, sans-serif;
@@ -38,7 +38,7 @@ app-root {
 input,
 select,
 textarea {
-  @apply bg-vault-grey/40 border border-white/5 rounded-xl px-4 py-3 outline-none 
+  @apply bg-vault-grey/40 border border-white/10 rounded-xl px-4 py-3 outline-none 
          focus:border-vault-purple/50 focus:ring-4 focus:ring-vault-purple/10 
          transition-all placeholder:text-white/20 text-sm;
 }
@@ -331,7 +331,6 @@ button.btn-secondary {
   opacity: 0;
 }
 
-/* Record Card Peek Animation */
 .revealed-text {
   display: inline-block !important;
   width: fit-content !important;
@@ -384,7 +383,7 @@ button.btn-secondary {
 }
 
 .overlay-card {
-  @apply bg-[#0D0D0E] border border-white/10 shadow-2xl;
+  @apply bg-transparent border-none shadow-none md:bg-[#0D0D0E] md:border md:border-white/10 md:shadow-2xl;
 }
 
 .modal-glass {
@@ -408,4 +407,34 @@ button.btn-secondary {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+.wipe-progress {
+  @apply absolute inset-y-0 left-0 bg-red-500/40 transition-all duration-100;
+}
+
+@keyframes intense-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(calc(var(--shake-intensity) * -1px), calc(var(--shake-intensity) * 1px));
+  }
+  50% {
+    transform: translate(
+      calc(var(--shake-intensity) * 1.5px),
+      calc(var(--shake-intensity) * -1.5px)
+    );
+  }
+  75% {
+    transform: translate(
+      calc(var(--shake-intensity) * -1.5px),
+      calc(var(--shake-intensity) * -1.5px)
+    );
+  }
+}
+
+.unstable-shake {
+  animation: intense-shake 0.08s infinite;
 }
