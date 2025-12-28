@@ -10,11 +10,12 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
 import { SessionTimerService } from '../../core/auth/session-timer.service';
 import { StarfieldComponent } from '../../shared/ui/starfield/starfield.component';
 import { ToastService } from '../../shared/ui/toast/toast.service';
+import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-meter.component';
 
 @Component({
   selector: 'app-auth-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, StarfieldComponent],
+  imports: [CommonModule, FormsModule, StarfieldComponent, StrengthMeterComponent],
   host: {
     class: 'w-full',
   },
@@ -28,7 +29,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
       <div class="w-full max-w-[440px] animate-slide-up relative z-10">
         <div class="auth-panel p-10 rounded-[2.5rem] relative flex flex-col gap-8">
           <div class="text-center relative z-10">
-            <h1 class="text-4xl font-black text-white tracking-tighter mb-2">
+            <h1 class="text-4xl font-black text-white tracking-tighter mb-3">
               Vaulton<span class="text-vault-purple">.</span>
             </h1>
             <div class="h-6 relative">
@@ -66,8 +67,8 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
           </div>
 
           <div class="relative z-10">
-            <div class="grid grid-cols-1 grid-rows-1 transition-all duration-500">
-              <div class="col-start-1 row-start-1 flex flex-col gap-6 form-view login-view"
+            <div class="grid grid-cols-1 grid-rows-1">
+              <div class="col-start-1 row-start-1 flex flex-col gap-8 form-view login-view"
                    [class.active]="mode() === 'LOGIN'"
                    [class.pointer-events-none]="mode() !== 'LOGIN'">
                 
@@ -124,7 +125,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                 </div>
               </div>
 
-              <div class="col-start-1 row-start-1 flex flex-col gap-6 form-view register-view"
+              <div class="col-start-1 row-start-1 flex flex-col gap-8 form-view register-view"
                    [class.active]="mode() === 'REGISTER'"
                    [class.pointer-events-none]="mode() !== 'REGISTER'">
                 
@@ -186,6 +187,11 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                       </svg>
                     </div>
                   </div>
+                  <app-strength-meter 
+                    [password]="password()" 
+                    [visible]="mode() === 'REGISTER'"
+                    class="block mt-3 px-1"
+                  ></app-strength-meter>
                 </div>
 
                 <div class="kdf-container mt-2" [class.expanded]="mode() === 'REGISTER'">
@@ -223,7 +229,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
             </div>
           </div>
 
-          <div class="flex flex-col gap-6 relative z-20">
+          <div class="flex flex-col gap-8 relative z-20">
             <button
               (click)="onSubmit()"
               [disabled]="!accountId() || !password() || isWorking()"
@@ -241,6 +247,11 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
               </span>
               <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             </button>
+
+            <p *ngIf="mode() === 'REGISTER'" 
+               class="text-white/40 text-[10px] font-black uppercase tracking-[0.2em] text-center sm:hidden animate-fade-in -mt-4">
+              Start your vault
+            </p>
           </div>
         </div>
 

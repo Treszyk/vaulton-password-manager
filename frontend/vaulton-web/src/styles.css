@@ -59,7 +59,7 @@ button.btn-secondary {
 }
 
 .auth-panel {
-  @apply bg-transparent border-0;
+  @apply bg-transparent border-0 flex flex-col gap-8;
 }
 
 @media (max-width: 640px) {
@@ -73,7 +73,11 @@ button.btn-secondary {
 
   .auth-panel h1 {
     font-size: 2.5rem !important;
-    margin-bottom: 0.5rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .register-text {
+    display: none !important;
   }
 
   .animate-slide-up {
@@ -115,24 +119,41 @@ button.btn-secondary {
 
 .form-view {
   opacity: 0;
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  will-change: transform, opacity, max-height;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+    max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .form-view.active {
   opacity: 1;
-  transition-delay: 150ms;
+  max-height: 500px;
+  visibility: visible;
 }
 
 .kdf-container {
   display: grid;
   grid-template-rows: 0fr;
   opacity: 0;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: grid-template-rows, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition: grid-template-rows 0.8s cubic-bezier(0.2, 0.2, 0.2, 1),
+    opacity 0.8s cubic-bezier(0.2, 0.2, 0.2, 0.2);
+  overflow: hidden;
 }
 
 .kdf-container.expanded {
   grid-template-rows: 1fr;
   opacity: 1;
+  overflow: visible;
 }
 
 .header-text {
@@ -147,7 +168,11 @@ button.btn-secondary {
 .kdf-option {
   @apply flex-1 p-4 rounded-xl bg-white/[0.05] border border-white/10 
          text-center cursor-pointer transition-all hover:bg-white/[0.08]
-         flex flex-col gap-1 items-center;
+         flex flex-col gap-1 items-center relative;
+}
+
+.kdf-option:hover {
+  z-index: 10;
 }
 
 .kdf-option.active {
@@ -182,7 +207,7 @@ button.btn-secondary {
   transform: translateX(-50%) translateY(5px);
   @apply px-4 py-2 rounded-xl bg-vault-grey border border-white/10 text-[10px] 
          font-bold text-white/70 opacity-0 pointer-events-none 
-         transition-all duration-300 z-[100] backdrop-blur-xl shadow-2xl
+         transition-all duration-300 z-[1000] backdrop-blur-xl shadow-2xl
          text-center leading-relaxed;
   min-width: max-content;
 }

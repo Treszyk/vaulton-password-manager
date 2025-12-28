@@ -12,11 +12,12 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VaultRecord, VaultRecordInput } from './vault-record.model';
+import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-meter.component';
 
 @Component({
   selector: 'app-record-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, StrengthMeterComponent],
   template: `
     <div
       class="fixed inset-0 !z-[9000] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-md"
@@ -164,10 +165,15 @@ import { VaultRecord, VaultRecordInput } from './vault-record.model';
                     </svg>
                   </button>
                 </div>
+                <app-strength-meter
+                  [password]="form.password"
+                  [visible]="!record || showPwd()"
+                  class="block w-full mt-2"
+                ></app-strength-meter>
                 <button
                   type="button"
                   (click)="generatePassword()"
-                  class="w-full text-center text-[7px] font-black uppercase tracking-[0.3em] text-vault-purple/70 hover:text-vault-purple transition-all pt-1.5 block"
+                  class="w-full text-center text-[9px] font-black uppercase tracking-[0.3em] text-vault-purple hover:text-vault-purple-bright transition-all py-2 block mt-1 active:scale-[0.98]"
                 >
                   Auto-Generate Password
                 </button>
