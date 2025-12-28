@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, Router } from '@angular/router';
 import { SessionService } from './core/auth/session.service';
 import { VaultonNavComponent } from './features/shell/vaulton-nav.component';
+import { ToastComponent } from './shared/ui/toast/toast.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, VaultonNavComponent],
+  imports: [RouterOutlet, VaultonNavComponent, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

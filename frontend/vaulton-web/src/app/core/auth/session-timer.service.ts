@@ -1,5 +1,6 @@
-import { Injectable, signal, inject, NgZone, OnDestroy } from '@angular/core';
+import { Injectable, signal, inject, NgZone, OnDestroy, effect } from '@angular/core';
 import { AuthCryptoService } from './auth-crypto.service';
+import { SettingsService } from '../../core/settings/settings.service';
 import { Router } from '@angular/router';
 import {
   fromEvent,
@@ -7,27 +8,35 @@ import {
   Subject,
   takeUntil,
   timer,
-  repeat,
   switchMap,
   map,
+  startWith,
   takeWhile,
   throttleTime,
-  distinctUntilChanged,
 } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class SessionTimerService implements OnDestroy {
-  private readonly crypto = inject(AuthCryptoService);
+  readonly crypto = inject(AuthCryptoService);
+  readonly settings = inject(SettingsService);
   private readonly router = inject(Router);
   private readonly ngZone = inject(NgZone);
 
-  private readonly TIMEOUT_SECONDS = 300;
   private readonly destroy$ = new Subject<void>();
+  private readonly stopTracker$ = new Subject<void>();
 
-  readonly remainingSeconds = signal(this.TIMEOUT_SECONDS);
+  readonly remainingSeconds = signal(300);
   readonly isAboutToLock = signal(false);
 
   constructor() {
+    effect(() => {
+      const _ = this.settings.timeoutSeconds();
+      this.restartTracker();
+    });
+  }
+
+  private restartTracker() {
+    this.stopTracker$.next();
     this.initInactivityTracker();
   }
 
@@ -43,12 +52,16 @@ export class SessionTimerService implements OnDestroy {
 
       activity$
         .pipe(
+          startWith(null),
           takeUntil(this.destroy$),
+          takeUntil(this.stopTracker$),
           throttleTime(200),
           switchMap(() => {
             this.ngZone.run(() => this.resetTimer());
+            const timeout = this.settings.timeoutSeconds();
             return timer(5000, 1000).pipe(
-              map((tick) => this.TIMEOUT_SECONDS - 1 - tick),
+              takeUntil(this.stopTracker$),
+              map((tick) => timeout - 1 - tick),
               takeWhile((remaining) => remaining >= 0)
             );
           })
@@ -70,7 +83,7 @@ export class SessionTimerService implements OnDestroy {
   }
 
   private resetTimer() {
-    this.remainingSeconds.set(this.TIMEOUT_SECONDS);
+    this.remainingSeconds.set(this.settings.timeoutSeconds());
     this.isAboutToLock.set(false);
   }
 
@@ -87,5 +100,7 @@ export class SessionTimerService implements OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    this.stopTracker$.next();
+    this.stopTracker$.complete();
   }
 }

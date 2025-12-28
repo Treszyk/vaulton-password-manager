@@ -5,6 +5,7 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
 import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { SessionService } from '../../core/auth/session.service';
+import { SettingsService } from '../../core/settings/settings.service';
 import { UnlockOverlayComponent } from './unlock-overlay.component';
 import { WipeConfirmationComponent } from './wipe-confirmation.component';
 import { LogoutConfirmationComponent } from './logout-confirmation.component';
@@ -25,7 +26,7 @@ import { LogoutConfirmationComponent } from './logout-confirmation.component';
   },
   template: `
     <div class="relative w-full h-full overflow-hidden flex flex-col">
-      <app-starfield></app-starfield>
+      <app-starfield *ngIf="settings.showStarfield()"></app-starfield>
 
       <div class="relative z-10 w-full flex-1 min-h-0 flex flex-col">
         <router-outlet></router-outlet>
@@ -67,6 +68,7 @@ export class VaultonShellComponent {
   protected readonly crypto = inject(AuthCryptoService);
   protected readonly authState = inject(AuthStateService);
   protected readonly session = inject(SessionService);
+  protected readonly settings = inject(SettingsService);
 
   triggerWipeFromLogout(): void {
     this.session.cancelLogoutConfirm();

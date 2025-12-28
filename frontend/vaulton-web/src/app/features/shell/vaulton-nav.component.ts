@@ -36,9 +36,17 @@ import { SessionService } from '../../core/auth/session.service';
            <a 
              routerLink="/vault" 
              routerLinkActive="!text-vault-purple !opacity-100"
+             [routerLinkActiveOptions]="{exact: true}"
              class="text-[10px] font-black uppercase tracking-[0.25em] text-white/80 hover:text-white transition-all active:scale-[0.98] decoration-none"
            >
              Vault
+           </a>
+           <a 
+             routerLink="/vault/settings" 
+             routerLinkActive="!text-vault-purple !opacity-100"
+             class="text-[10px] font-black uppercase tracking-[0.25em] text-white/80 hover:text-white transition-all active:scale-[0.98] decoration-none"
+           >
+             Settings
            </a>
         </div>
       </div>
@@ -48,15 +56,15 @@ import { SessionService } from '../../core/auth/session.service';
         class="fixed bottom-5 right-4 md:top-8 md:right-8 md:bottom-auto z-[30] flex flex-col md:flex-row items-end md:items-center gap-3 md:gap-4 animate-fade-in pointer-events-auto"
       >
         <div 
-          *ngIf="timer.remainingSeconds() < 300"
-          class="flex items-center gap-3 px-3 md:px-4 py-2 rounded-full bg-zinc-950 md:bg-white/[0.03] border border-white/10 transition-all animate-fade-in shadow-xl md:shadow-none"
+          *ngIf="timer.remainingSeconds() < timer.settings.timeoutSeconds()"
+          class="flex items-center gap-3 px-3 md:px-4 h-10 rounded-full bg-zinc-950 md:bg-white/[0.03] border border-white/10 transition-all animate-fade-in shadow-xl md:shadow-none box-border"
           [class.border-red-500/30]="timer.isAboutToLock()"
           [class.bg-red-500/5]="timer.isAboutToLock()"
         >
-          <div class="flex flex-col items-end">
-            <span class="hidden md:block text-[8px] font-black uppercase tracking-[0.2em] text-white/60 leading-none">Session</span>
+          <div class="flex flex-col items-end justify-center h-full">
+            <span class="hidden md:block text-[8px] font-black uppercase tracking-[0.2em] text-white/60 leading-none mb-0.5">Session</span>
             <span 
-              class="text-xs font-mono font-bold tracking-widest transition-colors duration-300"
+              class="text-xs font-mono font-bold tracking-widest transition-colors duration-300 leading-none"
               [class.text-red-400]="timer.isAboutToLock()"
               [class.text-white/70]="!timer.isAboutToLock()"
             >

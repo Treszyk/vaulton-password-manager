@@ -8,6 +8,7 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { AuthPersistenceService } from '../../core/auth/auth-persistence.service';
 import { StarfieldComponent } from '../../shared/ui/starfield/starfield.component';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 
 @Component({
   selector: 'app-auth-page',
@@ -251,22 +252,6 @@ import { StarfieldComponent } from '../../shared/ui/starfield/starfield.componen
         </div>
       </div>
       
-      <div *ngIf="statusMessage()" 
-           class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-md text-center transition-all duration-300 transform"
-           [class.opacity-0]="!showToast()"
-           [class.translate-y-4]="!showToast()"
-           [class.opacity-100]="showToast()"
-           [class.translate-y-0]="showToast()">
-        <div class="px-6 py-3">
-           <p class="text-xs font-black uppercase tracking-[0.2em] drop-shadow-lg"
-             [ngClass]="{
-               'text-vault-purple': isSuccess(),
-               'text-red-500': !isSuccess()
-             }">
-            {{ statusMessage() }}
-          </p>
-        </div>
-      </div>
     </div>
   `,
 })
@@ -278,9 +263,6 @@ export class AuthPageComponent {
   kdfMode = signal<number>(2);
   cryptoSchemaVer = signal<number>(1);
 
-  statusMessage = signal<string>('');
-  showToast = signal<boolean>(false);
-  isSuccess = signal<boolean>(false);
   isWorking = signal<boolean>(false);
 
   constructor(
@@ -288,7 +270,8 @@ export class AuthPageComponent {
     private readonly crypto: AuthCryptoService,
     private readonly authState: AuthStateService,
     private readonly persistence: AuthPersistenceService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly toast: ToastService
   ) {
     this.init();
   }
@@ -313,7 +296,6 @@ export class AuthPageComponent {
 
   setMode(m: 'LOGIN' | 'REGISTER'): void {
     this.mode.set(m);
-    this.statusMessage.set('');
     this.password.set('');
     if (m === 'REGISTER') {
       this.refreshAccountId();
@@ -323,7 +305,6 @@ export class AuthPageComponent {
   }
 
   refreshAccountId(): void {
-    this.statusMessage.set('');
     this.api.preRegister().subscribe({
       next: (r) => {
         this.accountId.set(r.AccountId);
@@ -333,37 +314,17 @@ export class AuthPageComponent {
     });
   }
 
-  private showStatus(msg: string, success: boolean) {
-    this.statusMessage.set(msg);
-    this.isSuccess.set(success);
-
-    this.showToast.set(false);
-
-    setTimeout(() => {
-      this.showToast.set(true);
-
-      setTimeout(() => {
-        this.showToast.set(false);
-        setTimeout(() => {
-          if (!this.showToast()) {
-            this.statusMessage.set('');
-          }
-        }, 500);
-      }, 2500);
-    }, 50);
+  private reportError(msg: string): void {
+    this.toast.trigger(msg, false);
+    this.isWorking.set(false);
+    this.password.set('');
   }
 
   copyToClipboard(text: string): void {
     if (!text) return;
     navigator.clipboard.writeText(text).then(() => {
-      this.showStatus('Copied to Clipboard', true);
+      this.toast.trigger('Copied to Clipboard', true);
     });
-  }
-
-  private reportError(msg: string): void {
-    this.showStatus(msg, false);
-    this.isWorking.set(false);
-    this.password.set('');
   }
 
   onSubmit(): void {
@@ -405,7 +366,7 @@ export class AuthPageComponent {
                         MkWrapRk: res.MkWrapRk || null,
                       })
                       .then(() => {
-                        this.showStatus('Vault Unlocked', true);
+                        this.toast.trigger('Vault Unlocked', true);
                         this.router.navigate(['/vault']);
                       });
                   })
@@ -441,7 +402,7 @@ export class AuthPageComponent {
         this.api.register(registerBody).subscribe({
           next: () => {
             this.persistence.saveAccountId(accountId);
-            this.showStatus('Vault Initialized', true);
+            this.toast.trigger('Vault Initialized', true);
             setTimeout(() => {
               this.setMode('LOGIN');
               this.accountId.set(accountId);

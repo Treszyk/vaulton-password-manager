@@ -20,6 +20,11 @@ export const routes: Routes = [
             (m) => m.VaultDashboardComponent
           ),
       },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./features/settings/settings.component').then((m) => m.SettingsComponent),
+      },
     ],
   },
   { path: '', redirectTo: 'auth', pathMatch: 'full' },

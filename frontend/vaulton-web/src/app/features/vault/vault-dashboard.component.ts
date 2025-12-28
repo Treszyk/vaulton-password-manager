@@ -16,6 +16,7 @@ import { RecordEditorComponent } from './record-editor.component';
 import { MemoModalComponent } from './memo-modal.component';
 import { VaultRecord, VaultRecordInput } from './vault-record.model';
 import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 
 @Component({
   selector: 'app-vault-dashboard',
@@ -165,27 +166,6 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
         [record]="activeMemo()!"
         (close)="activeMemo.set(null)"
       ></app-memo-modal>
-
-      <div
-        *ngIf="statusMessage()"
-        class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-md text-center transition-all duration-300 transform"
-        [class.opacity-0]="!showToast()"
-        [class.translate-y-4]="!showToast()"
-        [class.opacity-100]="showToast()"
-        [class.translate-y-0]="showToast()"
-      >
-        <div class="px-6 py-3">
-          <p
-            class="text-[10px] font-black uppercase tracking-[0.2em] drop-shadow-lg"
-            [ngClass]="{
-              'text-vault-purple': isSuccess(),
-              'text-red-500': !isSuccess()
-            }"
-          >
-            {{ statusMessage() }}
-          </p>
-        </div>
-      </div>
     </div>
   `,
   encapsulation: ViewEncapsulation.None,
@@ -199,14 +179,11 @@ export class VaultDashboardComponent implements OnDestroy {
   isSearching = signal(false);
   searchScope = signal<'titles' | 'all'>('titles');
 
-  statusMessage = signal('');
-  showToast = signal(false);
-  isSuccess = signal(true);
-
   constructor(
     protected readonly vault: VaultDataService,
     private readonly crypto: AuthCryptoService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly toast: ToastService
   ) {
     effect(() => {
       if (this.crypto.isUnlocked() && this.router.url.includes('/vault')) {
@@ -214,7 +191,6 @@ export class VaultDashboardComponent implements OnDestroy {
       }
     });
 
-    // debounce
     effect((onCleanup) => {
       const input = this.searchQueryInput();
       if (!input) {
@@ -261,14 +237,14 @@ export class VaultDashboardComponent implements OnDestroy {
     try {
       if (editRec) {
         await this.vault.updateRecord(editRec.id, input);
-        this.triggerToast('Vault Updated', true);
+        this.toast.trigger('Vault Updated', true);
       } else {
         await this.vault.addRecord(input);
-        this.triggerToast('Secret Added', true);
+        this.toast.trigger('Secret Added', true);
       }
       editor.triggerClose();
     } catch (e) {
-      this.triggerToast('Something went wrong', false);
+      this.toast.trigger('Something went wrong', false);
       this.closeEditor();
       this.vault.loadRecords();
     }
@@ -277,9 +253,9 @@ export class VaultDashboardComponent implements OnDestroy {
   async deleteRecord(id: string) {
     try {
       await this.vault.deleteRecord(id);
-      this.triggerToast('Secret Removed', true);
+      this.toast.trigger('Secret Removed', true);
     } catch (e) {
-      this.triggerToast('Something went wrong', false);
+      this.toast.trigger('Something went wrong', false);
     }
   }
 
@@ -295,23 +271,6 @@ export class VaultDashboardComponent implements OnDestroy {
   ngOnDestroy() {
     this.editingRecord.set(null);
     this.activeMemo.set(null);
-    this.statusMessage.set('');
-  }
-
-  private triggerToast(msg: string, success: boolean) {
-    this.statusMessage.set(msg);
-    this.isSuccess.set(success);
-    this.showToast.set(false);
-
-    setTimeout(() => {
-      this.showToast.set(true);
-      setTimeout(() => {
-        this.showToast.set(false);
-        setTimeout(() => {
-          if (!this.showToast()) this.statusMessage.set('');
-        }, 500);
-      }, 2500);
-    }, 50);
   }
 
   trackByQuery = (index: number, item: VaultRecord): string => {
