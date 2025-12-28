@@ -2,19 +2,21 @@ import { Injectable, signal, inject, effect } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { VaultApiService } from '../../core/api/vault-api.service';
 import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
+import { VaultCryptoService } from '../../core/vault/vault-crypto.service';
 import { VaultRecord, VaultRecordInput } from './vault-record.model';
 
 @Injectable({ providedIn: 'root' })
 export class VaultDataService {
   private readonly api = inject(VaultApiService);
-  private readonly crypto = inject(AuthCryptoService);
+  private readonly authCrypto = inject(AuthCryptoService);
+  private readonly vaultCrypto = inject(VaultCryptoService);
 
   readonly records = signal<VaultRecord[]>([]);
   readonly isLoading = signal(false);
 
   constructor() {
     effect(() => {
-      if (!this.crypto.isUnlocked()) {
+      if (!this.authCrypto.isUnlocked()) {
         this.records.set([]);
       }
     });
@@ -28,9 +30,7 @@ export class VaultDataService {
 
       for (const entry of encryptedEntries) {
         try {
-          const aadB64 = btoa(entry.Id);
-          const json = await this.crypto.decryptEntry(entry.Payload, aadB64);
-          const data = JSON.parse(json);
+          const data = await this.vaultCrypto.decryptEntry(entry.Payload, entry.Id);
 
           decryptedRecords.push({
             id: entry.Id,
@@ -48,11 +48,7 @@ export class VaultDataService {
 
   async addRecord(input: VaultRecordInput) {
     const { EntryId } = await firstValueFrom(this.api.preCreate());
-
-    const plaintext = JSON.stringify(input);
-    const aadB64 = btoa(EntryId);
-    const domain = input.website;
-    const encrypted = await this.crypto.encryptEntry(plaintext, aadB64, domain);
+    const encrypted = await this.vaultCrypto.encryptEntry(input, input.website, EntryId);
 
     await firstValueFrom(
       this.api.create({
@@ -67,6 +63,19 @@ export class VaultDataService {
       ...input,
     };
     this.records.update((prev) => [newRecord, ...prev]);
+  }
+
+  async updateRecord(id: string, input: VaultRecordInput) {
+    const encrypted = await this.vaultCrypto.encryptEntry(input, input.website, id);
+
+    await firstValueFrom(
+      this.api.update(id, {
+        DomainTag: encrypted.DomainTag,
+        Payload: encrypted.Payload,
+      })
+    );
+
+    this.records.update((prev) => prev.map((r) => (r.id === id ? { ...r, ...input } : r)));
   }
 
   async deleteRecord(id: string) {

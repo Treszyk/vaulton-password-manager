@@ -1,4 +1,12 @@
-import { Component, inject, signal, effect, ViewEncapsulation, computed } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  effect,
+  ViewEncapsulation,
+  computed,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -131,7 +139,7 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
           [style.animation-delay]="(i < 10 ? (i + (searchQuery() ? 0 : 1)) * 100 : 1000) + 'ms'"
           class="animate-scale-in"
           [record]="record"
-          (onDelete)="vault.deleteRecord($event)"
+          (onDelete)="deleteRecord($event)"
           (onEdit)="editRecord($event)"
           (onShowMemo)="activeMemo.set($event)"
         ></app-record-card>
@@ -145,9 +153,11 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
         </div>
       </div>
       <app-record-editor
-        *ngIf="showAddModal()"
-        (close)="showAddModal.set(false)"
-        (save)="addRecord($event)"
+        #editor
+        *ngIf="showAddModal() || editingRecord()"
+        [record]="editingRecord() || undefined"
+        (close)="closeEditor()"
+        (save)="handleSave($event, editor)"
       ></app-record-editor>
 
       <app-memo-modal
@@ -155,17 +165,43 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
         [record]="activeMemo()!"
         (close)="activeMemo.set(null)"
       ></app-memo-modal>
+
+      <div
+        *ngIf="statusMessage()"
+        class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-md text-center transition-all duration-300 transform"
+        [class.opacity-0]="!showToast()"
+        [class.translate-y-4]="!showToast()"
+        [class.opacity-100]="showToast()"
+        [class.translate-y-0]="showToast()"
+      >
+        <div class="px-6 py-3">
+          <p
+            class="text-[10px] font-black uppercase tracking-[0.2em] drop-shadow-lg"
+            [ngClass]="{
+              'text-vault-purple': isSuccess(),
+              'text-red-500': !isSuccess()
+            }"
+          >
+            {{ statusMessage() }}
+          </p>
+        </div>
+      </div>
     </div>
   `,
   encapsulation: ViewEncapsulation.None,
 })
-export class VaultDashboardComponent {
+export class VaultDashboardComponent implements OnDestroy {
   showAddModal = signal(false);
+  editingRecord = signal<VaultRecord | null>(null);
   activeMemo = signal<VaultRecord | null>(null);
   searchQueryInput = signal('');
   searchQuery = signal('');
   isSearching = signal(false);
   searchScope = signal<'titles' | 'all'>('titles');
+
+  statusMessage = signal('');
+  showToast = signal(false);
+  isSuccess = signal(true);
 
   constructor(
     protected readonly vault: VaultDataService,
@@ -220,14 +256,64 @@ export class VaultDashboardComponent {
     });
   });
 
-  async addRecord(input: VaultRecordInput) {
+  async handleSave(input: VaultRecordInput, editor: RecordEditorComponent) {
+    const editRec = this.editingRecord();
     try {
-      await this.vault.addRecord(input);
-      this.showAddModal.set(false);
-    } catch (e) {}
+      if (editRec) {
+        await this.vault.updateRecord(editRec.id, input);
+        this.triggerToast('Vault Updated', true);
+      } else {
+        await this.vault.addRecord(input);
+        this.triggerToast('Secret Added', true);
+      }
+      editor.triggerClose();
+    } catch (e) {
+      this.triggerToast('Something went wrong', false);
+      this.closeEditor();
+      this.vault.loadRecords();
+    }
   }
 
-  editRecord(record: VaultRecord) {}
+  async deleteRecord(id: string) {
+    try {
+      await this.vault.deleteRecord(id);
+      this.triggerToast('Secret Removed', true);
+    } catch (e) {
+      this.triggerToast('Something went wrong', false);
+    }
+  }
+
+  editRecord(record: VaultRecord) {
+    this.editingRecord.set(record);
+  }
+
+  closeEditor() {
+    this.showAddModal.set(false);
+    this.editingRecord.set(null);
+  }
+
+  ngOnDestroy() {
+    this.editingRecord.set(null);
+    this.activeMemo.set(null);
+    this.statusMessage.set('');
+  }
+
+  private triggerToast(msg: string, success: boolean) {
+    this.statusMessage.set(msg);
+    this.isSuccess.set(success);
+    this.showToast.set(false);
+
+    setTimeout(() => {
+      this.showToast.set(true);
+      setTimeout(() => {
+        this.showToast.set(false);
+        setTimeout(() => {
+          if (!this.showToast()) this.statusMessage.set('');
+        }, 500);
+      }, 2500);
+    }, 50);
+  }
+
   trackByQuery = (index: number, item: VaultRecord): string => {
     return item.id + (this.searchQuery() || '');
   };

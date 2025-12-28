@@ -1,7 +1,17 @@
-import { Component, EventEmitter, Output, signal, inject, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Output,
+  Input,
+  signal,
+  inject,
+  ViewEncapsulation,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { VaultRecordInput } from './vault-record.model';
+import { VaultRecord, VaultRecordInput } from './vault-record.model';
 
 @Component({
   selector: 'app-record-editor',
@@ -12,7 +22,6 @@ import { VaultRecordInput } from './vault-record.model';
       class="fixed inset-0 !z-[9000] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-md"
       [class.animate-fade-in]="!isClosing()"
       [class.animate-fade-out]="isClosing()"
-      (click)="triggerClose()"
     >
       <div
         class="w-full md:max-w-lg bg-transparent md:bg-zinc-950 border-none md:border border-white/15 rounded-t-[2rem] md:rounded-3xl shadow-none md:shadow-2xl overflow-hidden flex flex-col max-h-[85vh] relative !z-[9001]"
@@ -26,7 +35,7 @@ import { VaultRecordInput } from './vault-record.model';
         >
           <div>
             <h2 class="text-base md:text-lg font-black uppercase tracking-[0.2em] text-white/90">
-              Add a New Secret
+              {{ record ? 'Edit Secret' : 'Add a New Secret' }}
             </h2>
             <p
               class="text-[7px] md:text-[8px] text-white/55 uppercase tracking-[0.3em] mt-0.5 italic"
@@ -190,9 +199,9 @@ import { VaultRecordInput } from './vault-record.model';
                   *ngIf="isSubmitting()"
                   class="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin"
                 ></div>
-                <span *ngIf="!isSubmitting()" class="font-black uppercase tracking-[0.3em] text-sm"
-                  >Save Secret</span
-                >
+                <span *ngIf="!isSubmitting()" class="font-black uppercase tracking-[0.3em] text-sm">
+                  {{ record ? 'Update Secret' : 'Save Secret' }}
+                </span>
               </button>
               <button
                 type="button"
@@ -209,7 +218,8 @@ import { VaultRecordInput } from './vault-record.model';
   `,
   encapsulation: ViewEncapsulation.None,
 })
-export class RecordEditorComponent {
+export class RecordEditorComponent implements OnInit, OnDestroy {
+  @Input() record?: VaultRecord;
   @Output() save = new EventEmitter<VaultRecordInput>();
   @Output() close = new EventEmitter<void>();
 
@@ -225,6 +235,22 @@ export class RecordEditorComponent {
   isSubmitting = signal(false);
   isClosing = signal(false);
 
+  ngOnInit() {
+    if (this.record) {
+      this.form = {
+        title: this.record.title,
+        website: this.record.website,
+        username: this.record.username,
+        password: this.record.password,
+        notes: this.record.notes,
+      };
+    }
+  }
+
+  ngOnDestroy() {
+    this.wipeForm();
+  }
+
   isValid() {
     return this.form.title && this.form.username && this.form.password;
   }
@@ -234,7 +260,16 @@ export class RecordEditorComponent {
     this.isClosing.set(true);
     setTimeout(() => {
       this.close.emit();
+      this.wipeForm();
     }, 400);
+  }
+
+  private wipeForm() {
+    this.form.title = '';
+    this.form.website = '';
+    this.form.username = '';
+    this.form.password = '';
+    this.form.notes = '';
   }
 
   generatePassword() {
@@ -247,6 +282,7 @@ export class RecordEditorComponent {
       retVal += charset.charAt(array[i] % charset.length);
     }
     this.form.password = retVal;
+    array.fill(0);
     this.showPwd.set(true);
   }
 
