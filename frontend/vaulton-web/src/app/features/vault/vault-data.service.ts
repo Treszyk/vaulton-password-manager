@@ -22,6 +22,10 @@ export class VaultDataService {
     });
   }
 
+  clearData() {
+    this.records.set([]);
+  }
+
   async loadRecords() {
     this.isLoading.set(true);
     try {

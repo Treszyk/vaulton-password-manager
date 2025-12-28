@@ -7,6 +7,7 @@ import { AuthStateService } from '../../core/auth/auth-state.service';
 import { SessionService } from '../../core/auth/session.service';
 import { UnlockOverlayComponent } from './unlock-overlay.component';
 import { WipeConfirmationComponent } from './wipe-confirmation.component';
+import { LogoutConfirmationComponent } from './logout-confirmation.component';
 
 @Component({
   selector: 'app-vaulton-shell',
@@ -17,6 +18,7 @@ import { WipeConfirmationComponent } from './wipe-confirmation.component';
     StarfieldComponent,
     UnlockOverlayComponent,
     WipeConfirmationComponent,
+    LogoutConfirmationComponent,
   ],
   host: {
     class: 'flex-1 min-h-0 flex flex-col',
@@ -30,11 +32,15 @@ import { WipeConfirmationComponent } from './wipe-confirmation.component';
       </div>
 
       <div
-        *ngIf="(authState.isInitialized() && !crypto.isUnlocked()) || session.showWipeConfirm()"
+        *ngIf="
+          (authState.isInitialized() && !crypto.isUnlocked()) ||
+          session.showWipeConfirm() ||
+          session.showLogoutConfirm()
+        "
         class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in"
       >
         <app-unlock-overlay
-          *ngIf="!session.showWipeConfirm()"
+          *ngIf="!session.showWipeConfirm() && !session.showLogoutConfirm()"
           class="w-full flex justify-center"
         ></app-unlock-overlay>
 
@@ -44,6 +50,14 @@ import { WipeConfirmationComponent } from './wipe-confirmation.component';
           (cancel)="session.cancelWipeConfirm()"
           class="w-full flex justify-center"
         ></app-wipe-confirmation>
+
+        <app-logout-confirmation
+          *ngIf="session.showLogoutConfirm()"
+          (confirmLogout)="session.logout()"
+          (cancel)="session.cancelLogoutConfirm()"
+          (requestWipe)="triggerWipeFromLogout()"
+          class="w-full flex justify-center"
+        ></app-logout-confirmation>
       </div>
     </div>
   `,
@@ -53,4 +67,9 @@ export class VaultonShellComponent {
   protected readonly crypto = inject(AuthCryptoService);
   protected readonly authState = inject(AuthStateService);
   protected readonly session = inject(SessionService);
+
+  triggerWipeFromLogout(): void {
+    this.session.cancelLogoutConfirm();
+    this.session.triggerWipeConfirm();
+  }
 }

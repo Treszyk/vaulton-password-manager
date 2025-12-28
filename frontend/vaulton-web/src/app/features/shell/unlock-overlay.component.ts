@@ -16,11 +16,11 @@ import { firstValueFrom } from 'rxjs';
     <div class="w-full max-w-md p-8 rounded-3xl overlay-card animate-slide-up">
       <div class="flex flex-col items-center text-center mb-8">
         <div
-          class="w-16 h-16 rounded-full bg-vault-purple/20 flex items-center justify-center mb-4"
+          class="w-20 h-20 rounded-full bg-vault-purple/10 flex items-center justify-center mx-auto mb-6"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="w-8 h-8 text-vault-purple"
+            class="w-10 h-10 text-vault-purple"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -66,14 +66,25 @@ import { firstValueFrom } from 'rxjs';
           ></div>
         </button>
 
-        <button
-          type="button"
-          class="w-full py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-red-400 transition-all active:scale-[0.98]"
-          (click)="triggerWipe()"
-          [disabled]="isWorking()"
-        >
-          Wipe this Device
-        </button>
+        <div class="flex items-center justify-center gap-4">
+          <button
+            type="button"
+            class="py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-vault-purple transition-all active:scale-[0.98]"
+            (click)="triggerLogout()"
+            [disabled]="isWorking()"
+          >
+            Log Out
+          </button>
+          <div class="w-1 h-1 rounded-full bg-white/10"></div>
+          <button
+            type="button"
+            class="py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-red-400 transition-all active:scale-[0.98]"
+            (click)="triggerWipe()"
+            [disabled]="isWorking()"
+          >
+            Wipe Device
+          </button>
+        </div>
 
         <p
           *ngIf="error()"
@@ -155,6 +166,10 @@ export class UnlockOverlayComponent {
     } finally {
       this.isWorking.set(false);
     }
+  }
+
+  triggerLogout() {
+    this.session.triggerLogoutConfirm();
   }
 
   triggerWipe() {

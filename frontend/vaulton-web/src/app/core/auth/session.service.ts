@@ -6,6 +6,8 @@ import { AuthCryptoService } from './auth-crypto.service';
 import { AuthPersistenceService } from './auth-persistence.service';
 import { Router } from '@angular/router';
 
+import { VaultDataService } from '../../features/vault/vault-data.service';
+
 @Injectable({ providedIn: 'root' })
 export class SessionService {
   constructor(
@@ -13,10 +15,12 @@ export class SessionService {
     private readonly authState: AuthStateService,
     private readonly crypto: AuthCryptoService,
     private readonly persistence: AuthPersistenceService,
+    private readonly vault: VaultDataService,
     private readonly router: Router
   ) {}
 
   readonly showWipeConfirm = signal(false);
+  readonly showLogoutConfirm = signal(false);
 
   triggerWipeConfirm(): void {
     this.showWipeConfirm.set(true);
@@ -24,6 +28,14 @@ export class SessionService {
 
   cancelWipeConfirm(): void {
     this.showWipeConfirm.set(false);
+  }
+
+  triggerLogoutConfirm(): void {
+    this.showLogoutConfirm.set(true);
+  }
+
+  cancelLogoutConfirm(): void {
+    this.showLogoutConfirm.set(false);
   }
 
   tryRestore(): Observable<boolean> {
@@ -53,6 +65,8 @@ export class SessionService {
   logout(): void {
     this.authState.clear();
     this.crypto.clearKeys();
+    this.vault.clearData();
+    this.showLogoutConfirm.set(false);
 
     this.authApi.logout().subscribe();
 
@@ -62,6 +76,7 @@ export class SessionService {
   wipeDevice(): void {
     this.authState.clear();
     this.crypto.clearKeys();
+    this.vault.clearData();
     this.persistence.clearAll();
     this.showWipeConfirm.set(false);
 
