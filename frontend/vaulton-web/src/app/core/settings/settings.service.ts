@@ -18,7 +18,6 @@ export class SettingsService {
   constructor() {
     this.loadSettings();
 
-    // Auto-save whenever settings change
     effect(() => {
       this.saveSettings();
     });

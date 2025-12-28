@@ -6,6 +6,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
 import { SessionService } from '../../core/auth/session.service';
 import { AuthApiService } from '../../core/api/auth-api.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
+import { SessionTimerService } from '../../core/auth/session-timer.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -103,6 +104,7 @@ export class UnlockOverlayComponent {
   private readonly session = inject(SessionService);
   private readonly api = inject(AuthApiService);
   private readonly authState = inject(AuthStateService);
+  private readonly sessionTimer = inject(SessionTimerService);
 
   password = signal('');
   isWorking = signal(false);
@@ -157,6 +159,7 @@ export class UnlockOverlayComponent {
       } else {
         await this.crypto.unlock(password, bundle);
       }
+      this.sessionTimer.reset();
     } catch (e: any) {
       if (e.status === 401 || e.message?.includes('401')) {
         this.error.set('Incorrect Password');

@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, NgZone, OnDestroy, effect } from '@angular/core';
+import { Injectable, signal, inject, NgZone, OnDestroy, effect, untracked } from '@angular/core';
 import { AuthCryptoService } from './auth-crypto.service';
 import { SettingsService } from '../../core/settings/settings.service';
 import { Router } from '@angular/router';
@@ -13,6 +13,8 @@ import {
   startWith,
   takeWhile,
   throttleTime,
+  tap,
+  EMPTY,
 } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -28,10 +30,14 @@ export class SessionTimerService implements OnDestroy {
   readonly remainingSeconds = signal(300);
   readonly isAboutToLock = signal(false);
 
+  private targetTimestamp = 0;
+
   constructor() {
     effect(() => {
       const _ = this.settings.timeoutSeconds();
-      this.restartTracker();
+      untracked(() => {
+        this.restartTracker();
+      });
     });
   }
 
@@ -57,44 +63,80 @@ export class SessionTimerService implements OnDestroy {
           takeUntil(this.stopTracker$),
           throttleTime(200),
           switchMap(() => {
-            this.ngZone.run(() => this.resetTimer());
-            const timeout = this.settings.timeoutSeconds();
-            return timer(5000, 1000).pipe(
+            const now = Date.now();
+
+            if (this.targetTimestamp > 0 && now > this.targetTimestamp) {
+              this.ngZone.run(() => this.lockVault());
+              return EMPTY;
+            }
+
+            this.ngZone.run(() => this.resetTarget());
+
+            return timer(0, 1000).pipe(
               takeUntil(this.stopTracker$),
-              map((tick) => timeout - 1 - tick),
-              takeWhile((remaining) => remaining >= 0)
+              map(() => {
+                const currentNow = Date.now();
+                const diff = this.targetTimestamp - currentNow;
+                const realRemaining = Math.ceil(diff / 1000);
+
+                if (realRemaining <= 0) {
+                  return 0;
+                }
+
+                return Math.min(this.settings.timeoutSeconds(), realRemaining);
+              })
             );
           })
         )
         .subscribe({
           next: (remaining) => {
             this.ngZone.run(() => {
-              this.remainingSeconds.set(remaining);
-              this.isAboutToLock.set(remaining < 60);
-              if (remaining === 0) {
+              if (this.remainingSeconds() !== remaining) {
+                this.remainingSeconds.set(remaining);
+              }
+
+              this.isAboutToLock.set(remaining < 60 && remaining > 0);
+
+              if (remaining <= 0) {
                 this.lockVault();
               }
             });
           },
         });
 
-      this.ngZone.run(() => this.resetTimer());
+      this.ngZone.run(() => this.resetTarget());
     });
   }
 
-  private resetTimer() {
-    this.remainingSeconds.set(this.settings.timeoutSeconds());
+  private resetToMax() {
+    const max = this.settings.timeoutSeconds();
+    if (this.remainingSeconds() !== max) {
+      this.remainingSeconds.set(max);
+    }
     this.isAboutToLock.set(false);
   }
 
+  private resetTarget() {
+    const now = Date.now();
+    this.targetTimestamp = now + 5000 + this.settings.timeoutSeconds() * 1000;
+    this.resetToMax();
+  }
+
   private lockVault() {
-    this.crypto.clearKeys();
+    if (this.crypto.isUnlocked()) {
+      this.crypto.clearKeys();
+    }
   }
 
   getFormattedTime(): string {
     const mins = Math.floor(this.remainingSeconds() / 60);
     const secs = this.remainingSeconds() % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  reset() {
+    this.resetTarget();
+    this.restartTracker();
   }
 
   ngOnDestroy() {

@@ -7,6 +7,7 @@ import { AuthApiService } from '../../core/api/auth-api.service';
 import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { AuthPersistenceService } from '../../core/auth/auth-persistence.service';
+import { SessionTimerService } from '../../core/auth/session-timer.service';
 import { StarfieldComponent } from '../../shared/ui/starfield/starfield.component';
 import { ToastService } from '../../shared/ui/toast/toast.service';
 
@@ -271,7 +272,8 @@ export class AuthPageComponent {
     private readonly authState: AuthStateService,
     private readonly persistence: AuthPersistenceService,
     private readonly router: Router,
-    private readonly toast: ToastService
+    private readonly toast: ToastService,
+    private readonly sessionTimer: SessionTimerService
   ) {
     this.init();
   }
@@ -366,6 +368,7 @@ export class AuthPageComponent {
                         MkWrapRk: res.MkWrapRk || null,
                       })
                       .then(() => {
+                        this.sessionTimer.reset();
                         this.toast.trigger('Vault Unlocked', true);
                         this.router.navigate(['/vault']);
                       });
