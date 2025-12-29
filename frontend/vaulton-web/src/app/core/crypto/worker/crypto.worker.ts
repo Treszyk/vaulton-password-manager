@@ -4,7 +4,7 @@ import { bytesToB64, b64ToBytes } from '../b64';
 import { zeroize } from '../zeroize';
 import { encryptSplit } from '../aesgcm-split';
 import { hkdfAesGcm256Key, hkdfHmacSha256Key, hkdfVerifierB64 } from '../hkdf';
-import { Pbkdf2KdfProvider } from '../kdf/pbkdf2-kdf';
+import { Argon2KdfProvider } from '../kdf/argon2-kdf';
 import type {
   WorkerRequest,
   WorkerMessage,
@@ -14,7 +14,7 @@ import type {
 } from './crypto.worker.types';
 import type { KdfProvider } from '../kdf/kdf';
 
-const kdfProvider: KdfProvider = new Pbkdf2KdfProvider();
+const kdfProvider: KdfProvider = new Argon2KdfProvider();
 let vaultKey: CryptoKey | null = null;
 let domainTagKey: CryptoKey | null = null;
 let pendingLoginBaseKey: CryptoKey | null = null;
@@ -81,6 +81,19 @@ addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRe
       case 'DECRYPT_ENTRY': {
         const { result, transfer } = await handleDecryptEntry(request.payload);
         postSuccess(id, result, transfer);
+        break;
+      }
+      case 'BENCHMARK_KDF': {
+        const { passwordBuffer, saltBuffer, kdfMode } = request.payload;
+        const pwdBytes = new Uint8Array(passwordBuffer);
+        const saltBytes = new Uint8Array(saltBuffer);
+        try {
+          const duration = await kdfProvider.benchmark(pwdBytes, saltBytes, kdfMode);
+          postSuccess(id, { duration });
+        } finally {
+          zeroize(pwdBytes);
+          zeroize(saltBytes);
+        }
         break;
       }
       default:

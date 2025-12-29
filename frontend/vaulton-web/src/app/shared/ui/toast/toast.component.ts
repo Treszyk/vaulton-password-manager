@@ -15,7 +15,9 @@ import { ToastService } from './toast.service';
       [class.opacity-100]="toast.show()"
       [class.translate-y-0]="toast.show()"
     >
-      <div class="px-6 py-3">
+      <div
+        class="inline-block px-6 py-3 rounded-full bg-black/80 backdrop-blur-md sm:bg-transparent sm:backdrop-blur-none transition-colors border border-white/10 sm:border-transparent"
+      >
         <p
           class="text-xs font-black uppercase tracking-[0.2em] drop-shadow-lg"
           [ngClass]="{

@@ -1,13 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  NgZone,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  AfterViewInit,
-} from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { fromEvent, Subject, takeUntil } from 'rxjs';
 
 interface Star {

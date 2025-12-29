@@ -93,8 +93,15 @@ export type WorkerRequest =
       payload: { plaintextBuffer: ArrayBuffer; aadB64: string; domain?: string };
     }
   | { type: 'DECRYPT_ENTRY'; payload: { dto: EncryptedValueDto; aadB64: string } }
-  | { type: 'CREATE_VAULT_ENTRY'; payload: CreateVaultEntryRequest };
+  | { type: 'CREATE_VAULT_ENTRY'; payload: CreateVaultEntryRequest }
+  | {
+      type: 'BENCHMARK_KDF';
+      payload: { passwordBuffer: ArrayBuffer; saltBuffer: ArrayBuffer; kdfMode: number };
+    };
 
+export type BenchmarkResult = {
+  duration: number;
+};
 export type WorkerResponseEnvelope<T = unknown> =
   | { id: string; ok: true; result: T }
   | { id: string; ok: false; error: string };

@@ -38,8 +38,8 @@ export class AuthCryptoService {
       }
     };
 
-    this.worker.onerror = (err) => {
-      this.rejectAllPending(new Error('Crypto Worker crashed'));
+    this.worker.onerror = (err: ErrorEvent) => {
+      this.rejectAllPending(new Error(`Crypto Worker crashed: ${err.message || 'Unknown error'}`));
       this.terminate();
     };
 
@@ -84,7 +84,6 @@ export class AuthCryptoService {
     try {
       const res = await this.postToWorker<{
         registerBody: RegisterRequest;
-        loginBodyForSwagger: string;
       }>('REGISTER', { accountId, passwordBuffer, kdfMode, schemaVer }, [passwordBuffer]);
       return res;
     } finally {
@@ -190,6 +189,31 @@ export class AuthCryptoService {
     this.isUnlocked.set(true);
   }
 
+  async benchmarkKdf(password: string, salt: Uint8Array, kdfMode: number): Promise<number> {
+    const pwdBytes = new TextEncoder().encode(password);
+    const passwordBuffer = pwdBytes.buffer;
+    const saltBuffer = salt.buffer.slice(salt.byteOffset, salt.byteOffset + salt.byteLength);
+
+    try {
+      const res = await this.postToWorker<{ duration: number }>(
+        'BENCHMARK_KDF',
+        {
+          passwordBuffer,
+          saltBuffer,
+          kdfMode,
+        },
+        [passwordBuffer, saltBuffer]
+      );
+      return res.duration;
+    } catch (err: any) {
+      throw err;
+    } finally {
+      try {
+        pwdBytes.fill(0);
+      } catch {}
+    }
+  }
+
   async clearKeys(): Promise<void> {
     await this.postToWorker('CLEAR_KEYS', {});
     this.isUnlocked.set(false);
@@ -260,7 +284,11 @@ export class AuthCryptoService {
       }, 60000);
 
       this.pendingRequests.set(id, { resolve, reject, timeoutId });
-      this.worker!.postMessage({ id, payload: { type, payload } }, transfer || []);
+      try {
+        this.worker!.postMessage({ id, payload: { type, payload } }, transfer || []);
+      } catch (e) {
+        reject(e);
+      }
     });
   }
 }

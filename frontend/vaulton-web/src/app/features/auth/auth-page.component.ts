@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -11,6 +11,7 @@ import { SessionTimerService } from '../../core/auth/session-timer.service';
 import { StarfieldComponent } from '../../shared/ui/starfield/starfield.component';
 import { ToastService } from '../../shared/ui/toast/toast.service';
 import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-meter.component';
+import { zeroize } from '../../core/crypto/zeroize';
 
 @Component({
   selector: 'app-auth-page',
@@ -111,7 +112,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                     <input
                       type="password"
                       [ngModel]="password()"
-                      (ngModelChange)="password.set($event)"
+                      [disabled]="isWorking() || isBenchmarking()"
+                      (ngModelChange)="password.set($event); isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
                       class="w-full pl-5 pr-11 py-4 bg-white/5 border border-white/10 hover:bg-white/[0.08] focus:bg-white/[0.1] focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
                       placeholder="••••••••••••"
                       (keyup.enter)="onSubmit()"
@@ -150,6 +152,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                       type="text"
                       [ngModel]="accountId()"
                       readonly
+                      [disabled]="isWorking() || isBenchmarking()"
                       class="w-full pl-5 pr-12 py-4 bg-white/[0.03] border border-white/10 rounded-2xl transition-all text-white/60"
                       placeholder="Generating..."
                     />
@@ -168,6 +171,10 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
+                    <p class="absolute top-[105%] left-1 text-[9px] font-medium text-orange-400/80 tracking-wide pointer-events-none whitespace-nowrap opacity-0 animate-fade-in" 
+                       [class.opacity-100]="accountId() && mode() === 'REGISTER'">
+                      Please save this ID safely; it is your only identifier.
+                    </p>
                   </div>
                 </div>
 
@@ -177,7 +184,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                     <input
                       type="password"
                       [ngModel]="password()"
-                      (ngModelChange)="password.set($event)"
+                      [disabled]="isWorking() || isBenchmarking()"
+                      (ngModelChange)="password.set($event); isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
                       class="w-full pl-5 pr-11 py-4 bg-white/5 border border-white/10 hover:bg-white/[0.08] focus:bg-white/[0.1] focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
                       placeholder="••••••••••••"
                     />
@@ -196,31 +204,103 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
 
                 <div class="kdf-container mt-2" [class.expanded]="mode() === 'REGISTER'">
                   <div class="min-h-0 space-y-3">
-                    <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Vault Hardening Grade</label>
-                    <div class="flex gap-2">
-                      <div class="kdf-option group/kdf tooltip-trigger tooltip-full" 
-                           [class.active]="kdfMode() === 1"
-                           (click)="kdfMode.set(1)"
-                           data-tooltip="Balanced performance and security.">
-                        <div class="flex items-center gap-1.5">
-                          <span class="grade-title">Standard</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/kdf:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <span class="grade-desc">Balanced</span>
+                    <div class="flex items-center justify-between ml-1 mb-1 relative">
+                      <div class="flex items-center gap-1.5 group/info cursor-help tooltip-full" 
+                           data-tooltip="This setting influences both vault security and login time.">
+                        <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 cursor-help">Vault Hardening Grade</label>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/info:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                       </div>
-                      <div class="kdf-option group/kdf tooltip-trigger tooltip-full" 
-                           [class.active]="kdfMode() === 2"
-                           (click)="kdfMode.set(2)"
-                           data-tooltip="Stronger security (Recommended). May take longer on slower devices.">
-                        <div class="flex items-center gap-1.5">
-                          <span class="grade-title">Hardened</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/kdf:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      
+                      <div class="flex items-center gap-2 h-5">
+                        <span 
+                          *ngIf="isBenchmarking()"
+                          class="text-[7px] sm:text-[9px] font-black uppercase tracking-wider text-vault-purple-bright animate-pulse"
+                        >
+                          Benchmarking {{ benchmarkStatus() }}...
+                        </span>
+
+                        <button 
+                          *ngIf="isOptimized() && !isBenchmarking()"
+                          (click)="onOptimizeKdf()"
+                          class="group/rerun flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-white/5 transition-all animate-fade-in"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 text-vault-purple transition-transform group-hover/rerun:rotate-180 duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                           </svg>
+                          <span class="text-[8px] font-black uppercase tracking-widest text-vault-purple/70 group-hover/rerun:text-vault-purple transition-colors">Rerun</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="relative py-1 overflow-visible">
+                       <div class="flex gap-2 transition-all duration-700 ease-in-out -m-4 p-4" 
+                            [class.opacity-0]="!isOptimized() && !isBenchmarking()"
+                            [class.scale-[0.94]]="!isOptimized() && !isBenchmarking()"
+                           [class.pointer-events-none]="!isOptimized() && !isBenchmarking()">
+                        <div class="kdf-option group/kdf tooltip-trigger tooltip-full relative" 
+                             [class.active]="kdfMode() === 1"
+                             (click)="kdfMode.set(1)"
+                             data-tooltip="Strong protection (128MB / 3 Iterations). Recommended for most devices.">
+                          <div class="flex items-center gap-1.5">
+                            <span class="grade-title">Standard</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/kdf:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <span class="grade-desc" *ngIf="!standardTime()">Fast & Secure</span>
+                          <span class="grade-desc" *ngIf="standardTime()">Estimated time: {{ standardTime()?.toFixed(1) }}s</span>
+                          
+                          <!-- Timing Badge -->
+                          <div *ngIf="standardTime() && !isBenchmarking()" 
+                               class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-tighter"
+                               [class.text-green-400]="recommendedMode() === 1"
+                               [class.text-orange-400]="recommendedMode() !== 1 && standardTime()! <= 4.0"
+                               [class.text-red-400]="recommendedMode() !== 1 && standardTime()! > 4.0">
+                            {{ recommendedMode() === 1 ? 'RECOMMENDED' : (standardTime()! > 4.0 ? 'VERY SLOW' : 'GOOD') }}
+                          </div>
                         </div>
-                        <span class="grade-desc">Higher Security</span>
+                        
+                        <div class="kdf-option group/kdf tooltip-trigger tooltip-full relative" 
+                             [class.active]="kdfMode() === 2"
+                             (click)="kdfMode.set(2)"
+                             data-tooltip="Extreme protection (256MB / 3 Iterations). Best for modern desktops.">
+                          <div class="flex items-center gap-1.5">
+                            <span class="grade-title">Hardened</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/kdf:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <span class="grade-desc" *ngIf="!hardenedTime()">Maximum Resistance</span>
+                          <span class="grade-desc" *ngIf="hardenedTime()">Estimated time: {{ hardenedTime()?.toFixed(1) }}s</span>
+  
+                          <!-- Timing Badge / Warning -->
+                          <div *ngIf="hardenedTime() && !isBenchmarking()" 
+                               class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-tighter"
+                               [class.text-green-400]="recommendedMode() === 2"
+                               [class.text-orange-400]="recommendedMode() !== 2 && hardenedTime()! <= 3.25"
+                               [class.text-red-400]="recommendedMode() !== 2 && hardenedTime()! > 3.25">
+                            {{ recommendedMode() === 2 ? 'RECOMMENDED' : (hardenedTime()! > 3.25 ? 'VERY SLOW' : 'GOOD') }}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div *ngIf="!isOptimized() && !isBenchmarking()" 
+                           class="absolute inset-x-0 inset-y-0 z-10 flex flex-col items-center justify-center animate-fade-in pointer-events-none">
+                        <div class="flex flex-col items-center justify-center p-4 pointer-events-auto">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/80 mb-4 whitespace-nowrap drop-shadow-md">
+                            Benchmark required to select grade
+                          </p>
+                          <button 
+                            (click)="onOptimizeKdf()"
+                            class="flex items-center gap-2.5 px-6 py-3 bg-vault-purple hover:bg-vault-purple-bright text-white rounded-2xl transition-all active:scale-95 shadow-2xl shadow-vault-purple/40 border border-white/20"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            <span class="text-[10px] font-black uppercase tracking-widest">Run Benchmark</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -232,8 +312,9 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
           <div class="flex flex-col gap-8 relative z-20">
             <button
               (click)="onSubmit()"
-              [disabled]="!accountId() || !password() || isWorking()"
+              [disabled]="!accountId() || !password() || (mode() === 'REGISTER' && !isOptimized()) || isWorking()"
               class="btn-primary w-full py-4.5 relative overflow-hidden group rounded-2xl transition-all active:scale-[0.98]"
+              [class.opacity-50]="mode() === 'REGISTER' && !isOptimized()"
             >
               <span *ngIf="!isWorking()" class="relative z-10 uppercase tracking-[0.4em] text-xs font-black">
                 {{ mode() === 'LOGIN' ? 'Unlock Vault' : 'Initialize Vault' }}
@@ -249,8 +330,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
             </button>
 
             <p *ngIf="mode() === 'REGISTER'" 
-               class="text-white/40 text-[10px] font-black uppercase tracking-[0.2em] text-center sm:hidden animate-fade-in -mt-4">
-              Start your vault
+               class="text-white/40 text-sm font-medium text-center sm:hidden animate-fade-in -mt-4">
+              Start your vault.
             </p>
           </div>
         </div>
@@ -276,6 +357,19 @@ export class AuthPageComponent {
   cryptoSchemaVer = signal<number>(1);
 
   isWorking = signal<boolean>(false);
+  isBenchmarking = signal<boolean>(false);
+  isOptimized = signal<boolean>(false);
+  benchmarkStatus = signal<string>('');
+
+  standardTime = signal<number | null>(null);
+  hardenedTime = signal<number | null>(null);
+
+  recommendedMode = computed(() => {
+    const h = this.hardenedTime();
+    if (h && h <= 4.0) return 2;
+    if (this.standardTime()) return 1;
+    return null;
+  });
 
   constructor(
     private readonly api: AuthApiService,
@@ -310,6 +404,9 @@ export class AuthPageComponent {
   setMode(m: 'LOGIN' | 'REGISTER'): void {
     this.mode.set(m);
     this.password.set('');
+    this.isOptimized.set(false);
+    this.standardTime.set(null);
+    this.hardenedTime.set(null);
     if (m === 'REGISTER') {
       this.refreshAccountId();
     } else {
@@ -325,6 +422,59 @@ export class AuthPageComponent {
       },
       error: () => this.reportError('Server Unreachable'),
     });
+  }
+
+  async onOptimizeKdf(): Promise<void> {
+    if (this.isBenchmarking()) return;
+
+    if (!this.password()) {
+      this.toast.trigger('Please type a password first to benchmark', false);
+      return;
+    }
+
+    this.isBenchmarking.set(true);
+    this.standardTime.set(null);
+    this.hardenedTime.set(null);
+    const pwd = this.password();
+    const dummySalt = new Uint8Array(16);
+    const HARDENED_THRESHOLD_MS = 4000;
+    const STANDARD_SKIP_HARDENED_THRESHOLD = 4500;
+
+    try {
+      this.benchmarkStatus.set('Standard');
+      const t1 = await this.crypto.benchmarkKdf(pwd, dummySalt, 1);
+      this.standardTime.set(t1 / 1000);
+
+      if (t1 > STANDARD_SKIP_HARDENED_THRESHOLD) {
+        this.kdfMode.set(1);
+        this.isOptimized.set(true);
+        this.toast.trigger('Optimization complete! Standard mode selected for performance.', true);
+        return;
+      }
+
+      this.benchmarkStatus.set('Hardened');
+      const t2 = await this.crypto.benchmarkKdf(pwd, dummySalt, 2);
+      this.hardenedTime.set(t2 / 1000);
+
+      if (t2 < HARDENED_THRESHOLD_MS) {
+        this.kdfMode.set(2);
+        this.toast.trigger('Optimization complete! Hardened mode selected.', true);
+      } else {
+        this.kdfMode.set(1);
+        this.toast.trigger(
+          'Optimization complete! Standard mode selected for responsiveness.',
+          true
+        );
+      }
+      this.isOptimized.set(true);
+    } catch (e: any) {
+      console.error('[AuthPage] Benchmark failed trace:', e);
+      this.toast.trigger('Optimization failed: ' + (e.message || e), true);
+    } finally {
+      zeroize(dummySalt);
+      this.isBenchmarking.set(false);
+      this.benchmarkStatus.set('');
+    }
   }
 
   private reportError(msg: string): void {
@@ -429,7 +579,13 @@ export class AuthPageComponent {
         });
       })
       .catch((e) => {
-        this.reportError('Crypto Error');
+        if (kdfMode === 2) {
+          this.kdfMode.set(1);
+          this.toast.trigger('Hardware Lag: Reverting to Standard mode', false);
+          this.isWorking.set(false);
+        } else {
+          this.reportError('Crypto Error');
+        }
       });
   }
 }
