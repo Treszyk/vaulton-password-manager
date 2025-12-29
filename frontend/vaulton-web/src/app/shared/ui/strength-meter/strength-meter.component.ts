@@ -2,7 +2,8 @@ import { Component, Input, OnChanges, SimpleChanges, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { zxcvbn, zxcvbnOptions } from '@zxcvbn-ts/core';
 import { adjacencyGraphs, dictionary as commonDictionary } from '@zxcvbn-ts/language-common';
-import { translations, dictionary as enDictionary } from '@zxcvbn-ts/language-en';
+import { translations as enTranslations, dictionary as enDictionary } from '@zxcvbn-ts/language-en';
+import { translations as plTranslations, dictionary as plDictionary } from '@zxcvbn-ts/language-pl';
 
 @Component({
   selector: 'app-strength-meter',
@@ -46,9 +47,6 @@ import { translations, dictionary as enDictionary } from '@zxcvbn-ts/language-en
         [ngClass]="colorClass"
       >
         <span>{{ label() }}</span>
-        <span *ngIf="crackTime()" class="opacity-60 normal-case tracking-normal font-bold">{{
-          crackTime()
-        }}</span>
       </div>
     </div>
   `,
@@ -59,15 +57,18 @@ export class StrengthMeterComponent implements OnChanges {
 
   score = signal(0);
   label = signal('Empty');
-  crackTime = signal('');
 
   constructor() {
     const options = {
-      translations,
+      translations: {
+        ...enTranslations,
+        ...plTranslations,
+      },
       graphs: adjacencyGraphs,
       dictionary: {
         ...commonDictionary,
         ...enDictionary,
+        ...plDictionary,
       },
     };
     zxcvbnOptions.setOptions(options);
@@ -83,15 +84,22 @@ export class StrengthMeterComponent implements OnChanges {
     if (!pwd || !this.visible) {
       this.score.set(0);
       this.label.set(!pwd ? 'Empty' : 'Hidden');
-      this.crackTime.set('');
       return;
     }
 
     const result = zxcvbn(pwd);
-    this.score.set(result.score);
-    this.crackTime.set(result.crackTimesDisplay.offlineSlowHashing1e4PerSecond);
+    const entropy = result.guessesLog10;
 
-    switch (result.score) {
+    let score = 0;
+    if (entropy < 7) score = 0;
+    else if (entropy < 9) score = 1;
+    else if (entropy < 11) score = 2;
+    else if (entropy < 13) score = 3;
+    else score = 4;
+
+    this.score.set(score);
+
+    switch (score) {
       case 0:
         this.label.set('Very Weak');
         break;
@@ -105,7 +113,7 @@ export class StrengthMeterComponent implements OnChanges {
         this.label.set('Good');
         break;
       case 4:
-        this.label.set('Excellent');
+        this.label.set('Strong');
         break;
     }
   }
