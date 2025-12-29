@@ -42,13 +42,16 @@ namespace Infrastructure.Services.Auth
 				return RegisterResult.Fail(RegisterError.AccountExists);
 
 			var sVerifier = new byte[CryptoSizes.SaltLen];
+			var sAdminVerifier = new byte[CryptoSizes.SaltLen];
 			RandomNumberGenerator.Fill(sVerifier);
+			RandomNumberGenerator.Fill(sAdminVerifier);
 
 			var storedVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.Verifier, sVerifier);
+			var storedAdminVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.AdminVerifier, sAdminVerifier);
 
 			try
 			{
-				var user = CreateUserFromRegisterCommand(cmd, sVerifier, storedVerifier);
+				var user = CreateUserFromRegisterCommand(cmd, sVerifier, storedVerifier, sAdminVerifier, storedAdminVerifier);
 
 				db.Users.Add(user);
 				await db.SaveChangesAsync();
@@ -58,6 +61,7 @@ namespace Infrastructure.Services.Auth
 			finally
 			{
 				CryptographicOperations.ZeroMemory(cmd.Verifier);
+				CryptographicOperations.ZeroMemory(cmd.AdminVerifier);
 			}
 		}
 		public async Task<LoginResult> LoginAsync(LoginCommand cmd)
@@ -191,8 +195,140 @@ namespace Infrastructure.Services.Auth
 			}
 		}
 
+		public async Task<WrapsResult> GetWrapsAsync(WrapsCommand cmd)
+		{
+			var validationError = validator.ValidateWraps(cmd);
+			if (validationError is not null)
+				return WrapsResult.Fail(validationError.Value);
+
+			try
+			{
+				var now = DateTime.UtcNow;
+				var user = await db.Users.SingleOrDefaultAsync(u => u.Id == cmd.AccountId);
+				if (user is null)
+				{
+					DoDummyVerifierWork();
+					return WrapsResult.Fail(WrapsError.AccountNotFound);
+				}
+
+				if (lockoutPolicy.IsLockedOut(user, now))
+				{
+					return WrapsResult.Fail(WrapsError.InvalidAdminVerifier);
+				}
+
+				var computed = cryptoHelpers.ComputeStoredVerifier(cmd.AdminVerifier, user.S_AdminVerifier);
+				var ok = false;
+
+				try
+				{
+					ok = user.AdminVerifier.Length == computed.Length &&
+						 CryptographicOperations.FixedTimeEquals(user.AdminVerifier, computed);
+				}
+				finally
+				{
+					CryptographicOperations.ZeroMemory(computed);
+				}
+
+				if (!ok)
+				{
+					lockoutPolicy.RegisterFailedLogin(user, now);
+					await db.SaveChangesAsync();
+					return WrapsResult.Fail(WrapsError.InvalidAdminVerifier);
+				}
+
+				lockoutPolicy.RegisterSuccessfulLogin(user, now);
+				await db.SaveChangesAsync();
+
+				return WrapsResult.Ok(user.MkWrapPwd, user.MkWrapRk);
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(cmd.AdminVerifier);
+			}
+		}
+
+		public async Task<ChangePasswordResult> ChangePasswordAsync(ChangePasswordCommand cmd)
+		{
+			var validationError = validator.ValidateChangePassword(cmd);
+			if (validationError is not null)
+				return ChangePasswordResult.Fail(validationError.Value);
+
+			try
+			{
+				var now = DateTime.UtcNow;
+				var user = await db.Users.SingleOrDefaultAsync(u => u.Id == cmd.AccountId);
+				if (user is null)
+				{
+					DoDummyVerifierWork();
+					return ChangePasswordResult.Fail(ChangePasswordError.AccountNotFound);
+				}
+
+				if (lockoutPolicy.IsLockedOut(user, now))
+				{
+					return ChangePasswordResult.Fail(ChangePasswordError.InvalidAdminVerifier);
+				}
+
+				var computed = cryptoHelpers.ComputeStoredVerifier(cmd.AdminVerifier, user.S_AdminVerifier);
+				var ok = false;
+
+				try
+				{
+					ok = user.AdminVerifier.Length == computed.Length &&
+						 CryptographicOperations.FixedTimeEquals(user.AdminVerifier, computed);
+				}
+				finally
+				{
+					CryptographicOperations.ZeroMemory(computed);
+				}
+
+				if (!ok)
+				{
+					lockoutPolicy.RegisterFailedLogin(user, now);
+					await db.SaveChangesAsync();
+					return ChangePasswordResult.Fail(ChangePasswordError.InvalidAdminVerifier);
+				}
+
+				lockoutPolicy.RegisterSuccessfulLogin(user, now);
+
+				var sVerifier = new byte[CryptoSizes.SaltLen];
+				var sAdminVerifier = new byte[CryptoSizes.SaltLen];
+				RandomNumberGenerator.Fill(sVerifier);
+				RandomNumberGenerator.Fill(sAdminVerifier);
+
+				var storedVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.NewVerifier, sVerifier);
+				var storedAdminVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.NewAdminVerifier, sAdminVerifier);
+
+				user.Verifier = storedVerifier;
+				user.S_Verifier = sVerifier;
+				user.AdminVerifier = storedAdminVerifier;
+				user.S_AdminVerifier = sAdminVerifier;
+
+				user.S_Pwd = cmd.NewS_Pwd;
+				user.KdfMode = cmd.NewKdfMode;
+				user.MkWrapPwd = cmd.NewMkWrapPwd;
+				user.MkWrapRk = cmd.NewMkWrapRk;
+				user.CryptoSchemaVer = cmd.CryptoSchemaVer;
+				user.UpdatedAt = DateTime.UtcNow;
+
+				await db.SaveChangesAsync();
+
+				return ChangePasswordResult.Ok();
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(cmd.AdminVerifier);
+				CryptographicOperations.ZeroMemory(cmd.NewVerifier);
+				CryptographicOperations.ZeroMemory(cmd.NewAdminVerifier);
+			}
+		}
+
 		// these methods were made purely to increase readability of the main async ones
-		private static User CreateUserFromRegisterCommand(RegisterCommand cmd, byte[] sVerifier, byte[] verifier)
+		private static User CreateUserFromRegisterCommand(
+			RegisterCommand cmd, 
+			byte[] sVerifier, 
+			byte[] verifier,
+			byte[] sAdminVerifier,
+			byte[] adminVerifier)
 		{
 			var now = DateTime.UtcNow;
 
@@ -201,6 +337,8 @@ namespace Infrastructure.Services.Auth
 				Id = cmd.AccountId,
 				Verifier = verifier,
 				S_Verifier = sVerifier,
+				AdminVerifier = adminVerifier,
+				S_AdminVerifier = sAdminVerifier,
 				S_Pwd = cmd.S_Pwd,
 				KdfMode = cmd.KdfMode,
 

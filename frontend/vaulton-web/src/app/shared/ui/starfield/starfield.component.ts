@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, NgZone, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { fromEvent, Subject, takeUntil } from 'rxjs';
-
+// go back here sometime and implement "prefers-reduced-motion" media query
 interface Star {
   x: number;
   y: number;

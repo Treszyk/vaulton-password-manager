@@ -46,6 +46,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		var cmd = new RegisterCommand(
 			request.AccountId,
 			request.Verifier,
+			request.AdminVerifier,
 			request.S_Pwd,
 			(KdfMode)request.KdfMode,
 			mkWrapPwd,
@@ -109,6 +110,62 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 				? new EncryptedValueDto(result.MkWrapRk.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag) 
 				: null
 		));
+	}
+
+	[Authorize]
+	[HttpPost("wraps")]
+	public async Task<ActionResult<WrapsResponse>> GetWraps([FromBody] WrapsRequest request)
+	{
+		if (!User.TryGetAccountId(out var accountId))
+			return Unauthorized();
+
+		var cmd = new WrapsCommand(accountId, request.AdminVerifier);
+		var result = await _auth.GetWrapsAsync(cmd);
+
+		if (!result.Success)
+		{
+			if (result.Error == WrapsError.InvalidCryptoBlob)
+				return BadRequest(new { message = "Invalid crypto blob sizes." });
+
+			return Unauthorized();
+		}
+
+		return Ok(new WrapsResponse(new EncryptedValueDto(result.MkWrapPwd!.Nonce, result.MkWrapPwd.CipherText, result.MkWrapPwd.Tag)));
+	}
+
+	[Authorize]
+	[HttpPost("change-password")]
+	public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+	{
+		if (!User.TryGetAccountId(out var accountId))
+			return Unauthorized();
+
+		var cmd = new ChangePasswordCommand(
+			accountId,
+			request.AdminVerifier,
+			request.NewVerifier,
+			request.NewAdminVerifier,
+			request.NewS_Pwd,
+			(KdfMode)request.NewKdfMode,
+			request.NewMkWrapPwd.ToDomain(),
+			request.NewMkWrapRk?.ToDomain(),
+			request.CryptoSchemaVer
+		);
+
+		var result = await _auth.ChangePasswordAsync(cmd);
+
+		if (!result.Success)
+		{
+			return result.Error switch
+			{
+				ChangePasswordError.InvalidKdfMode => BadRequest(new { message = "Invalid KDF mode." }),
+				ChangePasswordError.UnsupportedCryptoSchema => BadRequest(new { message = "Unsupported crypto schema version." }),
+				ChangePasswordError.InvalidCryptoBlob => BadRequest(new { message = "Invalid crypto blob sizes." }),
+				_ => Unauthorized()
+			};
+		}
+
+		return NoContent();
 	}
 
 	[HttpPost("refresh")]

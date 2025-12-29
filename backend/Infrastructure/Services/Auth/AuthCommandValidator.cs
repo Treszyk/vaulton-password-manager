@@ -34,5 +34,38 @@ namespace Infrastructure.Services.Auth
 
 			return null;
 		}
+
+		public WrapsError? ValidateWraps(WrapsCommand cmd)
+		{
+			if (cmd.AdminVerifier.Length != CryptoSizes.VerifierLen)
+				return WrapsError.InvalidCryptoBlob;
+
+			return null;
+		}
+
+		public ChangePasswordError? ValidateChangePassword(ChangePasswordCommand cmd)
+		{
+			if (cmd.CryptoSchemaVer != 1)
+				return ChangePasswordError.UnsupportedCryptoSchema;
+
+			if (cmd.AdminVerifier.Length != CryptoSizes.VerifierLen ||
+				cmd.NewVerifier.Length != CryptoSizes.VerifierLen ||
+				cmd.NewAdminVerifier.Length != CryptoSizes.VerifierLen ||
+				cmd.NewS_Pwd.Length != CryptoSizes.SaltLen)
+			{
+				return ChangePasswordError.InvalidCryptoBlob;
+			}
+
+			if (!CryptoValidators.IsValidEncryptedValue(cmd.NewMkWrapPwd, CryptoSizes.MkLen))
+				return ChangePasswordError.InvalidCryptoBlob;
+
+			if (cmd.NewMkWrapRk is not null && !CryptoValidators.IsValidEncryptedValue(cmd.NewMkWrapRk, CryptoSizes.MkLen))
+				return ChangePasswordError.InvalidCryptoBlob;
+
+			if (cmd.NewKdfMode is not KdfMode.Default and not KdfMode.Strong)
+				return ChangePasswordError.InvalidKdfMode;
+
+			return null;
+		}
 	}
 }

@@ -18,6 +18,11 @@ public sealed record RegisterRequest(
 	byte[] Verifier,
 
 	[param: Required]
+	[param: Length(CryptoSizes.VerifierLen, CryptoSizes.VerifierLen)]
+	[property: JsonPropertyName("AdminVerifier")]
+	byte[] AdminVerifier,
+
+	[param: Required]
 	[param: Length(CryptoSizes.SaltLen, CryptoSizes.SaltLen)]
 	[property: JsonPropertyName("S_Pwd")]
 	byte[] S_Pwd,

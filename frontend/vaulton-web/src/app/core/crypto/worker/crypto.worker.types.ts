@@ -5,6 +5,7 @@ export type EncryptedValueDto = { Nonce: string; CipherText: string; Tag: string
 export type RegisterRequest = {
   AccountId: string;
   Verifier: string;
+  AdminVerifier: string;
   S_Pwd: string;
   KdfMode: number;
   MKWrapPwd: EncryptedValueDto;

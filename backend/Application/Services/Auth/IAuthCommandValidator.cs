@@ -7,4 +7,6 @@ public interface IAuthCommandValidator
 {
 	RegisterError? ValidateRegister(RegisterCommand cmd);
 	LoginError? ValidateLogin(LoginCommand cmd);
+	WrapsError? ValidateWraps(WrapsCommand cmd);
+	ChangePasswordError? ValidateChangePassword(ChangePasswordCommand cmd);
 }

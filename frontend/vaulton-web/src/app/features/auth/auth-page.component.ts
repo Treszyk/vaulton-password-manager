@@ -241,7 +241,7 @@ import { zeroize } from '../../core/crypto/zeroize';
                         <div class="kdf-option group/kdf tooltip-trigger tooltip-full relative" 
                              [class.active]="kdfMode() === 1"
                              (click)="kdfMode.set(1)"
-                             data-tooltip="Strong protection (128MB / 3 Iterations). Recommended for most devices.">
+                             data-tooltip="Standard protection. Recommended for most devices.">
                           <div class="flex items-center gap-1.5">
                             <span class="grade-title">Standard</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/kdf:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -264,7 +264,7 @@ import { zeroize } from '../../core/crypto/zeroize';
                         <div class="kdf-option group/kdf tooltip-trigger tooltip-full relative" 
                              [class.active]="kdfMode() === 2"
                              (click)="kdfMode.set(2)"
-                             data-tooltip="Extreme protection (256MB / 3 Iterations). Best for modern desktops.">
+                             data-tooltip="Strong protection. Best for modern desktops.">
                           <div class="flex items-center gap-1.5">
                             <span class="grade-title">Hardened</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/kdf:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">

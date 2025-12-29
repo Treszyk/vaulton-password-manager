@@ -132,6 +132,7 @@ async function handleRegister({
   try {
     const hkdfBaseKey = await kdfProvider.deriveHkdfBaseKey(password, sPwd, kdfMode);
     const verifierB64 = await hkdfVerifierB64(hkdfBaseKey, 'vaulton/verifier');
+    const adminVerifierB64 = await hkdfVerifierB64(hkdfBaseKey, 'vaulton/admin');
     const kekKey = await hkdfAesGcm256Key(hkdfBaseKey, 'vaulton/kek', ['encrypt']);
 
     mkBytes = crypto.getRandomValues(new Uint8Array(32));
@@ -153,6 +154,7 @@ async function handleRegister({
     const registerBody: RegisterRequest = {
       AccountId: accountId,
       Verifier: verifierB64,
+      AdminVerifier: adminVerifierB64,
       S_Pwd: sPwdB64,
       KdfMode: kdfMode,
       MKWrapPwd: mkWrapPwd,

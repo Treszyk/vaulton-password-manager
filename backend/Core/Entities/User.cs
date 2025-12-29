@@ -10,6 +10,10 @@ public class User
 	public required byte[] Verifier { get; set; }    // PBKDF2+pepper hash of K_vrf (password-derived verifier)
 	public required byte[] S_Verifier { get; set; }
 
+	// Admin (Elevated actions)
+	public required byte[] AdminVerifier { get; set; } // PBKDF2+pepper hash of K_adm (password-derived admin verifier)
+	public required byte[] S_AdminVerifier { get; set; }
+
 	// Initial KDF salt
 	public required byte[] S_Pwd { get; set; }
 

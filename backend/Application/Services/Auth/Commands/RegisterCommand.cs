@@ -5,6 +5,7 @@ namespace Application.Services.Auth.Commands;
 public sealed record RegisterCommand(
 	Guid AccountId,
 	byte[] Verifier,
+	byte[] AdminVerifier,
 	byte[] S_Pwd,
 	KdfMode KdfMode,
 	EncryptedValue MkWrapPwd,

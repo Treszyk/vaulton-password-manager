@@ -12,4 +12,6 @@ public interface IAuthService
 	Task LogoutAsync(string refreshToken);
 	Task LogoutAllAsync(Guid accountId);
 	Task<PreLoginResult> PreLoginAsync(PreLoginCommand cmd);
+	Task<WrapsResult> GetWrapsAsync(WrapsCommand cmd);
+	Task<ChangePasswordResult> ChangePasswordAsync(ChangePasswordCommand cmd);
 }
