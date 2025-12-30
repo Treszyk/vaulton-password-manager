@@ -7,6 +7,7 @@ import {
   QueryList,
   ViewChildren,
   ElementRef,
+  viewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -20,11 +21,12 @@ import { VaultDataService } from '../vault/vault-data.service';
 import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 import { AuthApiService } from '../../core/api/auth-api.service';
 import { ToastService } from '../../shared/ui/toast/toast.service';
+import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-meter.component';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, StrengthMeterComponent],
   host: {
     class: 'flex-1 min-h-0 flex flex-col',
   },
@@ -374,6 +376,12 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                           (ngModelChange)="isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
                           class="w-full pl-5 pr-5 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
                           placeholder="••••••••">
+
+                        <app-strength-meter
+                          [password]="rekeyNewPassword"
+                          [visible]="!!rekeyNewPassword"
+                          class="block w-full mt-2"
+                        ></app-strength-meter>
                      </div>
                      <div class="space-y-2 animate-fade-in" *ngIf="rekeyNewPassword">
                         <label class="text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Confirm New Password</label>
@@ -456,16 +464,34 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
     
                           <div *ngIf="!isOptimized() && !isBenchmarking()" 
                                class="absolute inset-x-0 inset-y-0 z-10 flex flex-col items-center justify-center animate-fade-in pointer-events-none">
-                            <div class="flex flex-col items-center justify-center p-4 pointer-events-auto">
+                            <div class="flex flex-col items-center justify-center p-4 pointer-events-auto w-full">
+                              <p class="text-[0.625rem] md:text-[0.6875rem] font-bold uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
+                                 [class.text-white/80]="isPasswordStrong()"
+                                 [class.text-red-400]="!isPasswordStrong()">
+                                {{ isPasswordStrong() ? 'Benchmark required to select grade' : 'Minimum "Fair" strength required' }}
+                              </p>
+                              
                               <button 
                                 (click)="onOptimizeKdf()"
-                                [disabled]="!rekeyNewPassword"
-                                class="flex items-center gap-2.5 px-6 py-3 bg-vault-purple hover:bg-vault-purple-bright text-white rounded-2xl transition-all active:scale-95 shadow-2xl shadow-vault-purple/40 border border-white/20 disabled:opacity-50 disabled:pointer-events-none"
+                                [disabled]="!rekeyNewPassword || !isPasswordStrong()"
+                                class="flex items-center gap-2.5 px-6 py-3 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-white/20 disabled:opacity-50 disabled:pointer-events-none"
+                                [class.bg-vault-purple]="isPasswordStrong()"
+                                [class.hover:bg-vault-purple-bright]="isPasswordStrong()"
+                                [class.shadow-vault-purple/40]="isPasswordStrong()"
+                                [class.bg-red-600]="!isPasswordStrong()"
+                                [class.border-red-400/50]="!isPasswordStrong()"
+                                [class.animate-pulse]="!isPasswordStrong()"
+                                [class.shadow-red-600/50]="!isPasswordStrong()"
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                                <svg *ngIf="isPasswordStrong()" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                                   <path d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
-                                <span class="text-[0.625rem] font-black uppercase tracking-widest">Benchmark & Select</span>
+                                <svg *ngIf="!isPasswordStrong()" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <span class="text-[0.625rem] font-black uppercase tracking-widest leading-none">
+                                  {{ isPasswordStrong() ? 'Benchmark & Select' : 'Weak Password' }}
+                                </span>
                               </button>
                             </div>
                           </div>
@@ -475,7 +501,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 
                      <button 
                       (click)="updateMasterKey()"
-                      [disabled]="isRekeyBusy() || !isOptimized() || isRekeySuccess()"
+                      [disabled]="isRekeyBusy() || !isOptimized() || isRekeySuccess() || !isPasswordStrong()"
                       class="w-full py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg"
                       [class.bg-vault-purple]="!isRekeySuccess()"
                       [class.hover:bg-vault-purple-bright]="!isRekeySuccess()"
@@ -525,6 +551,9 @@ export class SettingsComponent implements OnInit {
   protected readonly authState = inject(AuthStateService);
   protected readonly vaultData = inject(VaultDataService);
   private readonly route = inject(ActivatedRoute);
+
+  strengthMeter = viewChild(StrengthMeterComponent);
+  isPasswordStrong = computed(() => (this.strengthMeter()?.score() ?? 0) >= 2);
 
   activeTab = signal<'GENERAL' | 'SECURITY'>('GENERAL');
   accountId = signal<string>('');
@@ -713,6 +742,11 @@ export class SettingsComponent implements OnInit {
       return;
     }
 
+    if (!this.isPasswordStrong()) {
+      this.toast.trigger('Password too weak', false);
+      return;
+    }
+
     if (this.rekeyNewPassword !== this.rekeyConfirmPassword) {
       this.toast.trigger('Passwords do not match', false);
       return;
@@ -772,6 +806,11 @@ export class SettingsComponent implements OnInit {
 
     if (this.rekeyOldPassword === this.rekeyNewPassword) {
       this.toast.trigger('New password must be different');
+      return;
+    }
+
+    if (!this.isPasswordStrong()) {
+      this.toast.trigger('Password too weak');
       return;
     }
 
