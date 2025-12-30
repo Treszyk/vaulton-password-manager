@@ -1,0 +1,74 @@
+services:
+  vaulton-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: vaulton-db-dev
+    environment:
+      - ACCEPT_EULA=${ACCEPT_EULA}
+      - MSSQL_SA_PASSWORD=${SQL_PASSWORD}
+      - MSSQL_PID=Express
+    ports:
+      - '1433:1433'
+    volumes:
+      - vaulton-db-dev-data:/var/opt/mssql
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P '${SQL_PASSWORD}' -C -Q 'SELECT 1' || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vaulton-net
+
+  vaulton-api:
+    build:
+      context: ./backend
+      dockerfile: Api/Dockerfile
+    container_name: vaulton-api-dev
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__Default=${ConnectionStrings__Default}
+      - Jwt__Secret=${Jwt__Secret}
+      - Jwt__Issuer=${Jwt__Issuer}
+      - Jwt__Audience=${Jwt__Audience}
+      - Auth__VerifierPepper=${Auth__VerifierPepper}
+      - Auth__FakeSaltSecret=${Auth__FakeSaltSecret}
+      - Auth__VerifierPbkdf2Iterations=${Auth__VerifierPbkdf2Iterations}
+    ports:
+      - '8080:8080'
+    depends_on:
+      vaulton-db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/healthz']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - vaulton-net
+
+  vaulton-web:
+    build:
+      context: ./frontend/vaulton-web
+      dockerfile: Dockerfile.dev
+    container_name: vaulton-web-dev
+    ports:
+      - '4200:4200'
+    volumes:
+      - ./frontend/vaulton-web/src:/app/src
+      - ./frontend/vaulton-web/public:/app/public
+    depends_on:
+      vaulton-api:
+        condition: service_healthy
+    networks:
+      - vaulton-net
+
+volumes:
+  vaulton-db-dev-data:
+
+networks:
+  vaulton-net:
+    driver: bridge

@@ -1,0 +1,22 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install Angular CLI globally
+RUN npm install -g @angular/cli@21
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Expose the Angular dev server port
+EXPOSE 4200
+
+# Start the dev server
+# Using 0.0.0.0 to allow access from outside the container
+CMD ["ng", "serve", "--host", "0.0.0.0", "--proxy-config", "proxy.conf.json", "--poll", "2000"]

@@ -18,10 +18,10 @@ Vaulton is a zero-knowledge password manager built around an **AccountId-only** 
 
 ## What’s in this repo
 
-- **Api/** – ASP.NET Core API controllers and HTTP contracts.
-- **Application/** – service interfaces, commands, and results.
-- **Infrastructure/** – EF Core persistence and auth/crypto helpers.
-- **Core/** – shared crypto primitives and entities.
+- **backend/Api/** – ASP.NET Core API controllers and HTTP contracts.
+- **backend/Application/** – service interfaces, commands, and results.
+- **backend/Infrastructure/** – EF Core persistence and auth/crypto helpers.
+- **backend/Core/** – shared crypto primitives and entities.
 - **Docs/** – deep dives on authentication and cryptography.
 - **frontend/vaulton-web/** – Angular frontend application.
 
@@ -31,12 +31,19 @@ The easiest way to run the full stack locally is using Docker Compose.
 
 ### Quick Start
 
-1. Ensure Docker Desktop is running.
-2. Create your local secrets file:
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Treszyk/vaulton-password-manager.git
+   cd vaulton-password-manager
+   ```
+2. **Ensure Docker is running**:
+   - On Windows/Mac: Start **Docker Desktop**.
+   - On Linux: Ensure `docker` service is active.
+3. Create your local secrets file:
    ```bash
    cp .env.dev.example .env
    ```
-3. Run the following command from the root directory:
+4. Run the following command from the root directory:
    ```bash
    docker compose -f docker-compose.dev.yml up
    ```
