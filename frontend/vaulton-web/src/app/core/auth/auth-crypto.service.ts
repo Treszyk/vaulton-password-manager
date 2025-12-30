@@ -4,6 +4,8 @@ import type { PreLoginResponse } from '../api/auth-api.service';
 import type {
   RegisterRequest,
   EncryptedValueDto,
+  EncryptedEntryResult,
+  DecryptEntryResult,
   CheckStatusResponse,
 } from '../crypto/worker/crypto.worker.types';
 
@@ -144,10 +146,11 @@ export class AuthCryptoService {
     }
 
     try {
-      return await this.postToWorker<{
-        DomainTag: string;
-        Payload: { Nonce: string; CipherText: string; Tag: string };
-      }>('ENCRYPT_ENTRY', { plaintextBuffer, aadB64, domain }, [plaintextBuffer]);
+      return await this.postToWorker<EncryptedEntryResult>(
+        'ENCRYPT_ENTRY',
+        { plaintextBuffer, aadB64, domain },
+        [plaintextBuffer]
+      );
     } finally {
       if (ptBytes) {
         try {
@@ -158,11 +161,8 @@ export class AuthCryptoService {
     }
   }
 
-  async decryptEntry(
-    dto: { Nonce: string; CipherText: string; Tag: string },
-    aadB64: string
-  ): Promise<string> {
-    const res = await this.postToWorker<{ ptBuffer: ArrayBuffer }>('DECRYPT_ENTRY', {
+  async decryptEntry(dto: EncryptedValueDto, aadB64: string): Promise<string> {
+    const res = await this.postToWorker<DecryptEntryResult>('DECRYPT_ENTRY', {
       dto,
       aadB64,
     });
@@ -267,6 +267,145 @@ export class AuthCryptoService {
         pwdBytes = null;
       }
       this.isWorking = false;
+    }
+  }
+
+  async deriveAdminVerifier(password: string, salt: string, kdfMode: number): Promise<string> {
+    let pwdBytes: Uint8Array | null = new TextEncoder().encode(password);
+    const passwordBuffer = pwdBytes.buffer;
+    try {
+      const res = await this.postToWorker<{ adminVerifier: string }>(
+        'DERIVE_ADMIN_VERIFIER',
+        { passwordBuffer, saltB64: salt, kdfMode },
+        [passwordBuffer]
+      );
+      return res.adminVerifier;
+    } finally {
+      if (pwdBytes) {
+        try {
+          pwdBytes.fill(0);
+        } catch {}
+      }
+    }
+  }
+
+  async activatePasscode(
+    password: string,
+    masterSalt: string,
+    masterKdfMode: number,
+    passcode: string,
+    accountId: string,
+    mkWrapPwd: EncryptedValueDto,
+    schemaVer: number
+  ): Promise<{ mkWrapLocal: EncryptedValueDto; sLocalB64: string }> {
+    let pwdBytes: Uint8Array | null = new TextEncoder().encode(password);
+    let pinBytes: Uint8Array | null = new TextEncoder().encode(passcode);
+    const passwordBuffer = pwdBytes.buffer;
+    const passcodeBuffer = pinBytes.buffer;
+
+    try {
+      return await this.postToWorker<{ mkWrapLocal: EncryptedValueDto; sLocalB64: string }>(
+        'ACTIVATE_PASSCODE',
+        {
+          passwordBuffer,
+          masterSaltB64: masterSalt,
+          masterKdfMode,
+          passcodeBuffer,
+          accountId,
+          mkWrapPwd,
+          schemaVer,
+        },
+        [passwordBuffer, passcodeBuffer]
+      );
+    } finally {
+      if (pwdBytes) {
+        try {
+          pwdBytes.fill(0);
+        } catch {}
+      }
+      if (pinBytes) {
+        try {
+          pinBytes.fill(0);
+        } catch {}
+      }
+    }
+  }
+
+  async unlockViaPasscode(
+    passcode: string,
+    saltB64: string,
+    mkWrapLocal: EncryptedValueDto,
+    accountId: string
+  ): Promise<void> {
+    let pinBytes: Uint8Array | null = new TextEncoder().encode(passcode);
+    const passcodeBuffer = pinBytes.buffer;
+    try {
+      await this.postToWorker(
+        'UNLOCK_VIA_PASSCODE',
+        { passcodeBuffer, saltB64, mkWrapLocal, accountId },
+        [passcodeBuffer]
+      );
+      this.isUnlocked.set(true);
+    } finally {
+      if (pinBytes) {
+        try {
+          pinBytes.fill(0);
+        } catch {}
+      }
+    }
+  }
+
+  async executeRekey(
+    currentPassword: string,
+    currentSalt: string,
+    currentKdfMode: number,
+    newPassword: string,
+    accountId: string,
+    currentMkWrapPwd: EncryptedValueDto,
+    schemaVer: number,
+    newKdfMode: number
+  ): Promise<{
+    newVerifier: string;
+    newAdminVerifier: string;
+    newS_Pwd: string;
+    newMkWrapPwd: EncryptedValueDto;
+  }> {
+    let curPwdBytes: Uint8Array | null = new TextEncoder().encode(currentPassword);
+    let newPwdBytes: Uint8Array | null = new TextEncoder().encode(newPassword);
+    const currentPasswordBuffer = curPwdBytes.buffer;
+    const newPasswordBuffer = newPwdBytes.buffer;
+
+    try {
+      return await this.postToWorker<{
+        newVerifier: string;
+        newAdminVerifier: string;
+        newS_Pwd: string;
+        newMkWrapPwd: EncryptedValueDto;
+      }>(
+        'EXECUTE_REKEY',
+        {
+          currentPasswordBuffer,
+          currentSaltB64: currentSalt,
+          currentKdfMode,
+          newPasswordBuffer,
+          accountId,
+          currentMkWrapPwd,
+          schemaVer,
+          newKdfMode,
+        },
+        [currentPasswordBuffer, newPasswordBuffer]
+      );
+    } finally {
+      if (curPwdBytes) {
+        try {
+          curPwdBytes.fill(0);
+        } catch {}
+      }
+      if (newPwdBytes) {
+        try {
+          newPwdBytes.fill(0);
+        } catch {}
+      }
     }
   }
 

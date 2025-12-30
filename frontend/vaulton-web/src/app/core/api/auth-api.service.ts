@@ -14,6 +14,26 @@ type MeResponse = { accountId: string };
 type LoginRequest = { AccountId: string; Verifier: string };
 export type PreLoginResponse = { S_Pwd: string; KdfMode: number; CryptoSchemaVer: number };
 type PreRegisterResponse = { AccountId: string; CryptoSchemaVer: number };
+
+export interface WrapsRequest {
+  AdminVerifier: string;
+}
+
+export interface WrapsResponse {
+  MkWrapPwd: EncryptedValueDto;
+}
+
+export interface ChangePasswordRequest {
+  AdminVerifier: string;
+  NewVerifier: string;
+  NewAdminVerifier: string;
+  NewS_Pwd: string;
+  NewKdfMode: number;
+  NewMkWrapPwd: EncryptedValueDto;
+  NewMkWrapRk: EncryptedValueDto | null;
+  CryptoSchemaVer: number;
+}
+
 import type { EncryptedValueDto } from '../crypto/worker/crypto.worker.types';
 
 @Injectable({ providedIn: 'root' })
@@ -56,5 +76,13 @@ export class AuthApiService {
 
   me(): Observable<MeResponse> {
     return this.http.get<MeResponse>(`${this.baseUrl}/auth/me`);
+  }
+
+  getWraps(req: WrapsRequest): Observable<WrapsResponse> {
+    return this.http.post<WrapsResponse>(`${this.baseUrl}/auth/wraps`, req);
+  }
+
+  changePassword(req: ChangePasswordRequest): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/auth/change-password`, req);
   }
 }

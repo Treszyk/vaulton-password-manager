@@ -67,6 +67,10 @@ export class Argon2KdfProvider implements KdfProvider {
   }
 
   private getParams(kdfMode: number) {
+    if (kdfMode === 3) {
+      // balanced hardened - optimal for passcodes (192MB / 3 iterations)
+      return { memLimit: 192 * 1024 * 1024, opsLimit: 3 };
+    }
     const mode = kdfMode === 2 ? 2 : 1;
     const memLimit = mode === 2 ? 256 * 1024 * 1024 : 128 * 1024 * 1024;
     const opsLimit = mode === 2 ? 4 : 3;

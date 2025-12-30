@@ -17,6 +17,8 @@ import { MemoModalComponent } from './memo-modal.component';
 import { VaultRecord, VaultRecordInput } from './vault-record.model';
 import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 import { ToastService } from '../../shared/ui/toast/toast.service';
+import { PasscodePromptModalComponent } from '../../shared/ui/passcode-prompt-modal.component';
+import { AuthPersistenceService } from '../../core/auth/auth-persistence.service';
 
 @Component({
   selector: 'app-vault-dashboard',
@@ -27,6 +29,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
     RecordCardComponent,
     RecordEditorComponent,
     MemoModalComponent,
+    PasscodePromptModalComponent,
   ],
   host: {
     class: 'flex-1 min-h-0 flex flex-col',
@@ -166,6 +169,12 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
         [record]="activeMemo()!"
         (close)="activeMemo.set(null)"
       ></app-memo-modal>
+
+      <app-passcode-prompt-modal
+        *ngIf="showPasscodePrompt()"
+        (setup)="goToPasscodeSetup()"
+        (skip)="onSkipPasscodePrompt()"
+      ></app-passcode-prompt-modal>
     </div>
   `,
   encapsulation: ViewEncapsulation.None,
@@ -174,6 +183,7 @@ export class VaultDashboardComponent implements OnDestroy {
   showAddModal = signal(false);
   editingRecord = signal<VaultRecord | null>(null);
   activeMemo = signal<VaultRecord | null>(null);
+  showPasscodePrompt = signal(false);
   searchQueryInput = signal('');
   searchQuery = signal('');
   isSearching = signal(false);
@@ -182,9 +192,11 @@ export class VaultDashboardComponent implements OnDestroy {
   constructor(
     protected readonly vault: VaultDataService,
     private readonly crypto: AuthCryptoService,
+    private readonly persistence: AuthPersistenceService,
     private readonly router: Router,
     private readonly toast: ToastService
   ) {
+    this.checkPasscodePrompt();
     effect(() => {
       if (this.crypto.isUnlocked() && this.router.url.includes('/vault')) {
         this.vault.loadRecords();
@@ -276,4 +288,23 @@ export class VaultDashboardComponent implements OnDestroy {
   trackByQuery = (index: number, item: VaultRecord): string => {
     return item.id + (this.searchQuery() || '');
   };
+
+  private async checkPasscodePrompt() {
+    const hasPasscode = !!(await this.persistence.getLocalPasscode());
+    const prompted = await this.persistence.isPasscodePrompted();
+
+    if (!hasPasscode && !prompted) {
+      setTimeout(() => this.showPasscodePrompt.set(true), 1200);
+    }
+  }
+
+  async onSkipPasscodePrompt() {
+    await this.persistence.setPasscodePrompted(true);
+    this.showPasscodePrompt.set(false);
+  }
+
+  async goToPasscodeSetup() {
+    this.showPasscodePrompt.set(false);
+    this.router.navigate(['/settings'], { queryParams: { tab: 'SECURITY', setupPasscode: true } });
+  }
 }

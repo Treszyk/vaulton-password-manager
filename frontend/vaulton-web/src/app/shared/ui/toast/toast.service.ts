@@ -6,6 +6,17 @@ export class ToastService {
   readonly show = signal(false);
   readonly isSuccess = signal(true);
 
+  constructor() {
+    const queued = sessionStorage.getItem('vaulton_toast_queue');
+    if (queued) {
+      try {
+        const { msg, success } = JSON.parse(queued);
+        setTimeout(() => this.trigger(msg, success), 500);
+      } catch {}
+      sessionStorage.removeItem('vaulton_toast_queue');
+    }
+  }
+
   trigger(msg: string, success: boolean = true) {
     this.message.set(msg);
     this.isSuccess.set(success);
@@ -26,5 +37,9 @@ export class ToastService {
         }, 500);
       }, 2500);
     }, 50);
+  }
+
+  queue(msg: string, success: boolean = true) {
+    sessionStorage.setItem('vaulton_toast_queue', JSON.stringify({ msg, success }));
   }
 }

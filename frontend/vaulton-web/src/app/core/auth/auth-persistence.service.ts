@@ -11,8 +11,16 @@ export interface VaultBundle {
   AccountId: string;
 }
 
+export interface LocalPasscodeWrap {
+  AccountId: string;
+  MkWrapLocal: EncryptedValueDto;
+  S_Local: string;
+}
+
 const STORAGE_KEY = 'vaulton_bundle';
 const ID_KEY = 'vaulton_last_id';
+const PASSCODE_KEY = 'vaulton_local_passcode';
+const PROMPT_KEY = 'vaulton_passcode_prompted';
 
 @Injectable({ providedIn: 'root' })
 export class AuthPersistenceService {
@@ -39,6 +47,26 @@ export class AuthPersistenceService {
 
   async getAccountId(): Promise<string | undefined> {
     return await get<string>(ID_KEY);
+  }
+
+  async saveLocalPasscode(wrap: LocalPasscodeWrap): Promise<void> {
+    await set(PASSCODE_KEY, wrap);
+  }
+
+  async getLocalPasscode(): Promise<LocalPasscodeWrap | undefined> {
+    return await get<LocalPasscodeWrap>(PASSCODE_KEY);
+  }
+
+  async clearLocalPasscode(): Promise<void> {
+    await del(PASSCODE_KEY);
+  }
+
+  async setPasscodePrompted(prompted: boolean): Promise<void> {
+    await set(PROMPT_KEY, prompted);
+  }
+
+  async isPasscodePrompted(): Promise<boolean> {
+    return (await get<boolean>(PROMPT_KEY)) ?? false;
   }
 
   async clearAll(): Promise<void> {

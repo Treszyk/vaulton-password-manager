@@ -21,8 +21,8 @@ import { zeroize } from '../../core/crypto/zeroize';
     class: 'w-full',
   },
   template: `
-    <div 
-      class="w-full h-full flex flex-col items-center justify-center p-6 selection:bg-vault-purple/30 selection:text-vault-purple-bright relative overflow-hidden"
+  <div 
+      class="w-full h-full flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-vault-purple/30 selection:text-vault-purple-bright relative overflow-hidden"
       [attr.data-auth-mode]="mode()"
     >
       <app-starfield></app-starfield>
@@ -86,7 +86,6 @@ import { zeroize } from '../../core/crypto/zeroize';
                       placeholder="vault-xxxx-xxxx"
                       (keyup.enter)="onSubmit()"
                     />
-                    
                     <button 
                       *ngIf="accountId()"
                       (click)="copyToClipboard(accountId())"
@@ -97,7 +96,6 @@ import { zeroize } from '../../core/crypto/zeroize';
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                       </svg>
                     </button>
-                    
                     <div *ngIf="!accountId()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -126,6 +124,7 @@ import { zeroize } from '../../core/crypto/zeroize';
                   </div>
                 </div>
               </div>
+
 
               <div class="col-start-1 row-start-1 flex flex-col gap-8 form-view register-view"
                    [class.active]="mode() === 'REGISTER'"
@@ -353,6 +352,7 @@ export class AuthPageComponent {
 
   accountId = signal<string>('');
   password = signal<string>('');
+  pinDigits = ['', '', '', '', '', ''];
   kdfMode = signal<number>(2);
   cryptoSchemaVer = signal<number>(1);
 
@@ -404,6 +404,7 @@ export class AuthPageComponent {
   setMode(m: 'LOGIN' | 'REGISTER'): void {
     this.mode.set(m);
     this.password.set('');
+    this.pinDigits = ['', '', '', '', '', ''];
     this.isOptimized.set(false);
     this.standardTime.set(null);
     this.hardenedTime.set(null);
@@ -518,6 +519,7 @@ export class AuthPageComponent {
                   .then(() => {
                     this.authState.setAccessToken(res.Token);
                     this.authState.setAccountId(accountId);
+                    this.authState.setInitialized(true);
                     this.persistence.saveAccountId(accountId);
                     this.persistence
                       .saveBundle({
@@ -528,7 +530,7 @@ export class AuthPageComponent {
                         MkWrapPwd: res.MkWrapPwd!,
                         MkWrapRk: res.MkWrapRk || null,
                       })
-                      .then(() => {
+                      .then(async () => {
                         this.sessionTimer.reset();
                         this.toast.trigger('Vault Unlocked', true);
                         this.router.navigate(['/vault']);

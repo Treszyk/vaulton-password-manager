@@ -5,6 +5,7 @@ import { AuthStateService } from './auth-state.service';
 import { AuthCryptoService } from './auth-crypto.service';
 import { AuthPersistenceService } from './auth-persistence.service';
 import { Router } from '@angular/router';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 
 import { VaultDataService } from '../../features/vault/vault-data.service';
 
@@ -16,7 +17,8 @@ export class SessionService {
     private readonly crypto: AuthCryptoService,
     private readonly persistence: AuthPersistenceService,
     private readonly vault: VaultDataService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly toast: ToastService
   ) {}
 
   readonly showWipeConfirm = signal(false);
@@ -69,8 +71,8 @@ export class SessionService {
     this.showLogoutConfirm.set(false);
 
     this.authApi.logout().subscribe();
-
-    this.router.navigate(['/auth']);
+    this.toast.queue('Logged out successfully');
+    window.location.href = '/auth';
   }
 
   wipeDevice(): void {
@@ -81,6 +83,7 @@ export class SessionService {
     this.showWipeConfirm.set(false);
 
     this.authApi.logout().subscribe();
-    this.router.navigate(['/auth']);
+    this.toast.queue('Device wiped successfully');
+    window.location.href = '/auth';
   }
 }

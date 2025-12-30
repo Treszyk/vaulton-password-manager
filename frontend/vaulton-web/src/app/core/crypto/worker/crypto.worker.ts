@@ -52,7 +52,7 @@ addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRe
         break;
       }
       case 'CLEAR_KEYS': {
-        handleClearKeys();
+        await handleClearKeys();
         postSuccess(id, { ok: true });
         break;
       }
@@ -68,6 +68,17 @@ addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRe
           await handleLogin({ ...request.payload, password: pwdBytes });
           await handleFinalizeLogin(request.payload as any);
           postSuccess(id, { ok: true });
+        } finally {
+          zeroize(pwdBytes);
+        }
+        break;
+      }
+      case 'DERIVE_ADMIN_VERIFIER': {
+        const { passwordBuffer, saltB64, kdfMode } = request.payload;
+        const pwdBytes = new Uint8Array(passwordBuffer);
+        try {
+          const res = await handleDeriveAdminVerifier({ password: pwdBytes, saltB64, kdfMode });
+          postSuccess(id, res);
         } finally {
           zeroize(pwdBytes);
         }
@@ -93,6 +104,63 @@ addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRe
         } finally {
           zeroize(pwdBytes);
           zeroize(saltBytes);
+        }
+        break;
+      }
+      case 'ACTIVATE_PASSCODE': {
+        const {
+          passwordBuffer,
+          passcodeBuffer,
+          masterSaltB64,
+          masterKdfMode,
+          accountId,
+          mkWrapPwd,
+          schemaVer,
+        } = request.payload;
+        const pwdBytes = new Uint8Array(passwordBuffer);
+        const pinBytes = new Uint8Array(passcodeBuffer);
+        try {
+          const res = await handleActivatePasscode({
+            password: pwdBytes,
+            masterSaltB64,
+            masterKdfMode,
+            passcode: pinBytes,
+            accountId,
+            mkWrapPwd,
+            schemaVer,
+          });
+          postSuccess(id, res);
+        } finally {
+          zeroize(pwdBytes);
+          zeroize(pinBytes);
+        }
+        break;
+      }
+      case 'UNLOCK_VIA_PASSCODE': {
+        const { passcodeBuffer, saltB64, mkWrapLocal, accountId } = request.payload;
+        const pinBytes = new Uint8Array(passcodeBuffer);
+        try {
+          await handleUnlockViaPasscode({ passcode: pinBytes, saltB64, mkWrapLocal, accountId });
+          postSuccess(id, { ok: true });
+        } finally {
+          zeroize(pinBytes);
+        }
+        break;
+      }
+      case 'EXECUTE_REKEY': {
+        const { currentPasswordBuffer, newPasswordBuffer } = request.payload;
+        const currentPwdBytes = new Uint8Array(currentPasswordBuffer);
+        const newPwdBytes = new Uint8Array(newPasswordBuffer);
+        try {
+          const res = await handleExecuteRekey({
+            ...request.payload,
+            currentPassword: currentPwdBytes,
+            newPassword: newPwdBytes,
+          });
+          postSuccess(id, res);
+        } finally {
+          zeroize(currentPwdBytes);
+          zeroize(newPwdBytes);
         }
         break;
       }
@@ -236,10 +304,29 @@ async function handleFinalizeLogin({
   }
 }
 
-function handleClearKeys() {
+async function handleClearKeys() {
   vaultKey = null;
   domainTagKey = null;
   pendingLoginBaseKey = null;
+}
+
+async function handleDeriveAdminVerifier({
+  password,
+  saltB64,
+  kdfMode,
+}: {
+  password: Uint8Array;
+  saltB64: string;
+  kdfMode: number;
+}) {
+  const sPwd = b64ToBytes(saltB64);
+  try {
+    const hkdfBaseKey = await kdfProvider.deriveHkdfBaseKey(password, sPwd, kdfMode);
+    const adminVerifierB64 = await hkdfVerifierB64(hkdfBaseKey, 'vaulton/admin');
+    return { adminVerifier: adminVerifierB64 };
+  } finally {
+    zeroize(sPwd);
+  }
 }
 
 async function handleEncryptEntry({
@@ -332,6 +419,145 @@ async function handleDecryptEntry({ dto, aadB64 }: { dto: EncryptedValueDto; aad
   }
 }
 
+async function handleActivatePasscode({
+  password,
+  masterSaltB64,
+  masterKdfMode,
+  passcode,
+  accountId,
+  mkWrapPwd,
+  schemaVer,
+}: {
+  password: Uint8Array;
+  masterSaltB64: string;
+  masterKdfMode: number;
+  passcode: Uint8Array;
+  accountId: string;
+  mkWrapPwd: EncryptedValueDto;
+  schemaVer: number;
+}) {
+  const mSalt = b64ToBytes(masterSaltB64);
+  const localSalt = crypto.getRandomValues(new Uint8Array(16));
+  const aadLocal = new TextEncoder().encode(`vaulton:local-passcode-wrap:${accountId}`);
+  const aadMaster = new TextEncoder().encode(`vaulton:mk-wrap-pwd:schema${schemaVer}:${accountId}`);
+
+  try {
+    const hkdfLocal = await kdfProvider.deriveHkdfBaseKey(passcode, localSalt, 3);
+    const kekLocal = await hkdfAesGcm256Key(hkdfLocal, 'vaulton/kek', ['encrypt']);
+
+    const hkdfMaster = await kdfProvider.deriveHkdfBaseKey(password, mSalt, masterKdfMode);
+    const kekMaster = await hkdfAesGcm256Key(hkdfMaster, 'vaulton/kek', ['decrypt']);
+
+    const mkRaw = await decryptMk(kekMaster, mkWrapPwd, aadMaster);
+    const wrap = await encryptSplit(kekLocal, mkRaw, aadLocal);
+    zeroize(mkRaw);
+
+    return {
+      mkWrapLocal: {
+        Nonce: bytesToB64(wrap.Nonce),
+        CipherText: bytesToB64(wrap.CipherText),
+        Tag: bytesToB64(wrap.Tag),
+      },
+      sLocalB64: bytesToB64(localSalt),
+    };
+  } finally {
+    zeroize(mSalt);
+    zeroize(localSalt);
+    zeroize(aadLocal);
+    zeroize(aadMaster);
+  }
+}
+
+async function handleUnlockViaPasscode({
+  passcode,
+  saltB64,
+  mkWrapLocal,
+  accountId,
+}: {
+  passcode: Uint8Array;
+  saltB64: string;
+  mkWrapLocal: EncryptedValueDto;
+  accountId: string;
+}) {
+  const sLocal = b64ToBytes(saltB64);
+  const aadLocal = new TextEncoder().encode(`vaulton:local-passcode-wrap:${accountId}`);
+  vaultKey = null;
+  domainTagKey = null;
+
+  try {
+    const hkdfBaseKey = await kdfProvider.deriveHkdfBaseKey(passcode, sLocal, 3);
+
+    const kekKey = await hkdfAesGcm256Key(hkdfBaseKey, 'vaulton/kek', ['unwrapKey']);
+    const mk = await unwrapMk(kekKey, mkWrapLocal, aadLocal);
+
+    vaultKey = await hkdfAesGcm256Key(mk, 'vaulton/vault-enc', ['encrypt', 'decrypt']);
+    domainTagKey = await hkdfHmacSha256Key(mk, 'vaulton/vault-tag');
+  } catch (e) {
+    vaultKey = null;
+    domainTagKey = null;
+    throw e;
+  } finally {
+    zeroize(sLocal);
+  }
+}
+
+async function handleExecuteRekey({
+  currentPassword,
+  currentSaltB64,
+  currentKdfMode,
+  newPassword,
+  accountId,
+  currentMkWrapPwd,
+  schemaVer,
+  newKdfMode,
+}: {
+  currentPassword: Uint8Array;
+  currentSaltB64: string;
+  currentKdfMode: number;
+  newPassword: Uint8Array;
+  accountId: string;
+  currentMkWrapPwd: EncryptedValueDto;
+  schemaVer: number;
+  newKdfMode: number;
+}) {
+  const curSalt = b64ToBytes(currentSaltB64);
+  const newSalt = crypto.getRandomValues(new Uint8Array(16));
+  const aad = new TextEncoder().encode(`vaulton:mk-wrap-pwd:schema${schemaVer}:${accountId}`);
+
+  try {
+    const hkdfCurrent = await kdfProvider.deriveHkdfBaseKey(
+      currentPassword,
+      curSalt,
+      currentKdfMode
+    );
+    const kekCurrent = await hkdfAesGcm256Key(hkdfCurrent, 'vaulton/kek', ['decrypt']);
+
+    const hkdfNew = await kdfProvider.deriveHkdfBaseKey(newPassword, newSalt, newKdfMode);
+    const verifierB64 = await hkdfVerifierB64(hkdfNew, 'vaulton/verifier');
+    const adminVerifierB64 = await hkdfVerifierB64(hkdfNew, 'vaulton/admin');
+    const kekNew = await hkdfAesGcm256Key(hkdfNew, 'vaulton/kek', ['encrypt']);
+
+    const mkRaw = await decryptMk(kekCurrent, currentMkWrapPwd, aad);
+    const wrap = await encryptSplit(kekNew, mkRaw, aad);
+    zeroize(mkRaw);
+
+    return {
+      newVerifier: verifierB64,
+      newAdminVerifier: adminVerifierB64,
+      newS_Pwd: bytesToB64(newSalt),
+      newMkWrapPwd: {
+        Nonce: bytesToB64(wrap.Nonce),
+        CipherText: bytesToB64(wrap.CipherText),
+        Tag: bytesToB64(wrap.Tag),
+      },
+    };
+  } finally {
+    zeroize(curSalt);
+    zeroize(newSalt);
+    zeroize(aad);
+  }
+}
+
 async function unwrapMk(
   kek: CryptoKey,
   dto: EncryptedValueDto,
@@ -360,5 +586,38 @@ async function unwrapMk(
     zeroize(ct);
     zeroize(tag);
     zeroize(wrappedBytes);
+  }
+}
+
+async function decryptMk(
+  kek: CryptoKey,
+  dto: EncryptedValueDto,
+  aad: Uint8Array
+): Promise<Uint8Array> {
+  const nonce = b64ToBytes(dto.Nonce);
+  const ct = b64ToBytes(dto.CipherText);
+  const tag = b64ToBytes(dto.Tag);
+
+  const ctTag = new Uint8Array(ct.length + tag.length);
+  ctTag.set(ct, 0);
+  ctTag.set(tag, ct.length);
+
+  try {
+    const ptBuf = await crypto.subtle.decrypt(
+      {
+        name: 'AES-GCM',
+        iv: nonce as BufferSource,
+        additionalData: aad as BufferSource,
+      },
+      kek,
+      ctTag as BufferSource
+    );
+
+    return new Uint8Array(ptBuf);
+  } finally {
+    zeroize(nonce);
+    zeroize(ct);
+    zeroize(tag);
+    zeroize(ctTag);
   }
 }
