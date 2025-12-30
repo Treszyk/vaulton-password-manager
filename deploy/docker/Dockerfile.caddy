@@ -1,0 +1,24 @@
+# Stage 1: Build Angular frontend
+FROM node:20-alpine AS build-stage
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY frontend/vaulton-web/package*.json ./
+RUN npm install
+
+# Copy source and build
+COPY frontend/vaulton-web/ ./
+RUN npm run build -- --configuration production
+
+# Stage 2: Serve with Caddy
+FROM caddy:latest AS final-stage
+
+# Copy built assets from build-stage
+# Note: Angular outputs to dist/vaulton-web/browser by default in newer versions
+COPY --from=build-stage /app/dist/vaulton-web/browser /var/www/html
+
+# Copy Caddyfile (Caddy expects it at /etc/caddy/Caddyfile)
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+
+EXPOSE 80
+EXPOSE 443

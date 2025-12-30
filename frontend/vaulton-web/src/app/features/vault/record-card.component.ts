@@ -42,16 +42,28 @@ import { VaultRecord } from './vault-record.model';
             </svg>
           </button>
 
-          <button 
-            type="button"
-            (click)="onDelete.emit(record.id)"
-            class="trash-btn p-2 rounded-xl flex items-center justify-center"
-            title="Delete Entry"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+          <div class="relative flex items-center justify-center">
+            <span 
+              *ngIf="deleteConfirmActive()" 
+              class="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black tracking-widest pointer-events-none whitespace-nowrap !bg-transparent text-red-500 animate-pulse"
+            >
+              SURE?
+            </span>
+            <button 
+              type="button"
+              (click)="onDeleteClick(record.id)"
+              class="p-2 rounded-xl flex items-center justify-center transition-all duration-300"
+              [class.trash-btn]="!deleteConfirmActive()"
+              [ngClass]="{
+                'bg-red-500/10 text-red-500 hover:text-red-400': deleteConfirmActive()
+              }"
+              title="Delete Entry"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" class="w-5 h-5" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -159,6 +171,8 @@ export class RecordCardComponent {
   protected justCopied = signal(false);
   protected copiedStatus = signal<'username' | 'password' | null>(null);
 
+  protected deleteConfirmActive = signal(false);
+  private deleteTimeout?: any;
   private revealTimeout?: any;
   private copyTimeout?: any;
   private statusTimeout?: any;
@@ -175,6 +189,19 @@ export class RecordCardComponent {
     this.revealTimeout = setTimeout(() => {
       this.reveal.set(false);
     }, 8000);
+  }
+
+  onDeleteClick(id: string) {
+    if (!this.deleteConfirmActive()) {
+      this.deleteConfirmActive.set(true);
+      if (this.deleteTimeout) clearTimeout(this.deleteTimeout);
+      this.deleteTimeout = setTimeout(() => this.deleteConfirmActive.set(false), 3000);
+      return;
+    }
+
+    this.onDelete.emit(id);
+    this.deleteConfirmActive.set(false);
+    if (this.deleteTimeout) clearTimeout(this.deleteTimeout);
   }
 
   copy(value: string) {

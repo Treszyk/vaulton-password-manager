@@ -1,0 +1,50 @@
+{
+    # Global options
+    email {$ACME_EMAIL}
+}
+
+{$DOMAIN_NAME} {
+    # 1. Reverse Proxy (Backend API) - Must be matched first or exclusively
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy vaulton-api:8080
+    }
+
+    # 2. Static Files (Frontend) - Catch-all handle (only if above didn't match)
+    handle {
+        root * /var/www/html
+        try_files {path} {path}/ /index.html
+        file_server
+        encode zstd gzip
+    }
+
+    # 3. Enhanced Security Headers (Edge Hardening)
+    header {
+        # Strict-Transport-Security (HSTS)
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        
+        # Clickjacking protection
+        X-Frame-Options "DENY"
+        
+        # MIME Sniffing protection
+        X-Content-Type-Options "nosniff"
+        
+        # Referrer Policy
+        Referrer-Policy "strict-origin-when-cross-origin"
+        
+        # Permissions Policy
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=()"
+        
+        # Content Security Policy (Mirrored from Backend but enforced at Edge)
+        # Note: frame-ancestors 'none' MUST be in the header to work properly
+        Content-Security-Policy "default-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests; block-all-mixed-content; require-trusted-types-for 'script'; trusted-types angular vaulton-worker-policy;"
+        
+        # Clean up identifying headers
+        -Server
+    }
+
+    # Logging
+    log {
+        output file /var/log/caddy/access.log
+    }
+}

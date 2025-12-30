@@ -1,4 +1,4 @@
-import { Component, inject, ViewEncapsulation } from '@angular/core';
+import { Component, inject, ViewEncapsulation, effect } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StarfieldComponent } from '../../shared/ui/starfield/starfield.component';
@@ -69,6 +69,15 @@ export class VaultonShellComponent {
   protected readonly authState = inject(AuthStateService);
   protected readonly session = inject(SessionService);
   protected readonly settings = inject(SettingsService);
+
+  constructor() {
+    effect(() => {
+      const accountId = this.authState.accountId();
+      if (accountId) {
+        this.settings.loadSettings(accountId);
+      }
+    });
+  }
 
   triggerWipeFromLogout(): void {
     this.session.cancelLogoutConfirm();

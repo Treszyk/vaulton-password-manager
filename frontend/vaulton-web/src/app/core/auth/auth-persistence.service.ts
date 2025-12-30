@@ -50,26 +50,38 @@ export class AuthPersistenceService {
   }
 
   async saveLocalPasscode(wrap: LocalPasscodeWrap): Promise<void> {
-    await set(PASSCODE_KEY, wrap);
+    await set(`${PASSCODE_KEY}_${wrap.AccountId}`, wrap);
   }
 
-  async getLocalPasscode(): Promise<LocalPasscodeWrap | undefined> {
-    return await get<LocalPasscodeWrap>(PASSCODE_KEY);
+  async getLocalPasscode(accountId: string): Promise<LocalPasscodeWrap | undefined> {
+    return await get<LocalPasscodeWrap>(`${PASSCODE_KEY}_${accountId}`);
   }
 
-  async clearLocalPasscode(): Promise<void> {
-    await del(PASSCODE_KEY);
+  async clearLocalPasscode(accountId: string): Promise<void> {
+    await del(`${PASSCODE_KEY}_${accountId}`);
   }
 
-  async setPasscodePrompted(prompted: boolean): Promise<void> {
-    await set(PROMPT_KEY, prompted);
+  async setPasscodePrompted(accountId: string, prompted: boolean): Promise<void> {
+    await set(`${PROMPT_KEY}_${accountId}`, prompted);
   }
 
-  async isPasscodePrompted(): Promise<boolean> {
-    return (await get<boolean>(PROMPT_KEY)) ?? false;
+  async isPasscodePrompted(accountId: string): Promise<boolean> {
+    return (await get<boolean>(`${PROMPT_KEY}_${accountId}`)) ?? false;
   }
 
   async clearAll(): Promise<void> {
     await clear();
+  }
+
+  async clearUserData(accountId: string): Promise<void> {
+    await del(STORAGE_KEY);
+
+    await del(`${PASSCODE_KEY}_${accountId}`);
+    await del(`${PROMPT_KEY}_${accountId}`);
+
+    const lastId = await this.getAccountId();
+    if (lastId === accountId) {
+      await del(ID_KEY);
+    }
   }
 }

@@ -114,7 +114,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                 </div>
                 
                 <button 
-                  (click)="settings.toggleStarfield()"
+                  (click)="settings.toggleStarfield(accountId())"
                   class="w-12 h-7 rounded-full transition-colors duration-300 relative focus:outline-none"
                   [class.bg-vault-purple]="settings.showStarfield()"
                   [class.bg-white/10]="!settings.showStarfield()"
@@ -251,7 +251,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
                 <button
-                  (click)="settings.updateTimeout(60)"
+                  (click)="settings.updateTimeout(accountId(), 60)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
                   [class.bg-vault-purple/10]="settings.timeoutSeconds() === 60"
                   [class.border-vault-purple]="settings.timeoutSeconds() === 60"
@@ -274,7 +274,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 
 
                 <button
-                  (click)="settings.updateTimeout(300)"
+                  (click)="settings.updateTimeout(accountId(), 300)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
                   [class.bg-vault-purple/10]="settings.timeoutSeconds() === 300"
                   [class.border-vault-purple]="settings.timeoutSeconds() === 300"
@@ -297,7 +297,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 
 
                 <button
-                  (click)="settings.updateTimeout(1800)"
+                  (click)="settings.updateTimeout(accountId(), 1800)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
                   [class.bg-orange-500/10]="settings.timeoutSeconds() === 1800"
                   [class.border-orange-500]="settings.timeoutSeconds() === 1800"
@@ -320,7 +320,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 
 
                 <button
-                  (click)="settings.updateTimeout(3600)"
+                  (click)="settings.updateTimeout(accountId(), 3600)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
                   [class.bg-red-500/10]="settings.timeoutSeconds() === 3600"
                   [class.border-red-500]="settings.timeoutSeconds() === 3600"
@@ -581,8 +581,11 @@ export class SettingsComponent implements OnInit {
       }
     });
 
-    const wrap = await this.persistence.getLocalPasscode();
-    this.isPasscodeEnabled.set(!!wrap);
+    const id = this.accountId() || (await this.persistence.getAccountId());
+    if (id) {
+      const wrap = await this.persistence.getLocalPasscode(id);
+      this.isPasscodeEnabled.set(!!wrap);
+    }
   }
 
   setTab(tab: 'GENERAL' | 'SECURITY') {
@@ -611,10 +614,13 @@ export class SettingsComponent implements OnInit {
 
   togglePasscode() {
     if (this.isPasscodeEnabled()) {
-      this.persistence.clearLocalPasscode().then(() => {
-        this.isPasscodeEnabled.set(false);
-        this.toast.trigger('Local Passcode Disabled');
-      });
+      const id = this.accountId();
+      if (id) {
+        this.persistence.clearLocalPasscode(id).then(() => {
+          this.isPasscodeEnabled.set(false);
+          this.toast.trigger('Local Passcode Disabled');
+        });
+      }
     } else {
       this.showPasscodeSetup.set(true);
     }
@@ -824,7 +830,7 @@ export class SettingsComponent implements OnInit {
       this.toast.queue('Password Updated. Please log in again.');
       setTimeout(async () => {
         await this.persistence.clearBundle();
-        await this.persistence.clearLocalPasscode();
+        await this.persistence.clearLocalPasscode(bundle.AccountId);
         await this.session.logout();
       }, 2000);
     } catch (err: any) {

@@ -204,10 +204,13 @@ export class UnlockOverlayComponent implements OnInit {
   @ViewChildren('pinInput') pinInputs!: QueryList<ElementRef<HTMLInputElement>>;
 
   async ngOnInit() {
-    const wrap = await this.persistence.getLocalPasscode();
-    if (wrap) {
-      this.hasPasscode.set(true);
-      this.mode.set('PASSCODE');
+    const id = await this.persistence.getAccountId();
+    if (id) {
+      const wrap = await this.persistence.getLocalPasscode(id);
+      if (wrap) {
+        this.hasPasscode.set(true);
+        this.mode.set('PASSCODE');
+      }
     }
   }
 
@@ -307,7 +310,10 @@ export class UnlockOverlayComponent implements OnInit {
     this.isWorking.set(true);
 
     try {
-      const wrap = await this.persistence.getLocalPasscode();
+      const id = await this.persistence.getAccountId();
+      if (!id) throw new Error('Account ID not found');
+
+      const wrap = await this.persistence.getLocalPasscode(id);
       if (!wrap) throw new Error('Security wrap missing');
 
       await this.crypto.unlockViaPasscode(pin, wrap.S_Local, wrap.MkWrapLocal, wrap.AccountId);

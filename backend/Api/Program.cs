@@ -114,13 +114,13 @@ namespace Api
 				options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 				options.AddPolicy("AuthPolicy", context =>
 				{
-                    // RemoteIpAddress here will be correct because of UseForwardedHeaders
 					var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
 					return RateLimitPartition.GetFixedWindowLimiter(
 						ip,
 						_ => new FixedWindowRateLimiterOptions
 						{
-							PermitLimit = 999,
+							PermitLimit = 10,
 							Window = TimeSpan.FromMinutes(1),
 							QueueLimit = 0,
 							AutoReplenishment = true
@@ -130,18 +130,20 @@ namespace Api
 
 			var app = builder.Build();
 
-            // 1. Trust proxy headers (Caddy/Nginx)
-            // This is critical for accurate client IP in rate limiting
             var forwardedOptions = new ForwardedHeadersOptions
             {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+				ForwardLimit = 1
             };
-            // In a real production environment, you would restrict KnownProxies/KnownNetworks
-            forwardedOptions.KnownNetworks.Clear();
-            forwardedOptions.KnownProxies.Clear();
+
+            var trustAllProxies = builder.Configuration.GetValue<bool>("ForwardedHeaders:TrustAll", true);
+            if (trustAllProxies)
+            {
+                forwardedOptions.KnownNetworks.Clear();
+                forwardedOptions.KnownProxies.Clear();
+            }
             app.UseForwardedHeaders(forwardedOptions);
 
-            // 2. Global Security Headers
             app.UseMiddleware<SecurityHeadersMiddleware>();
 
 			app.MapHealthChecks("/healthz", new HealthCheckOptions
@@ -160,10 +162,6 @@ namespace Api
 			{
 				app.UseSwagger();
 				app.UseSwaggerUI();
-			}
-			else
-			{
-				app.UseHttpsRedirection();
 			}
 
 			app.UseRateLimiter();

@@ -23,8 +23,45 @@ Vaulton is a zero-knowledge password manager built around an **AccountId-only** 
 - **Infrastructure/** – EF Core persistence and auth/crypto helpers.
 - **Core/** – shared crypto primitives and entities.
 - **Docs/** – deep dives on authentication and cryptography.
+- **frontend/vaulton-web/** – Angular frontend application.
 
-If you want to learn more, start with:
+## Development Setup
+
+The easiest way to run the full stack locally is using Docker Compose.
+
+### Quick Start
+
+1. Ensure Docker Desktop is running.
+2. Create your local secrets file:
+   ```bash
+   cp .env.dev.example .env
+   ```
+3. Run the following command from the root directory:
+   ```bash
+   docker compose -f docker-compose.dev.yml up
+   ```
+
+### Resetting the Environment (Clean Slate)
+
+By default, the development database persists data so you don't lose your work between restarts. If you want to **wipe everything** and start fresh:
+
+```bash
+docker compose -f docker-compose.dev.yml down -v
+```
+
+The `-v` flag removes the persistent volume (`vaulton-db-dev-data`), giving you an empty database on the next startup.
+
+### Features
+
+- **Health-Aware Startup**: The API waits for the SQL Server database to be healthy before starting.
+- **Swagger UI**: Accessible at `http://localhost:8080/swagger` during development.
+- **Frontend App**: Accessible at `http://localhost:4200`.
+
+## Production Deployment
+
+Production deployment is managed via the `deploy/` directory. For detailed technical instructions on VPS hosting, SSL termination with Caddy, and hardened security policies, refer to [deploy/README.md](deploy/README.md).
+
+## Documentation
 
 - `Docs/auth.md` for the authentication/session model.
 - `Docs/crypto.md` for the key ladder and encryption design.

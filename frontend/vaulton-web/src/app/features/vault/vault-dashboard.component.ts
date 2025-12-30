@@ -301,8 +301,11 @@ export class VaultDashboardComponent implements OnDestroy {
   };
 
   private async checkPasscodePrompt() {
-    const hasPasscode = !!(await this.persistence.getLocalPasscode());
-    const prompted = await this.persistence.isPasscodePrompted();
+    const accountId = await this.persistence.getAccountId();
+    if (!accountId) return;
+
+    const hasPasscode = !!(await this.persistence.getLocalPasscode(accountId));
+    const prompted = await this.persistence.isPasscodePrompted(accountId);
 
     if (!hasPasscode && !prompted) {
       setTimeout(() => this.showPasscodePrompt.set(true), 1200);
@@ -310,12 +313,18 @@ export class VaultDashboardComponent implements OnDestroy {
   }
 
   async onSkipPasscodePrompt() {
-    await this.persistence.setPasscodePrompted(true);
+    const accountId = await this.persistence.getAccountId();
+    if (accountId) {
+      await this.persistence.setPasscodePrompted(accountId, true);
+    }
     this.showPasscodePrompt.set(false);
   }
 
   async goToPasscodeSetup() {
-    await this.persistence.setPasscodePrompted(true);
+    const accountId = await this.persistence.getAccountId();
+    if (accountId) {
+      await this.persistence.setPasscodePrompted(accountId, true);
+    }
     this.showPasscodePrompt.set(false);
     this.router.navigate(['/vault/settings'], {
       queryParams: { tab: 'SECURITY', setupPasscode: true },

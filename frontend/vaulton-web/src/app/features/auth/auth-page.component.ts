@@ -437,7 +437,13 @@ export class AuthPageComponent {
         this.accountId.set(r.AccountId);
         this.cryptoSchemaVer.set(r.CryptoSchemaVer);
       },
-      error: () => this.reportError('Server Unreachable'),
+      error: (e) => {
+        if (e.status === 429) {
+          this.reportError('Too Many Requests');
+        } else {
+          this.reportError('Server Unreachable');
+        }
+      },
     });
   }
 
@@ -566,7 +572,13 @@ export class AuthPageComponent {
                     this.reportError('Finalization Failed');
                   });
               },
-              error: () => this.reportError('Invalid Credentials'),
+              error: (e) => {
+                if (e.status === 429) {
+                  this.reportError('Too Many Requests');
+                } else {
+                  this.reportError('Invalid Credentials');
+                }
+              },
             });
           })
           .catch(() => this.reportError('Crypto Failure'));

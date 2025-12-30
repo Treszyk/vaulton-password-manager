@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { ToastService } from '../../shared/ui/toast/toast.service';
 
 import { VaultDataService } from '../../features/vault/vault-data.service';
+import { SettingsService } from '../../core/settings/settings.service';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -18,7 +19,8 @@ export class SessionService {
     private readonly persistence: AuthPersistenceService,
     private readonly vault: VaultDataService,
     private readonly router: Router,
-    private readonly toast: ToastService
+    private readonly toast: ToastService,
+    private readonly settings: SettingsService
   ) {}
 
   readonly showWipeConfirm = signal(false);
@@ -82,13 +84,23 @@ export class SessionService {
   }
 
   async wipeDevice(): Promise<void> {
-    await this.crypto.clearKeys();
+    const accountId = this.authState.accountId() || (await this.persistence.getAccountId());
 
+    await this.crypto.clearKeys();
     this.authState.clear();
     this.vault.clearData();
-    await this.persistence.clearAll();
 
-    this.toast.queue('Device wiped successfully');
+    if (accountId) {
+      // Scoped Wipe: Delete only this user's data
+      await this.persistence.clearUserData(accountId);
+      this.settings.clearSettings(accountId);
+    } else {
+      // Fallback if no ID found: wipe all to be safe (Nuclear option as fallback)
+      await this.persistence.clearAll();
+      localStorage.clear();
+    }
+
+    this.toast.queue('Device wiped for this account');
     this.authApi.logout().subscribe({
       complete: () => {
         window.location.href = '/auth';

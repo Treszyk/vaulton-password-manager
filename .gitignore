@@ -34,6 +34,7 @@ coverage*/
 *.local.json
 appsettings.*.local.json
 .env
+.env.local
 # .env.*
 
 # OS cruft
