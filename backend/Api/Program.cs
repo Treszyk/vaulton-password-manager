@@ -1,4 +1,5 @@
 using Api.Health;
+using Api.Middleware;
 using Api.Startup;
 using Application.Services.Auth;
 using Application.Services.Vault;
@@ -8,6 +9,7 @@ using Infrastructure.Services.Auth;
 using Infrastructure.Services.Vault;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
@@ -112,6 +114,7 @@ namespace Api
 				options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 				options.AddPolicy("AuthPolicy", context =>
 				{
+                    // RemoteIpAddress here will be correct because of UseForwardedHeaders
 					var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 					return RateLimitPartition.GetFixedWindowLimiter(
 						ip,
@@ -126,6 +129,20 @@ namespace Api
 			});
 
 			var app = builder.Build();
+
+            // 1. Trust proxy headers (Caddy/Nginx)
+            // This is critical for accurate client IP in rate limiting
+            var forwardedOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            };
+            // In a real production environment, you would restrict KnownProxies/KnownNetworks
+            forwardedOptions.KnownNetworks.Clear();
+            forwardedOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(forwardedOptions);
+
+            // 2. Global Security Headers
+            app.UseMiddleware<SecurityHeadersMiddleware>();
 
 			app.MapHealthChecks("/healthz", new HealthCheckOptions
 			{
