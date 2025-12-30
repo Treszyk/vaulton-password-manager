@@ -26,7 +26,7 @@ namespace Api.Middleware
             context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
 
             context.Response.Headers.Append("Permissions-Policy", 
-                "camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=()");
+                "camera=(), microphone=(), geolocation=(), payment=(), usb=()");
 
             // force HTTPS
             context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");

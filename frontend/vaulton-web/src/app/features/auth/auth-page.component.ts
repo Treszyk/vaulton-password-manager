@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -297,19 +297,33 @@ import { zeroize } from '../../core/crypto/zeroize';
                       </div>
 
                       <div *ngIf="!isOptimized() && !isBenchmarking()" 
-                           class="absolute inset-x-0 inset-y-0 z-10 flex flex-col items-center justify-center animate-fade-in pointer-events-none">
-                        <div class="flex flex-col items-center justify-center p-4 pointer-events-auto">
-                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/80 mb-4 whitespace-nowrap drop-shadow-md">
-                            Benchmark required to select grade
+                           class="absolute inset-x-0 inset-y-0 z-20 flex flex-col items-center justify-center animate-fade-in pointer-events-none">
+                        <div class="flex flex-col items-center justify-center p-4 pointer-events-auto w-full relative">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
+                             [class.text-white/80]="isPasswordStrong()"
+                             [class.text-red-400]="!isPasswordStrong()">
+                            {{ isPasswordStrong() ? 'Benchmark required to select grade' : 'Minimum "Fair" strength required' }}
                           </p>
                           <button 
                             (click)="onOptimizeKdf()"
-                            class="flex items-center gap-2.5 px-6 py-3 bg-vault-purple hover:bg-vault-purple-bright text-white rounded-2xl transition-all active:scale-95 shadow-2xl shadow-vault-purple/40 border border-white/20"
+                            [class.bg-vault-purple]="isPasswordStrong()"
+                            [class.bg-red-600]="!isPasswordStrong()"
+                            [class.border-red-400/50]="!isPasswordStrong()"
+                            [class.animate-pulse]="!isPasswordStrong()"
+                            [class.pointer-events-none]="!isPasswordStrong()"
+                            class="flex items-center gap-2.5 px-6 py-3 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-white/20"
+                            [class.shadow-vault-purple/40]="isPasswordStrong()"
+                            [class.shadow-red-600/50]="!isPasswordStrong()"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                            <svg *ngIf="isPasswordStrong()" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
-                            <span class="text-[10px] font-black uppercase tracking-widest">Run Benchmark</span>
+                            <svg *ngIf="!isPasswordStrong()" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            <span class="text-[10px] font-black uppercase tracking-widest leading-none">
+                              {{ isPasswordStrong() ? 'Run Benchmark' : 'Weak Password' }}
+                            </span>
                           </button>
                         </div>
                       </div>
@@ -323,9 +337,9 @@ import { zeroize } from '../../core/crypto/zeroize';
           <div class="flex flex-col gap-8 relative z-20">
             <button
               (click)="onSubmit()"
-              [disabled]="!accountId() || !password() || (mode() === 'REGISTER' && !isOptimized()) || isWorking()"
+              [disabled]="!accountId() || !password() || (mode() === 'REGISTER' && (!isOptimized() || !isPasswordStrong())) || isWorking()"
               class="btn-primary w-full py-4.5 relative overflow-hidden group rounded-2xl transition-all active:scale-[0.98]"
-              [class.opacity-50]="mode() === 'REGISTER' && !isOptimized()"
+              [class.opacity-50]="mode() === 'REGISTER' && (!isOptimized() || !isPasswordStrong())"
             >
               <span *ngIf="!isWorking()" class="relative z-10 uppercase tracking-[0.4em] text-xs font-black">
                 {{ mode() === 'LOGIN' ? 'Unlock Vault' : 'Initialize Vault' }}
@@ -360,6 +374,7 @@ import { zeroize } from '../../core/crypto/zeroize';
   `,
 })
 export class AuthPageComponent {
+  strengthMeter = viewChild(StrengthMeterComponent);
   mode = signal<'LOGIN' | 'REGISTER'>('LOGIN');
 
   accountId = signal<string>('');
@@ -382,6 +397,8 @@ export class AuthPageComponent {
     if (this.standardTime()) return 1;
     return null;
   });
+
+  isPasswordStrong = computed(() => (this.strengthMeter()?.score() ?? 0) >= 2);
 
   constructor(
     private readonly api: AuthApiService,
@@ -450,8 +467,8 @@ export class AuthPageComponent {
   async onOptimizeKdf(): Promise<void> {
     if (this.isBenchmarking()) return;
 
-    if (!this.password()) {
-      this.toast.trigger('Please type a password first to benchmark', false);
+    if (!this.password() || !this.isPasswordStrong()) {
+      this.toast.trigger('Password is too weak to benchmark. Minimum "Fair" required.', false);
       return;
     }
 

@@ -33,7 +33,7 @@
         Referrer-Policy "strict-origin-when-cross-origin"
         
         # Permissions Policy
-        Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=()"
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
         
         # Content Security Policy (Mirrored from Backend but enforced at Edge)
         # Note: frame-ancestors 'none' MUST be in the header to work properly

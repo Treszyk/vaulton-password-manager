@@ -203,33 +203,44 @@ button.btn-secondary {
   content: attr(data-tooltip);
   position: absolute;
   bottom: calc(100% + 12px);
-  left: 50%;
-  transform: translateX(-50%) translateY(5px);
+
+  left: -100px;
+  right: -100px;
+  margin: 0 auto;
+  width: max-content;
+  max-width: 250px;
+
+  transform: translateY(5px);
   @apply px-4 py-2 rounded-xl bg-vault-grey border border-white/10 text-[10px] 
          font-bold text-white/70 opacity-0 pointer-events-none 
-         transition-all duration-300 z-[1000] backdrop-blur-xl shadow-2xl
+         transition-all duration-300 z-[1000] backdrop-blur-md shadow-2xl
          text-center leading-relaxed;
-  min-width: max-content;
+  will-change: transform, opacity;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 [data-tooltip]:hover::before {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
 }
 
 .tooltip-bottom::before {
   bottom: auto !important;
   top: calc(100% + 8px) !important;
-  transform: translateX(-50%) translateY(-5px) !important;
+  transform: translateY(-5px) !important;
 }
 
 .tooltip-bottom:hover::before {
-  transform: translateX(-50%) translateY(0) !important;
+  transform: translateY(0) !important;
 }
 
 .tooltip-full::before {
-  width: 100% !important;
-  min-width: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
   max-width: none !important;
 }
 
