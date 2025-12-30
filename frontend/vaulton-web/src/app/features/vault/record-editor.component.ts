@@ -35,11 +35,11 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
           class="flex-none p-5 md:p-6 border-b border-transparent md:border-white/10 flex items-center justify-between bg-transparent md:bg-zinc-950"
         >
           <div>
-            <h2 class="text-base md:text-lg font-black uppercase tracking-[0.2em] text-white/90">
+            <h2 class="text-base md:text-xl font-bold uppercase tracking-[0.2em] text-white/90">
               {{ record ? 'Edit Secret' : 'Add a New Secret' }}
             </h2>
             <p
-              class="text-[7px] md:text-[8px] text-white/55 uppercase tracking-[0.3em] mt-0.5 italic"
+              class="text-[0.4375rem] md:text-[0.625rem] text-white/55 uppercase tracking-[0.3em] mt-0.5 italic"
             >
               Locally Encrypted Before Transit
             </p>
@@ -69,7 +69,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
           <form (submit)="submit()" class="space-y-5">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/85 ml-1"
+                <label
+                  class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Title</label
                 >
                 <input
@@ -78,12 +79,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [(ngModel)]="form.title"
                   required
                   placeholder="e.g. My Google Account"
-                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs transition-all"
+                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
                 />
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/85 ml-1"
+                <label
+                  class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Website</label
                 >
                 <input
@@ -91,12 +93,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   name="website"
                   [(ngModel)]="form.website"
                   placeholder="e.g. google.com"
-                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs transition-all"
+                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
                 />
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/85 ml-1"
+                <label
+                  class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Username / Email</label
                 >
                 <input
@@ -105,12 +108,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [(ngModel)]="form.username"
                   required
                   placeholder="email@example.com"
-                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs transition-all"
+                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
                 />
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/85 ml-1"
+                <label
+                  class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Password</label
                 >
                 <div class="relative group">
@@ -120,7 +124,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                     [(ngModel)]="form.password"
                     required
                     placeholder="••••••••••••"
-                    class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !pr-10 !text-xs transition-all"
+                    class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !pr-10 !text-xs md:!text-sm/relaxed transition-all"
                   />
                   <button
                     type="button"
@@ -173,7 +177,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 <button
                   type="button"
                   (click)="generatePassword()"
-                  class="w-full text-center text-[9px] font-black uppercase tracking-[0.3em] text-vault-purple hover:text-vault-purple-bright transition-all py-2 block mt-1 active:scale-[0.98]"
+                  class="w-full text-center text-[0.5625rem] md:text-[0.75rem] font-bold uppercase tracking-[0.3em] text-vault-purple hover:text-vault-purple-bright transition-all py-2 block mt-1 active:scale-[0.98]"
                 >
                   Auto-Generate Password
                 </button>
@@ -181,7 +185,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
             </div>
 
             <div class="space-y-1.5">
-              <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/85 ml-1"
+              <label
+                class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                 >Notes</label
               >
               <textarea
@@ -189,7 +194,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 [(ngModel)]="form.notes"
                 rows="2"
                 placeholder="Private annotations..."
-                class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 transition-all resize-none !text-xs"
+                class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 transition-all resize-none !text-xs md:!text-base"
               ></textarea>
             </div>
 
@@ -205,14 +210,17 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   *ngIf="isSubmitting()"
                   class="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin"
                 ></div>
-                <span *ngIf="!isSubmitting()" class="font-black uppercase tracking-[0.3em] text-sm">
-                  {{ record ? 'Update Secret' : 'Save Secret' }}
+                <span
+                  *ngIf="!isSubmitting()"
+                  class="font-bold uppercase tracking-[0.3em] text-sm md:text-base"
+                >
+                  {{ record ? 'Update' : 'Save Secret' }}
                 </span>
               </button>
               <button
                 type="button"
                 (click)="triggerClose()"
-                class="w-full py-3 rounded-xl border border-white/10 bg-white/[0.02] text-sm font-black uppercase tracking-[0.3em] text-white/55 hover:text-white transition-all shadow-inner hidden md:block"
+                class="w-full py-3 rounded-xl border border-white/10 bg-white/[0.02] text-sm md:text-base font-bold uppercase tracking-[0.3em] text-white/55 hover:text-white transition-all shadow-inner hidden md:block"
               >
                 Discard
               </button>

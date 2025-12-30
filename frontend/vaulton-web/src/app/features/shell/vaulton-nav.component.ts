@@ -29,7 +29,7 @@ import { SessionService } from '../../core/auth/session.service';
              routerLink="/" 
              routerLinkActive="!text-vault-purple !opacity-100"
              [routerLinkActiveOptions]="{exact: true}"
-             class="text-[10px] font-black uppercase tracking-[0.25em] text-white/80 hover:text-white transition-all active:scale-[0.98] decoration-none"
+             class="text-[0.625rem] font-black uppercase tracking-[0.25em] text-white/80 hover:text-white transition-all active:scale-[0.98] decoration-none"
            >
              Home
            </a>
@@ -37,14 +37,14 @@ import { SessionService } from '../../core/auth/session.service';
              routerLink="/vault" 
              routerLinkActive="!text-vault-purple !opacity-100"
              [routerLinkActiveOptions]="{exact: true}"
-             class="text-[10px] font-black uppercase tracking-[0.25em] text-white/80 hover:text-white transition-all active:scale-[0.98] decoration-none"
+             class="text-[0.625rem] font-black uppercase tracking-[0.25em] text-white/80 hover:text-white transition-all active:scale-[0.98] decoration-none"
            >
              Vault
            </a>
            <a 
              routerLink="/vault/settings" 
              routerLinkActive="!text-vault-purple !opacity-100"
-             class="text-[10px] font-black uppercase tracking-[0.25em] text-white/80 hover:text-white transition-all active:scale-[0.98] decoration-none"
+             class="text-[0.625rem] font-black uppercase tracking-[0.25em] text-white/80 hover:text-white transition-all active:scale-[0.98] decoration-none"
            >
              Settings
            </a>
@@ -62,7 +62,7 @@ import { SessionService } from '../../core/auth/session.service';
           [class.bg-red-500/5]="timer.isAboutToLock()"
         >
           <div class="flex flex-col items-end justify-center h-full">
-            <span class="hidden md:block text-[8px] font-black uppercase tracking-[0.2em] text-white/60 leading-none mb-0.5">Session</span>
+            <span class="hidden md:block text-[0.5rem] font-black uppercase tracking-[0.2em] text-white/60 leading-none mb-0.5">Session</span>
             <span 
               class="text-xs font-mono font-bold tracking-widest transition-colors duration-300 leading-none"
               [class.text-red-400]="timer.isAboutToLock()"
@@ -78,7 +78,7 @@ import { SessionService } from '../../core/auth/session.service';
 
         <div class="flex items-center gap-2 p-1 rounded-full bg-zinc-950 md:bg-white/[0.03] border border-white/10 shadow-xl md:shadow-none">
           <button
-            class="px-2 md:px-5 py-2 rounded-full hover:bg-white/5 text-white/70 hover:text-white transition-all text-[10px] font-black uppercase tracking-[0.2em] active:scale-[0.98] flex items-center justify-center"
+            class="px-2 md:px-5 py-2 rounded-full hover:bg-white/5 text-white/70 hover:text-white transition-all text-[0.625rem] font-black uppercase tracking-[0.2em] active:scale-[0.98] flex items-center justify-center"
             (click)="lock()"
             title="Lock Vault"
           >
@@ -89,7 +89,7 @@ import { SessionService } from '../../core/auth/session.service';
           </button>
           <div class="w-[1px] h-4 bg-white/10"></div>
           <button
-            class="px-2 md:px-5 py-2 rounded-full hover:bg-vault-purple/10 text-white/70 hover:text-vault-purple transition-all text-[10px] font-black uppercase tracking-[0.2em] active:scale-[0.98] flex items-center justify-center"
+            class="px-2 md:px-5 py-2 rounded-full hover:bg-vault-purple/10 text-white/70 hover:text-vault-purple transition-all text-[0.625rem] font-black uppercase tracking-[0.2em] active:scale-[0.98] flex items-center justify-center"
             (click)="triggerLogout()"
             title="Logout"
           >
@@ -100,7 +100,7 @@ import { SessionService } from '../../core/auth/session.service';
           </button>
           <div class="w-[1px] h-4 bg-white/10"></div>
           <button
-            class="px-2 md:px-5 py-2 rounded-full hover:bg-red-500/10 text-white/70 hover:text-red-400 transition-all text-[10px] font-black uppercase tracking-[0.2em] active:scale-[0.98] flex items-center justify-center"
+            class="px-2 md:px-5 py-2 rounded-full hover:bg-red-500/10 text-white/70 hover:text-red-400 transition-all text-[0.625rem] font-black uppercase tracking-[0.2em] active:scale-[0.98] flex items-center justify-center"
             (click)="triggerWipe()"
             title="Wipe Data"
           >

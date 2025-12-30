@@ -26,8 +26,8 @@ import { CommonModule } from '@angular/common';
         </svg>
       </div>
 
-      <h2 class="text-2xl font-black uppercase tracking-[0.2em] text-white/90 mb-4">End Session</h2>
-      <p class="text-sm text-white/40 mb-8 font-medium leading-relaxed">
+      <h2 class="text-2xl font-bold uppercase tracking-[0.2em] text-white/90 mb-4">End Session</h2>
+      <p class="text-sm md:text-base text-white/40 mb-8 font-medium leading-relaxed">
         This will invalidate your current session on this device.
         <br /><br />
         Your <span class="text-white/70">Account Login</span> will remain pre-filled for your next
@@ -48,12 +48,14 @@ import { CommonModule } from '@angular/common';
           (click)="confirmLogout.emit()"
           class="w-full btn-primary !rounded-2xl !py-4 active:scale-[0.98] transition-all"
         >
-          <span class="font-black uppercase tracking-[0.25em] text-xs">Confirm Logout</span>
+          <span class="font-bold uppercase tracking-[0.25em] text-xs md:text-base"
+            >Confirm Logout</span
+          >
         </button>
 
         <button
           (click)="cancel.emit()"
-          class="py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-white transition-all"
+          class="py-4 text-[0.625rem] md:text-[0.75rem] font-bold uppercase tracking-[0.2em] text-white/55 hover:text-white transition-all"
         >
           Go Back
         </button>

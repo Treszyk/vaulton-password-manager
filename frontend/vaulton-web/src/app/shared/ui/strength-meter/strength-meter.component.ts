@@ -43,7 +43,7 @@ import { translations as plTranslations, dictionary as plDictionary } from '@zxc
       </div>
 
       <div
-        class="flex justify-between items-center text-[9px] font-black uppercase tracking-[0.2em] transition-colors duration-300"
+        class="flex justify-between items-center text-[0.5625rem] font-black uppercase tracking-[0.2em] transition-colors duration-300"
         [ngClass]="colorClass"
       >
         <span>{{ label() }}</span>

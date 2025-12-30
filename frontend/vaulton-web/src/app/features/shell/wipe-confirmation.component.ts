@@ -21,8 +21,8 @@ import { CommonModule } from '@angular/common';
         </svg>
       </div>
 
-      <h2 class="text-2xl font-black uppercase tracking-[0.2em] text-white/90 mb-4">Destructive Wipe</h2>
-      <p class="text-sm text-white/40 mb-8 font-medium leading-relaxed">
+      <h2 class="text-2xl font-bold uppercase tracking-[0.2em] text-white/90 mb-4">Destructive Wipe</h2>
+      <p class="text-sm md:text-base text-white/40 mb-8 font-medium leading-relaxed">
         This will permanently remove your <span class="text-white/70">Vault Bundle</span>, 
         <span class="text-white/70">Account ID</span>, and all local session data.
         <br><br>
@@ -49,7 +49,7 @@ import { CommonModule } from '@angular/common';
           <button
             class="absolute inset-0 w-full h-full flex items-center justify-center gap-3 transition-all pointer-events-none"
           >
-            <span class="font-black uppercase tracking-[0.2em] text-xs transition-all"
+            <span class="font-bold uppercase tracking-[0.2em] text-xs md:text-base transition-all"
                   [class.text-red-400]="isHolding()"
                   [class.text-white/70]="!isHolding()">
               {{ buttonLabel() }}
@@ -59,7 +59,7 @@ import { CommonModule } from '@angular/common';
 
         <button 
           (click)="cancel.emit()"
-          class="py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-white transition-all"
+          class="py-4 text-[0.625rem] md:text-[0.75rem] font-bold uppercase tracking-[0.2em] text-white/55 hover:text-white transition-all"
         >
           Go Back
         </button>

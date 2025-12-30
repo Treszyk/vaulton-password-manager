@@ -22,12 +22,12 @@ import { zeroize } from '../../core/crypto/zeroize';
   },
   template: `
   <div 
-      class="w-full h-full flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-vault-purple/30 selection:text-vault-purple-bright relative overflow-hidden"
+      class="w-full min-h-full flex flex-col items-center justify-center p-4 sm:p-6 sm:py-20 selection:bg-vault-purple/30 selection:text-vault-purple-bright relative overflow-x-hidden overflow-y-auto"
       [attr.data-auth-mode]="mode()"
     >
       <app-starfield></app-starfield>
 
-      <div class="w-full max-w-[440px] animate-slide-up relative z-10">
+      <div class="w-full max-w-[28rem] animate-slide-up relative z-10">
         <div class="auth-panel p-10 rounded-[2.5rem] relative flex flex-col gap-8">
           <div class="text-center relative z-10">
             <h1 
@@ -51,7 +51,7 @@ import { zeroize } from '../../core/crypto/zeroize';
           <div class="flex p-1.5 bg-white/5 rounded-2xl relative z-20 border border-white/5 backdrop-blur-md">
             <button
               (click)="setMode('LOGIN')"
-              class="flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 z-10"
+              class="flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 z-10"
               [class.text-white]="mode() === 'LOGIN'"
               [class.text-white/40]="mode() !== 'LOGIN'"
             >
@@ -59,7 +59,7 @@ import { zeroize } from '../../core/crypto/zeroize';
             </button>
             <button
               (click)="setMode('REGISTER')"
-              class="flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 z-10"
+              class="flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 z-10"
               [class.text-white]="mode() === 'REGISTER'"
               [class.text-white/40]="mode() !== 'REGISTER'"
             >
@@ -78,7 +78,7 @@ import { zeroize } from '../../core/crypto/zeroize';
                 
                 <div class="space-y-2">
                   <header class="flex items-center justify-between px-1">
-                     <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Account ID</label>
+                     <label class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Account ID</label>
                   </header>
                   <div class="relative group">
                     <input
@@ -109,13 +109,13 @@ import { zeroize } from '../../core/crypto/zeroize';
 
                 <div class="space-y-2">
                   <div class="flex items-center justify-between ml-1">
-                    <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Master Password</label>
+                    <label class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Master Password</label>
                     <button 
                       (click)="onForgotPassword()"
-                      class="text-[9px] font-black uppercase tracking-widest text-white/30 hover:text-vault-purple transition-all flex items-center gap-1.5 group/forgot"
+                      class="text-[0.5625rem] font-black uppercase tracking-widest text-white/30 hover:text-vault-purple transition-all flex items-center gap-1.5 group/forgot"
                     >
                       <span>Forgot?</span>
-                      <span class="px-1 py-0.5 rounded-md bg-white/5 border border-white/5 text-[7px] text-white/20 group-hover/forgot:border-vault-purple/30 group-hover/forgot:text-vault-purple/60 transition-all">SOON</span>
+                      <span class="px-1 py-0.5 rounded-md bg-white/5 border border-white/5 text-[0.4375rem] text-white/20 group-hover/forgot:border-vault-purple/30 group-hover/forgot:text-vault-purple/60 transition-all">SOON</span>
                     </button>
                   </div>
                   <div class="relative group">
@@ -146,14 +146,14 @@ import { zeroize } from '../../core/crypto/zeroize';
                   <div class="flex items-center justify-between px-1">
                     <div class="flex items-center gap-1.5 group/info cursor-help tooltip-bottom tooltip-full" 
                          data-tooltip="Anonymous opaque identifier used for platform login.">
-                      <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Account ID</label>
+                      <label class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Account ID</label>
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/info:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <button 
                       (click)="refreshAccountId()"
-                      class="text-[10px] font-bold text-vault-purple hover:text-vault-purple-bright transition-colors uppercase"
+                      class="text-[0.625rem] font-bold text-vault-purple hover:text-vault-purple-bright transition-colors uppercase"
                     >
                       Refresh
                     </button>
@@ -182,7 +182,7 @@ import { zeroize } from '../../core/crypto/zeroize';
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
-                    <p class="absolute top-[105%] left-1 text-[9px] font-medium text-orange-400/80 tracking-wide pointer-events-none whitespace-nowrap opacity-0 animate-fade-in" 
+                    <p class="absolute top-[105%] left-1 text-[0.625rem] md:text-[0.6875rem] font-medium text-orange-400/80 tracking-wide pointer-events-none whitespace-nowrap opacity-0 animate-fade-in" 
                        [class.opacity-100]="accountId() && mode() === 'REGISTER'">
                       Please save this ID safely; it is your only identifier.
                     </p>
@@ -190,7 +190,7 @@ import { zeroize } from '../../core/crypto/zeroize';
                 </div>
 
                 <div class="space-y-2">
-                  <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Master Password</label>
+                  <label class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Master Password</label>
                   <div class="relative group">
                     <input
                       type="password"
@@ -216,18 +216,18 @@ import { zeroize } from '../../core/crypto/zeroize';
                 <div class="kdf-container mt-2" [class.expanded]="mode() === 'REGISTER'">
                   <div class="min-h-0 space-y-3">
                     <div class="flex items-center justify-between ml-1 mb-1 relative">
-                      <div class="flex items-center gap-1.5 group/info cursor-help tooltip-full" 
+                      <div class="flex items-center gap-1.5 group/info cursor-help tooltip-full flex-shrink-0" 
                            data-tooltip="This setting influences both vault security and login time.">
-                        <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 cursor-help">Vault Hardening Grade</label>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/info:text-white/30 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <label class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 cursor-help whitespace-nowrap">Vault Hardening Grade</label>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white/35 group-hover/info:text-white/30 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       </div>
                       
-                      <div class="flex items-center gap-2 h-5">
+                      <div class="flex items-center justify-end gap-2 h-5 flex-1">
                         <span 
                           *ngIf="isBenchmarking()"
-                          class="text-[7px] sm:text-[9px] font-black uppercase tracking-wider text-vault-purple-bright animate-pulse"
+                          class="text-[0.4375rem] md:text-[0.5625rem] font-bold uppercase tracking-wider text-vault-purple-bright animate-pulse whitespace-nowrap"
                         >
                           Benchmarking {{ benchmarkStatus() }}...
                         </span>
@@ -240,11 +240,11 @@ import { zeroize } from '../../core/crypto/zeroize';
                           <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 text-vault-purple transition-transform group-hover/rerun:rotate-180 duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                           </svg>
-                          <span class="text-[8px] font-black uppercase tracking-widest text-vault-purple/70 group-hover/rerun:text-vault-purple transition-colors">Rerun</span>
+                          <span class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-widest text-vault-purple/70 group-hover/rerun:text-vault-purple transition-colors">Rerun</span>
                         </button>
                       </div>
                     </div>
-                    <div class="relative py-1 overflow-visible">
+                    <div class="relative py-1 overflow-visible" [class.min-h-[8.5rem]]="!isOptimized() && mode() === 'REGISTER'">
                        <div class="flex gap-2 transition-all duration-700 ease-in-out -m-4 p-4" 
                             [class.opacity-0]="!isOptimized() && !isBenchmarking()"
                             [class.scale-[0.94]]="!isOptimized() && !isBenchmarking()"
@@ -262,9 +262,8 @@ import { zeroize } from '../../core/crypto/zeroize';
                           <span class="grade-desc" *ngIf="!standardTime()">Fast & Secure</span>
                           <span class="grade-desc" *ngIf="standardTime()">Estimated time: {{ standardTime()?.toFixed(1) }}s</span>
                           
-                          <!-- Timing Badge -->
                           <div *ngIf="standardTime() && !isBenchmarking()" 
-                               class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-tighter"
+                               class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.4375rem] md:text-[0.5rem] font-bold uppercase tracking-tighter"
                                [class.text-green-400]="recommendedMode() === 1"
                                [class.text-orange-400]="recommendedMode() !== 1 && standardTime()! <= 4.0"
                                [class.text-red-400]="recommendedMode() !== 1 && standardTime()! > 4.0">
@@ -285,9 +284,8 @@ import { zeroize } from '../../core/crypto/zeroize';
                           <span class="grade-desc" *ngIf="!hardenedTime()">Maximum Resistance</span>
                           <span class="grade-desc" *ngIf="hardenedTime()">Estimated time: {{ hardenedTime()?.toFixed(1) }}s</span>
   
-                          <!-- Timing Badge / Warning -->
                           <div *ngIf="hardenedTime() && !isBenchmarking()" 
-                               class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-tighter"
+                               class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.4375rem] md:text-[0.5rem] font-bold uppercase tracking-tighter"
                                [class.text-green-400]="recommendedMode() === 2"
                                [class.text-orange-400]="recommendedMode() !== 2 && hardenedTime()! <= 3.25"
                                [class.text-red-400]="recommendedMode() !== 2 && hardenedTime()! > 3.25">
@@ -299,7 +297,7 @@ import { zeroize } from '../../core/crypto/zeroize';
                       <div *ngIf="!isOptimized() && !isBenchmarking()" 
                            class="absolute inset-x-0 inset-y-0 z-20 flex flex-col items-center justify-center animate-fade-in pointer-events-none">
                         <div class="flex flex-col items-center justify-center p-4 pointer-events-auto w-full relative">
-                          <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
+                          <p class="text-[0.625rem] md:text-[0.6875rem] font-bold uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
                              [class.text-white/80]="isPasswordStrong()"
                              [class.text-red-400]="!isPasswordStrong()">
                             {{ isPasswordStrong() ? 'Benchmark required to select grade' : 'Minimum "Fair" strength required' }}
@@ -321,7 +319,7 @@ import { zeroize } from '../../core/crypto/zeroize';
                             <svg *ngIf="!isPasswordStrong()" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
-                            <span class="text-[10px] font-black uppercase tracking-widest leading-none">
+                            <span class="text-[0.625rem] md:text-[0.75rem] font-bold uppercase tracking-widest leading-none">
                               {{ isPasswordStrong() ? 'Run Benchmark' : 'Weak Password' }}
                             </span>
                           </button>
@@ -341,7 +339,7 @@ import { zeroize } from '../../core/crypto/zeroize';
               class="btn-primary w-full py-4.5 relative overflow-hidden group rounded-2xl transition-all active:scale-[0.98]"
               [class.opacity-50]="mode() === 'REGISTER' && (!isOptimized() || !isPasswordStrong())"
             >
-              <span *ngIf="!isWorking()" class="relative z-10 uppercase tracking-[0.4em] text-xs font-black">
+              <span *ngIf="!isWorking()" class="relative z-10 uppercase tracking-[0.4em] text-xs md:text-sm font-bold">
                 {{ mode() === 'LOGIN' ? 'Unlock Vault' : 'Initialize Vault' }}
               </span>
               <span *ngIf="isWorking()" class="flex items-center justify-center gap-3">
@@ -349,7 +347,7 @@ import { zeroize } from '../../core/crypto/zeroize';
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span class="uppercase tracking-[0.2em] text-[10px] font-bold">Processing...</span>
+                <span class="uppercase tracking-[0.2em] text-[0.625rem] md:text-[0.75rem] font-bold">Processing...</span>
               </span>
               <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             </button>
@@ -362,7 +360,7 @@ import { zeroize } from '../../core/crypto/zeroize';
         </div>
 
         <div class="mt-[2px] sm:mt-[2px] text-center footer-container">
-          <p class="text-[10px] text-white/55 uppercase tracking-[0.6em] font-black pointer-events-none">
+          <p class="text-[0.625rem] text-white/55 uppercase tracking-[0.6em] font-black pointer-events-none">
             <span class="block sm:inline">ZERO-KNOWLEDGE</span>
             <span class="mx-3 text-vault-purple/30 hidden sm:inline">•</span>
             <span class="block sm:inline">PRIVACY-FIRST</span>

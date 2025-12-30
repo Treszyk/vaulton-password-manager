@@ -35,17 +35,17 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
     class: 'flex-1 min-h-0 flex flex-col',
   },
   template: `
-    <div class="p-4 pb-0 md:p-8 md:pb-0 max-w-7xl mx-auto flex-1 min-h-0 flex flex-col w-full">
+    <div class="p-4 pb-0 md:p-8 md:pb-0 max-w-[100rem] mx-auto flex-1 min-h-0 flex flex-col w-full">
       <div
         class="flex-none mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8 px-4"
       >
         <div>
-          <h2 class="text-[10px] font-black uppercase tracking-[0.4em] text-white/55 mb-1">
+          <h2 class="text-[0.625rem] font-black uppercase tracking-[0.4em] text-white/55 mb-1">
             Vault Storage
           </h2>
           <div class="flex items-center gap-3">
             <span class="text-4xl font-black text-white/90">{{ filteredRecords().length }}</span>
-            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-white/55 mb-1.5"
+            <span class="text-[0.625rem] font-black uppercase tracking-[0.2em] text-white/55 mb-1.5"
               >Results</span
             >
           </div>
@@ -74,7 +74,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
           </div>
           <button
             (click)="searchScope.set(searchScope() === 'titles' ? 'all' : 'titles')"
-            class="absolute inset-y-0 right-2 my-auto px-3 py-1.5 h-fit rounded-lg text-[10px] font-black uppercase tracking-wider transition-all"
+            class="absolute inset-y-0 right-2 my-auto px-3 py-1.5 h-fit rounded-lg text-[0.625rem] font-black uppercase tracking-wider transition-all"
             [ngClass]="{
               'text-vault-purple bg-vault-purple/10 border border-vault-purple/20':
                 searchScope() === 'titles',
@@ -89,7 +89,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
             type="text"
             [(ngModel)]="searchQueryInput"
             placeholder="Search Vault..."
-            class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-2xl !py-4 !pl-14 !pr-6 !text-xs !tracking-[0.1em] !font-bold transition-all placeholder:text-white/5"
+            class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-2xl !py-4 !pl-14 !pr-6 !text-xs !tracking-[0.1em] !font-bold transition-all placeholder:text-white/20"
           />
         </div>
       </div>
@@ -100,18 +100,20 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
         <div
           class="w-12 h-12 border-2 border-white/10 border-t-white/40 rounded-full animate-spin mb-4"
         ></div>
-        <p class="text-white/55 text-[9px] font-black uppercase tracking-[0.4em]">
+        <p
+          class="text-white/55 text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.4em]"
+        >
           Unlocking Secure Vault...
         </p>
       </div>
       <div
         *ngIf="!vault.isLoading()"
-        class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth pb-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch animate-fade-in px-1"
+        class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth pb-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 [3000px]:grid-cols-4 gap-8 items-stretch animate-fade-in px-1"
       >
         <button
           *ngIf="!searchQuery()"
           (click)="showAddModal.set(true)"
-          class="group relative h-[240px] flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white/[0.01] border-2 border-dashed border-white/10 hover:border-vault-purple/40 hover:bg-white/[0.02] transition-all duration-500 animate-scale-in"
+          class="group relative h-[15rem] flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white/[0.01] border-2 border-dashed border-white/10 hover:border-vault-purple/40 hover:bg-white/[0.02] transition-all duration-500 animate-scale-in"
           [style.animation-delay]="'0ms'"
         >
           <div
@@ -133,7 +135,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
             </svg>
           </div>
           <span
-            class="text-[11px] font-black uppercase tracking-[0.4em] text-white/70 group-hover:text-white/60 transition-colors"
+            class="text-[0.6875rem] md:text-[0.75rem] font-bold uppercase tracking-[0.4em] text-white/70 group-hover:text-white/60 transition-colors"
             >Add a New Entry</span
           >
         </button>
@@ -151,7 +153,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
           *ngIf="filteredRecords().length === 0 && searchQuery()"
           class="col-span-full py-20 text-center"
         >
-          <p class="text-white/35 text-[10px] font-black uppercase tracking-[0.5em]">
+          <p class="text-white/35 text-[0.625rem] font-black uppercase tracking-[0.5em]">
             No matching secrets found
           </p>
         </div>

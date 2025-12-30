@@ -44,17 +44,18 @@ import { firstValueFrom } from 'rxjs';
             />
           </svg>
         </div>
-        <h2 class="text-2xl font-black uppercase tracking-[0.2em] text-white/90">Vault Locked</h2>
+        <h2 class="text-2xl font-bold uppercase tracking-[0.2em] text-white/90">
+          Vault Locked
+        </h2>
         <p class="text-sm text-white/40 mt-2 font-medium">
           Verify identity to resume
         </p>
       </div>
 
-      <!-- Mode Choice (Tabs) -->
       <div *ngIf="hasPasscode()" class="flex p-1 bg-white/5 rounded-2xl mb-8 border border-white/5 relative">
         <button
           (click)="setMode('PASSWORD')"
-          class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 relative z-10"
+          class="flex-1 py-3 text-[0.625rem] md:text-[0.75rem] font-bold uppercase tracking-widest rounded-xl transition-all duration-300 relative z-10"
           [class.text-white]="mode() === 'PASSWORD'"
           [class.text-white/40]="mode() !== 'PASSWORD'"
         >
@@ -62,7 +63,7 @@ import { firstValueFrom } from 'rxjs';
         </button>
         <button
           (click)="setMode('PASSCODE')"
-          class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 relative z-10"
+          class="flex-1 py-3 text-[0.625rem] md:text-[0.75rem] font-bold uppercase tracking-widest rounded-xl transition-all duration-300 relative z-10"
           [class.text-white]="mode() === 'PASSCODE'"
           [class.text-white/40]="mode() !== 'PASSCODE'"
         >
@@ -75,8 +76,7 @@ import { firstValueFrom } from 'rxjs';
         ></div>
       </div>
 
-      <div class="relative min-h-[140px]">
-        <!-- PASSWORD MODE -->
+      <div class="relative min-h-[8.75rem]">
         <form *ngIf="mode() === 'PASSWORD'" (submit)="unlock()" class="space-y-4 animate-fade-in">
           <div class="relative group">
             <input
@@ -95,23 +95,22 @@ import { firstValueFrom } from 'rxjs';
             class="w-full btn-primary !rounded-2xl !py-4 flex items-center justify-center gap-3 group overflow-hidden relative"
             [disabled]="isWorking() || !password()"
           >
-            <span *ngIf="!isWorking()" class="font-black uppercase tracking-[0.2em] relative z-10">Unlock Vault</span>
+            <span *ngIf="!isWorking()" class="font-bold uppercase tracking-[0.2em] md:text-base relative z-10">Unlock Vault</span>
              <span *ngIf="isWorking()" class="flex items-center gap-2 relative z-10">
                 <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span class="font-black uppercase tracking-[0.2em]">Unlocking...</span>
+                <span class="font-bold uppercase tracking-[0.2em] md:text-base">Unlocking...</span>
              </span>
              <div class="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
           </button>
         </form>
 
-        <!-- PASSCODE MODE -->
         <div *ngIf="mode() === 'PASSCODE'" class="flex flex-col items-center gap-8 animate-fade-in">
           <div class="space-y-4 text-center w-full">
             <div class="flex items-center justify-between px-1">
-              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">6-Character Passcode</label>
+              <label class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">6-Character Passcode</label>
               <button (click)="togglePinVisibility()" class="text-white/30 hover:text-white transition-colors">
                 <svg *ngIf="pinVisibility()" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -138,7 +137,6 @@ import { firstValueFrom } from 'rxjs';
                >
             </div>
             
-            <!-- Spinner Container in empty space -->
             <div class="min-h-[24px] flex items-center justify-center transition-all duration-300"
                  [class.opacity-0]="!isWorking()"
                  [class.opacity-100]="isWorking()">
@@ -147,7 +145,7 @@ import { firstValueFrom } from 'rxjs';
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                    </svg>
-                   <span class="text-[10px] font-bold uppercase tracking-wider text-white/60">Verifying...</span>
+                   <span class="text-[0.625rem] font-bold uppercase tracking-wider text-white/60">Verifying...</span>
                 </div>
             </div>
 
@@ -155,11 +153,11 @@ import { firstValueFrom } from 'rxjs';
         </div>
       </div>
 
-      <div class="mt-8 grid grid-cols-[1fr_auto_1fr] items-center gap-4 w-full max-w-[320px] mx-auto">
+      <div class="mt-8 grid grid-cols-[1fr_auto_1fr] items-center gap-4 w-full max-w-[20rem] mx-auto">
         <div class="flex justify-end">
           <button
             type="button"
-            class="py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-vault-purple transition-all active:scale-[0.98]"
+            class="py-2 text-[0.625rem] font-black uppercase tracking-[0.2em] text-white/55 hover:text-vault-purple transition-all active:scale-[0.98]"
             (click)="triggerLogout()"
             [disabled]="isWorking()"
           >
@@ -172,7 +170,7 @@ import { firstValueFrom } from 'rxjs';
         <div class="flex justify-start">
           <button
             type="button"
-            class="py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-red-400 transition-all active:scale-[0.98]"
+            class="py-2 text-[0.625rem] font-black uppercase tracking-[0.2em] text-white/55 hover:text-red-400 transition-all active:scale-[0.98]"
             (click)="triggerWipe()"
             [disabled]="isWorking()"
           >

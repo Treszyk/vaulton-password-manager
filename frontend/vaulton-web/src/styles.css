@@ -26,6 +26,30 @@ body {
   overflow: hidden;
 }
 
+@media (min-width: 1024px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 2500px) {
+  html {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 3800px) {
+  html {
+    font-size: 36px;
+  }
+}
+
+@media (min-width: 5000px) {
+  html {
+    font-size: 44px;
+  }
+}
+
 app-root {
   display: block;
   height: 100%;
@@ -134,7 +158,7 @@ button.btn-secondary {
 
 .form-view.active {
   opacity: 1;
-  max-height: 500px;
+  max-height: 80rem;
   visibility: visible;
 }
 
@@ -180,7 +204,7 @@ button.btn-secondary {
 }
 
 .kdf-option .grade-title {
-  @apply text-[11px] font-black uppercase tracking-widest text-white/60;
+  @apply text-[0.6875rem] md:text-[0.75rem] font-bold uppercase tracking-widest text-white/60;
 }
 
 .kdf-option.active .grade-title {
@@ -188,7 +212,7 @@ button.btn-secondary {
 }
 
 .kdf-option .grade-desc {
-  @apply text-[9px] font-bold text-white/30 uppercase tracking-tight;
+  @apply text-[0.5625rem] md:text-[0.625rem] font-bold text-white/30 uppercase tracking-tight;
 }
 
 .kdf-option.active .grade-desc {
@@ -211,7 +235,7 @@ button.btn-secondary {
   max-width: 250px;
 
   transform: translateY(5px);
-  @apply px-4 py-2 rounded-xl bg-vault-grey border border-white/10 text-[10px] 
+  @apply px-4 py-2 rounded-xl bg-vault-grey border border-white/10 text-[0.625rem] 
          font-bold text-white/70 opacity-0 pointer-events-none 
          transition-all duration-300 z-[1000] backdrop-blur-md shadow-2xl
          text-center leading-relaxed;

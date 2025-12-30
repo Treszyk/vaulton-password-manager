@@ -99,7 +99,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                         </svg>
                       </button>
                     </div>
-                    <p class="text-[10px] text-white/30 pt-1">This is your unique vault identifier. Keep it safe. You need it to log in to your vault.</p>
+                    <p class="text-[0.625rem] md:text-[0.75rem] text-white/30 pt-1">This is your unique vault identifier. Keep it safe. You need it to log in to your vault.</p>
                  </div>
               </div>
             </section>
@@ -138,7 +138,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                 <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-white/40">Device Security</h2>
                 <div *ngIf="isPasscodeEnabled()" class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                   <div class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
-                  <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-tighter">Active</span>
+                  <span class="text-[0.5625rem] font-bold text-emerald-500 uppercase tracking-tighter">Active</span>
                 </div>
               </div>
 
@@ -161,7 +161,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                   ></div>
                 </button>
               </div>
-              <p class="text-[9px] font-medium text-orange-400/80 tracking-wide px-1 mt-1.5 animate-fade-in">
+              <p class="text-[0.75rem] md:text-sm font-medium text-orange-400/80 tracking-wide px-1 mt-1.5 animate-fade-in">
                  Weakens local security, but increases convenience.
               </p>
 
@@ -186,7 +186,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 
                      <div class="space-y-4">
                         <div class="space-y-2">
-                           <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Master Password</label>
+                           <label class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Master Password</label>
                            <input 
                             type="password" 
                             [(ngModel)]="confirmPasswordForPasscode"
@@ -197,7 +197,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 
                         <div class="space-y-4 text-center">
                             <div class="flex items-center justify-between px-1">
-                              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Choose 6-Character PASSCODE</label>
+                              <label class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Choose 6-Character PASSCODE</label>
                               <button (click)="togglePinVisibility()" class="text-white/30 hover:text-white transition-colors">
                                 <svg *ngIf="pinVisibility()" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -268,7 +268,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                   </div>
                   <div>
                     <div class="text-sm font-bold text-white">1 Minute</div>
-                    <div class="text-[10px] text-white/40 uppercase tracking-wider">Paranoid</div>
+                    <div class="text-[0.625rem] text-white/40 uppercase tracking-wider">Paranoid</div>
                   </div>
                 </button>
 
@@ -291,7 +291,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                   </div>
                   <div>
                     <div class="text-sm font-bold text-white">5 Minutes</div>
-                    <div class="text-[10px] text-white/40 uppercase tracking-wider">Recommended</div>
+                    <div class="text-[0.625rem] text-white/40 uppercase tracking-wider">Recommended</div>
                   </div>
                 </button>
 
@@ -314,7 +314,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                   </div>
                   <div>
                     <div class="text-sm font-bold text-white group-hover:text-orange-200 transition-colors">30 Minutes</div>
-                    <div class="text-[10px] text-orange-500/80 uppercase tracking-wider font-bold">Decreased Security</div>
+                    <div class="text-[0.625rem] text-orange-500/80 uppercase tracking-wider font-bold">Decreased Security</div>
                   </div>
                 </button>
 
@@ -337,7 +337,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                   </div>
                   <div>
                     <div class="text-sm font-bold text-white group-hover:text-red-200 transition-colors">1 Hour</div>
-                    <div class="text-[10px] text-red-500 uppercase tracking-wider font-bold">Danger: High Risk</div>
+                    <div class="text-[0.625rem] text-red-500 uppercase tracking-wider font-bold">Danger: High Risk</div>
                   </div>
                 </button>
               </div>
@@ -352,14 +352,14 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <p class="text-[11px] text-amber-500/70 leading-relaxed font-medium">
+                    <p class="text-[0.6875rem] md:text-[0.75rem] text-amber-500/70 leading-relaxed font-medium">
                       Changing your password will re-key your entire vault. This is a irreversible local and cloud operation. Ensure you remember your new password.
                     </p>
                   </div>
 
                   <div class="space-y-4">
                      <div class="space-y-2">
-                        <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Current Password</label>
+                        <label class="text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Current Password</label>
                         <input 
                           type="password" 
                           [(ngModel)]="rekeyOldPassword"
@@ -367,7 +367,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                           placeholder="••••••••">
                      </div>
                      <div class="space-y-2">
-                        <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">New Master Password</label>
+                        <label class="text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">New Master Password</label>
                         <input 
                           type="password" 
                           [(ngModel)]="rekeyNewPassword"
@@ -376,7 +376,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                           placeholder="••••••••">
                      </div>
                      <div class="space-y-2 animate-fade-in" *ngIf="rekeyNewPassword">
-                        <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Confirm New Password</label>
+                        <label class="text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Confirm New Password</label>
                         <input 
                           type="password" 
                           [(ngModel)]="rekeyConfirmPassword"
@@ -384,19 +384,18 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                           placeholder="••••••••">
                      </div>
 
-                     <!-- KDF Chooser for Rekey -->
                      <div class="kdf-container expanded mt-2">
                       <div class="min-h-0 space-y-3">
                         <div class="flex items-center justify-between ml-1 mb-1 relative">
                           <div class="flex items-center gap-1.5 group/info cursor-help tooltip-full" 
                                data-tooltip="This setting influences both vault security and login time.">
-                            <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 cursor-help">Vault Hardening Grade</label>
+                            <label class="text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 cursor-help">Vault Hardening Grade</label>
                           </div>
                           
                           <div class="flex items-center gap-2 h-5">
                             <span 
                               *ngIf="isBenchmarking()"
-                              class="text-[7px] sm:text-[9px] font-black uppercase tracking-wider text-vault-purple-bright animate-pulse"
+                              class="text-[0.4375rem] md:text-[0.5625rem] font-black uppercase tracking-wider text-vault-purple-bright animate-pulse"
                             >
                               Benchmarking {{ benchmarkStatus() }}...
                             </span>
@@ -409,7 +408,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                               <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 text-vault-purple transition-transform group-hover/rerun:rotate-180 duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                               </svg>
-                              <span class="text-[8px] font-black uppercase tracking-widest text-vault-purple/70 group-hover/rerun:text-vault-purple transition-colors">Rerun</span>
+                              <span class="text-[0.5rem] md:text-[0.625rem] font-black uppercase tracking-widest text-vault-purple/70 group-hover/rerun:text-vault-purple transition-colors">Rerun</span>
                             </button>
                           </div>
                         </div>
@@ -428,7 +427,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                               <span class="grade-desc" *ngIf="!standardTime()">Fast & Secure</span>
                               <span class="grade-desc" *ngIf="standardTime()">Estimated time: {{ standardTime()?.toFixed(1) }}s</span>
                               <div *ngIf="standardTime() && !isBenchmarking()" 
-                                   class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-tighter"
+                                   class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.4375rem] md:text-[0.5rem] font-black uppercase tracking-tighter"
                                    [class.text-green-400]="recommendedMode() === 1"
                                    [class.text-orange-400]="recommendedMode() !== 1 && standardTime()! <= 4.0"
                                    [class.text-red-400]="recommendedMode() !== 1 && standardTime()! > 4.0">
@@ -446,7 +445,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                               <span class="grade-desc" *ngIf="!hardenedTime()">Maximum Resistance</span>
                               <span class="grade-desc" *ngIf="hardenedTime()">Estimated time: {{ hardenedTime()?.toFixed(1) }}s</span>
                               <div *ngIf="hardenedTime() && !isBenchmarking()" 
-                                   class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-tighter"
+                                   class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.4375rem] md:text-[0.5rem] font-black uppercase tracking-tighter"
                                    [class.text-green-400]="recommendedMode() === 2"
                                    [class.text-orange-400]="recommendedMode() !== 2 && hardenedTime()! <= 3.25"
                                    [class.text-red-400]="recommendedMode() !== 2 && hardenedTime()! > 3.25">
@@ -466,7 +465,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                                   <path d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
-                                <span class="text-[10px] font-black uppercase tracking-widest">Benchmark & Select</span>
+                                <span class="text-[0.625rem] font-black uppercase tracking-widest">Benchmark & Select</span>
                               </button>
                             </div>
                           </div>

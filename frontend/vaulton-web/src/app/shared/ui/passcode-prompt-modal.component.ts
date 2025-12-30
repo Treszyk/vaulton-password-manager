@@ -29,13 +29,13 @@ import { CommonModule } from '@angular/common';
               />
             </svg>
           </div>
-          <h2 class="text-2xl font-black uppercase tracking-[0.2em] text-white/90">
+          <h2 class="text-2xl font-bold uppercase tracking-[0.2em] text-white/90">
             Enable Quick Unlock?
           </h2>
           <div class="mt-4 p-4 rounded-2xl bg-orange-500/5 border border-orange-500/20 text-left">
-            <p class="text-xs text-orange-200/70 leading-relaxed font-medium">
+            <p class="text-xs md:text-sm text-orange-200/70 leading-relaxed font-medium">
               <span
-                class="text-orange-400 font-bold block mb-1 uppercase tracking-wider text-[10px]"
+                class="text-orange-400 font-bold block mb-1 uppercase tracking-wider text-[0.625rem] md:text-[0.6875rem]"
                 >Security Notice</span
               >
               This feature enables a 6-digit passcode for faster access. It is
@@ -49,7 +49,7 @@ import { CommonModule } from '@angular/common';
         <div class="flex flex-col gap-3">
           <button
             type="button"
-            class="w-full btn-primary !rounded-2xl !py-4 flex items-center justify-center font-black uppercase tracking-[0.2em] shadow-lg shadow-vault-purple/30 group"
+            class="w-full btn-primary !rounded-2xl !py-4 flex items-center justify-center font-bold uppercase tracking-[0.2em] shadow-lg shadow-vault-purple/30 group"
             (click)="setup.emit()"
           >
             Setup Passcode
@@ -71,7 +71,7 @@ import { CommonModule } from '@angular/common';
 
           <button
             type="button"
-            class="w-full py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors"
+            class="w-full py-4 text-[0.625rem] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors"
             (click)="skip.emit()"
           >
             Maybe Later
