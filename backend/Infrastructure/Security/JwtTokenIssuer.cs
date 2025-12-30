@@ -1,7 +1,7 @@
 ﻿using Application.Services.Auth;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
@@ -28,22 +28,24 @@ public sealed class JwtTokenIssuer(IConfiguration config) : ITokenIssuer
 		var now = DateTime.UtcNow;
 		var expires = now.AddMinutes(20);
 
-		var claims = new[]
+		var claims = new Dictionary<string, object>
 		{
-			new Claim(JwtRegisteredClaimNames.Sub, accountId.ToString()),
-			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-			new Claim(JwtRegisteredClaimNames.Iat, new DateTimeOffset(now).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+			{ JwtRegisteredClaimNames.Sub, accountId.ToString() },
+			{ JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString() },
+			{ JwtRegisteredClaimNames.Iat, new DateTimeOffset(now).ToUnixTimeSeconds() }
 		};
 
-		var token = new JwtSecurityToken(
-			issuer: issuer,
-			audience: audience,
-			claims: claims,
-			notBefore: now,
-			expires: expires,
-			signingCredentials: creds
-		);
+		var descriptor = new SecurityTokenDescriptor
+		{
+			Issuer = issuer,
+			Audience = audience,
+			Claims = claims,
+			NotBefore = now,
+			Expires = expires,
+			SigningCredentials = creds
+		};
 
-		return new JwtSecurityTokenHandler().WriteToken(token);
+		var handler = new JsonWebTokenHandler();
+		return handler.CreateToken(descriptor);
 	}
 }

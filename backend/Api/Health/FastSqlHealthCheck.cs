@@ -1,7 +1,7 @@
 ﻿using System.Data;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Npgsql;
 
 namespace Api.Health;
 
@@ -19,12 +19,12 @@ public sealed class FastSqlHealthCheck(IConfiguration config) : IHealthCheck
 		if (string.IsNullOrWhiteSpace(cs))
 			return HealthCheckResult.Unhealthy("Missing connection string.");
 
-		var b = new SqlConnectionStringBuilder(cs)
+		var b = new NpgsqlConnectionStringBuilder(cs)
 		{
-			ConnectTimeout = 1
+			Timeout = 1 // Fail fast (1 second)
 		};
 
-		await using var conn = new SqlConnection(b.ConnectionString);
+		await using var conn = new NpgsqlConnection(b.ConnectionString);
 		try
 		{
 			await conn.OpenAsync(cancellationToken);

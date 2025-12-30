@@ -19,10 +19,10 @@ namespace Tests.Integration
 			var envCs = Environment.GetEnvironmentVariable("ConnectionStrings__Default");
 			var cs = !string.IsNullOrWhiteSpace(envCs)
 				? envCs.TrimEnd(';')
-				: "Server=localhost,1433;Database=VaultonTest;User Id=SA;Password=VaultonTest!Passw0rd;TrustServerCertificate=True";
+				: "Host=localhost;Database=VaultonTest;Username=postgres;Password=VaultonTest!Passw0rd;";
 
-			if (!cs.Contains("Connect Timeout=", StringComparison.OrdinalIgnoreCase))
-				cs += ";Connect Timeout=3;";
+			if (!cs.Contains("Timeout=", StringComparison.OrdinalIgnoreCase))
+				cs += "Timeout=3;";
 
 			var appFactory = _factory.WithWebHostBuilder(b =>
 			{
@@ -38,7 +38,7 @@ namespace Tests.Integration
 
 			using var scope = appFactory.Services.CreateScope();
 			var db = scope.ServiceProvider.GetRequiredService<VaultonDbContext>();
-			db.Database.CanConnect().Should().BeTrue("the API should be able to reach SQL Server");
+			db.Database.CanConnect().Should().BeTrue("the API should be able to reach PostgreSQL");
 		}
 	}
 }

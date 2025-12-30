@@ -91,11 +91,10 @@ export class SessionService {
     this.vault.clearData();
 
     if (accountId) {
-      // Scoped Wipe: Delete only this user's data
       await this.persistence.clearUserData(accountId);
       this.settings.clearSettings(accountId);
     } else {
-      // Fallback if no ID found: wipe all to be safe (Nuclear option as fallback)
+      // fallback if no ID found: wipe all to be safe (Nuclear option as fallback)
       await this.persistence.clearAll();
       localStorage.clear();
     }

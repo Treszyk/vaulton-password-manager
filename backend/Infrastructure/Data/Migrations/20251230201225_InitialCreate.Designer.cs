@@ -3,49 +3,51 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(VaultonDbContext))]
-    [Migration("20251219080449_RefactorEncryptedValue")]
-    partial class RefactorEncryptedValue
+    [Migration("20251230201225_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Core.Entities.Entry", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<byte[]>("DomainTag")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("varbinary(32)");
+                        .HasColumnType("bytea");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DomainTag");
 
                     b.HasIndex("UserId");
 
@@ -56,25 +58,29 @@ namespace Infrastructure.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<byte[]>("TokenHash")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasMaxLength(32)
+                        .HasColumnType("bytea");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -85,46 +91,54 @@ namespace Infrastructure.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("ArgonLanes")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ArgonMem")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ArgonTime")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ArgonVersion")
-                        .HasColumnType("int");
+                    b.Property<byte[]>("AdminVerifier")
+                        .IsRequired()
+                        .HasColumnType("bytea");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("CryptoSchemaVer")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FailedLoginCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("KdfMode")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("LastFailedLoginAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("LastLoginAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LockedUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("S_AdminVerifier")
+                        .IsRequired()
+                        .HasColumnType("bytea");
 
                     b.Property<byte[]>("S_Pwd")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("varbinary(16)");
+                        .HasColumnType("bytea");
 
                     b.Property<byte[]>("S_Verifier")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("varbinary(16)");
+                        .HasColumnType("bytea");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<byte[]>("Verifier")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("varbinary(32)");
+                        .HasColumnType("bytea");
 
                     b.HasKey("Id");
 
@@ -142,23 +156,24 @@ namespace Infrastructure.Data.Migrations
                     b.OwnsOne("Core.Crypto.EncryptedValue", "Payload", b1 =>
                         {
                             b1.Property<Guid>("EntryId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<byte[]>("CipherText")
                                 .IsRequired()
-                                .HasColumnType("varbinary(max)")
+                                .HasMaxLength(4096)
+                                .HasColumnType("bytea")
                                 .HasColumnName("Payload_CipherText");
 
                             b1.Property<byte[]>("Nonce")
                                 .IsRequired()
                                 .HasMaxLength(12)
-                                .HasColumnType("varbinary(12)")
+                                .HasColumnType("bytea")
                                 .HasColumnName("Payload_Nonce");
 
                             b1.Property<byte[]>("Tag")
                                 .IsRequired()
                                 .HasMaxLength(16)
-                                .HasColumnType("varbinary(16)")
+                                .HasColumnType("bytea")
                                 .HasColumnName("Payload_Tag");
 
                             b1.HasKey("EntryId");
@@ -189,24 +204,24 @@ namespace Infrastructure.Data.Migrations
                     b.OwnsOne("Core.Crypto.EncryptedValue", "MkWrapPwd", b1 =>
                         {
                             b1.Property<Guid>("UserId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<byte[]>("CipherText")
                                 .IsRequired()
                                 .HasMaxLength(32)
-                                .HasColumnType("varbinary(32)")
+                                .HasColumnType("bytea")
                                 .HasColumnName("MkWrapPwd_CipherText");
 
                             b1.Property<byte[]>("Nonce")
                                 .IsRequired()
                                 .HasMaxLength(12)
-                                .HasColumnType("varbinary(12)")
+                                .HasColumnType("bytea")
                                 .HasColumnName("MkWrapPwd_Nonce");
 
                             b1.Property<byte[]>("Tag")
                                 .IsRequired()
                                 .HasMaxLength(16)
-                                .HasColumnType("varbinary(16)")
+                                .HasColumnType("bytea")
                                 .HasColumnName("MkWrapPwd_Tag");
 
                             b1.HasKey("UserId");
@@ -220,21 +235,21 @@ namespace Infrastructure.Data.Migrations
                     b.OwnsOne("Core.Crypto.EncryptedValue", "MkWrapRk", b1 =>
                         {
                             b1.Property<Guid>("UserId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<byte[]>("CipherText")
                                 .HasMaxLength(32)
-                                .HasColumnType("varbinary(32)")
+                                .HasColumnType("bytea")
                                 .HasColumnName("MkWrapRk_CipherText");
 
                             b1.Property<byte[]>("Nonce")
                                 .HasMaxLength(12)
-                                .HasColumnType("varbinary(12)")
+                                .HasColumnType("bytea")
                                 .HasColumnName("MkWrapRk_Nonce");
 
                             b1.Property<byte[]>("Tag")
                                 .HasMaxLength(16)
-                                .HasColumnType("varbinary(16)")
+                                .HasColumnType("bytea")
                                 .HasColumnName("MkWrapRk_Tag");
 
                             b1.HasKey("UserId");

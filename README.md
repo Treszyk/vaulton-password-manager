@@ -45,7 +45,7 @@ The easiest way to run the full stack locally is using Docker Compose.
    ```
 4. Run the following command from the root directory:
    ```bash
-   docker compose -f docker-compose.dev.yml up
+    docker compose -f docker-compose.dev.yml up --build
    ```
 
 ### Resetting the Environment (Clean Slate)
@@ -54,13 +54,14 @@ By default, the development database persists data so you don't lose your work b
 
 ```bash
 docker compose -f docker-compose.dev.yml down -v
+docker compose -f docker-compose.dev.yml up --build
 ```
 
 The `-v` flag removes the persistent volume (`vaulton-db-dev-data`), giving you an empty database on the next startup.
 
 ### Features
 
-- **Health-Aware Startup**: The API waits for the SQL Server database to be healthy before starting.
+- **Health-Aware Startup**: The API waits for the PostgreSQL database to be healthy before starting.
 - **Swagger UI**: Accessible at `http://localhost:8080/swagger` during development.
 - **Frontend App**: Accessible at `http://localhost:4200`.
 

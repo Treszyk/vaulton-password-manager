@@ -58,7 +58,7 @@ Initialize the `.env` file in the `deploy/` directory from the provided `.env.ex
 From the **root of the repository**:
 
 ```bash
-docker compose -f deploy/docker/docker-compose.prod.yml --env-file deploy/.env up -d
+docker compose -f deploy/docker/docker-compose.prod.yml --env-file deploy/.env up --build -d
 ```
 
 If you need to **update the code**, you must rebuild the images manually:
@@ -67,11 +67,23 @@ If you need to **update the code**, you must rebuild the images manually:
 docker compose -f deploy/docker/docker-compose.prod.yml --env-file deploy/.env build
 ```
 
+## 5. Troubleshooting Migration
+
+If you encounter an error like `initdb: error: directory "/var/lib/postgresql/data" exists but is not empty`, it means there is a stale volume from a previous deployment. To fix this and start fresh with PostgreSQL:
+
+```bash
+docker compose -f deploy/docker/docker-compose.prod.yml --env-file deploy/.env down -v
+docker compose -f deploy/docker/docker-compose.prod.yml --env-file deploy/.env up --build -d
+```
+
+> [!CAUTION]
+> The `-v` flag deletes the persistent database volume. Use this only if you intend to wipe the database.
+
 ## System Architecture
 
 1. **Gateway (Caddy)**: Handles SSL termination, static file delivery, and API reverse proxying. Enhances security headers (CSP, HSTS) at the edge.
 2. **Backend (API)**: .NET 8 Web API implementing core business logic and security middleware.
-3. **Database (SQL Server)**: Persistent storage for encrypted user data.
+3. **Database (PostgreSQL)**: Persistent storage for encrypted user data.
 
 ## Security Policies
 

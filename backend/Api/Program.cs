@@ -33,7 +33,7 @@ namespace Api
 				?? throw new InvalidOperationException("Connection string not configured. Set ConnectionStrings:Default or ConnectionStrings__Default.");
 
 			builder.Services.AddDbContext<VaultonDbContext>(o =>
-				o.UseSqlServer(conn, sql => sql.EnableRetryOnFailure()));
+				o.UseNpgsql(conn, sql => sql.EnableRetryOnFailure()));
 
 			builder.Services.AddControllers();
 			builder.Services.AddHealthChecks()
