@@ -69,7 +69,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
           <form (submit)="submit()" class="space-y-5">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/55 ml-1"
+                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Title</label
                 >
                 <input
@@ -83,7 +83,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/55 ml-1"
+                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Website</label
                 >
                 <input
@@ -96,7 +96,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/55 ml-1"
+                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Username / Email</label
                 >
                 <input
@@ -110,7 +110,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/55 ml-1"
+                <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Password</label
                 >
                 <div class="relative group">
@@ -181,7 +181,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
             </div>
 
             <div class="space-y-1.5">
-              <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/55 ml-1"
+              <label class="text-[8px] font-black uppercase tracking-[0.2em] text-white/85 ml-1"
                 >Notes</label
               >
               <textarea

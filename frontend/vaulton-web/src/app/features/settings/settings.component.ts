@@ -165,14 +165,13 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                  Weakens local security, but increases convenience.
               </p>
 
-              <!-- Passcode Setup Modal / Inline (Animated) -->
               <div class="grid transition-[grid-template-rows,opacity,margin] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
                    [class.grid-rows-[0fr]]="!showPasscodeSetup()"
                    [class.grid-rows-[1fr]]="showPasscodeSetup()"
                    [class.opacity-0]="!showPasscodeSetup()"
                    [class.opacity-100]="showPasscodeSetup()"
                    [class.mt-0]="!showPasscodeSetup()"
-                   [class.mt-6]="showPasscodeSetup()"> <!-- Animating margin using class toggle -->
+                   [class.mt-6]="showPasscodeSetup()">
                    
                  <div class="overflow-hidden min-h-0">
                    <div class="bg-zinc-900/80 border border-vault-purple/30 rounded-2xl p-6 space-y-6">
@@ -778,7 +777,7 @@ export class SettingsComponent implements OnInit {
 
     this.isRekeyBusy.set(true);
     try {
-      this.rekeyStatus.set('Verifying Identity...');
+      this.rekeyStatus.set('Verifying current password...');
       const bundle = await this.persistence.getBundle();
       if (!bundle) throw new Error('No vault session found');
 
@@ -789,7 +788,7 @@ export class SettingsComponent implements OnInit {
       );
 
       const wraps = await this.api.getWraps({ AdminVerifier: oldAdminVerifier }).toPromise();
-      if (!wraps) throw new Error('Identity verification failed');
+      if (!wraps) throw new Error('Current password incorrect');
 
       this.rekeyStatus.set('Deriving New Keys...');
 
@@ -806,7 +805,7 @@ export class SettingsComponent implements OnInit {
         this.kdfMode()
       );
 
-      this.rekeyStatus.set('Re-encrypting Vault...');
+      this.rekeyStatus.set('Updating vault...');
       this.rekeyStatus.set('Updating Server...');
       await this.api
         .changePassword({

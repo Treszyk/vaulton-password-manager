@@ -41,7 +41,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
       >
         <div>
           <h2 class="text-[10px] font-black uppercase tracking-[0.4em] text-white/55 mb-1">
-            Encrypted Archive
+            Vault Storage
           </h2>
           <div class="flex items-center gap-3">
             <span class="text-4xl font-black text-white/90">{{ filteredRecords().length }}</span>
@@ -101,7 +101,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
           class="w-12 h-12 border-2 border-white/10 border-t-white/40 rounded-full animate-spin mb-4"
         ></div>
         <p class="text-white/55 text-[9px] font-black uppercase tracking-[0.4em]">
-          Deciphering Neural Storage...
+          Unlocking Secure Vault...
         </p>
       </div>
       <div

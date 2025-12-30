@@ -57,19 +57,33 @@ import { VaultRecord } from './vault-record.model';
 
       <div class="space-y-4 flex-1 flex flex-col justify-end">
         <div class="relative">
-          <p class="text-[10px] font-black uppercase tracking-widest text-white/55 mb-1">Identity Access</p>
+          <p class="text-[10px] font-black uppercase tracking-widest text-white/55 mb-1">Login</p>
           <div class="flex items-center justify-between">
             <p class="text-sm text-white/80 truncate font-medium">{{ record.username }}</p>
-            <button (click)="copy(record.username)" class="p-1 px-2 text-white/35 hover:text-white/40 transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            </button>
+            <div class="relative flex items-center justify-center">
+              <span 
+                *ngIf="justCopied() && copiedStatus() === 'username'" 
+                class="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black tracking-widest pointer-events-none whitespace-nowrap text-emerald-400 !bg-transparent"
+              >
+                COPIED
+              </span>
+              <button 
+                (click)="copyUsername(record.username)" 
+                class="p-1 px-2 transition-all"
+                [class.text-white/35]="!justCopied() || copiedStatus() !== 'username'"
+                [class.hover:text-white/40]="!justCopied() || copiedStatus() !== 'username'"
+                [class.text-emerald-400]="justCopied() && copiedStatus() === 'username'"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
         <div class="relative">
-          <p class="text-[10px] font-black uppercase tracking-widest text-white/55 mb-1">Neural Secret</p>
+          <p class="text-[10px] font-black uppercase tracking-widest text-white/55 mb-1">Secret</p>
           <div class="flex items-center justify-between gap-4">
             <div class="relative flex-1 overflow-hidden flex items-center h-5">
                <p 
@@ -81,7 +95,7 @@ import { VaultRecord } from './vault-record.model';
                </p>
             </div>
             
-            <div class="flex items-center gap-1 flex-shrink-0">
+            <div class="flex items-center gap-1.5 flex-shrink-0">
               <button (click)="toggleReveal()" class="p-1 text-white/35 hover:text-white/40 transition-all relative">
                 <svg *ngIf="!reveal()" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -91,11 +105,29 @@ import { VaultRecord } from './vault-record.model';
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
                 </svg>
               </button>
-              <button (click)="copy(record.password)" class="p-1 text-white/35 hover:text-white/40 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </button>
+              <div class="relative flex items-center justify-center">
+                <span 
+                  *ngIf="copyConfirmActive() || (justCopied() && copiedStatus() === 'password')" 
+                  class="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black tracking-widest pointer-events-none whitespace-nowrap !bg-transparent"
+                  [class.text-orange-400]="copyConfirmActive() && !justCopied()"
+                  [class.text-emerald-400]="justCopied() && copiedStatus() === 'password'"
+                  [class.animate-pulse]="copyConfirmActive() && !justCopied()"
+                >
+                  {{ (justCopied() && copiedStatus() === 'password') ? 'COPIED' : 'SURE?' }}
+                </span>
+                <button 
+                  (click)="copyPassword(record.password)" 
+                  class="p-1 transition-all text-[10px] font-black flex items-center justify-center"
+                  [class.text-white/35]="!copyConfirmActive() && (!justCopied() || copiedStatus() !== 'password')"
+                  [class.hover:text-white/40]="!copyConfirmActive() && (!justCopied() || copiedStatus() !== 'password')"
+                  [class.text-orange-400]="copyConfirmActive()"
+                  [class.text-emerald-400]="justCopied() && copiedStatus() === 'password'"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -104,7 +136,7 @@ import { VaultRecord } from './vault-record.model';
           [class.invisible]="!record.notes"
           [class.pointer-events-none]="!record.notes"
           (click)="record.notes && onShowMemo.emit(record)"
-          class="w-fit py-1 text-[10px] font-black uppercase tracking-widest text-vault-purple/40 hover:text-vault-purple active:scale-95 transition-all flex items-center gap-2 group/btn"
+          class="w-fit py-1 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-vault-purple hover:opacity-100 active:scale-95 transition-all flex items-center gap-2 group/btn"
         >
           View Description
           <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover/btn:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -123,7 +155,13 @@ export class RecordCardComponent {
   @Output() onShowMemo = new EventEmitter<VaultRecord>();
 
   protected reveal = signal(false);
+  protected copyConfirmActive = signal(false);
+  protected justCopied = signal(false);
+  protected copiedStatus = signal<'username' | 'password' | null>(null);
+
   private revealTimeout?: any;
+  private copyTimeout?: any;
+  private statusTimeout?: any;
 
   toggleReveal() {
     if (this.reveal()) {
@@ -141,5 +179,36 @@ export class RecordCardComponent {
 
   copy(value: string) {
     navigator.clipboard.writeText(value);
+  }
+
+  copyUsername(value: string) {
+    this.copy(value);
+    this.showFeedback('username');
+  }
+
+  copyPassword(value: string) {
+    if (this.justCopied() && this.copiedStatus() === 'password') return;
+
+    if (!this.copyConfirmActive()) {
+      this.copyConfirmActive.set(true);
+      if (this.copyTimeout) clearTimeout(this.copyTimeout);
+      this.copyTimeout = setTimeout(() => this.copyConfirmActive.set(false), 3000);
+      return;
+    }
+
+    this.copy(value);
+    this.copyConfirmActive.set(false);
+    if (this.copyTimeout) clearTimeout(this.copyTimeout);
+    this.showFeedback('password');
+  }
+
+  private showFeedback(type: 'username' | 'password') {
+    this.justCopied.set(true);
+    this.copiedStatus.set(type);
+    if (this.statusTimeout) clearTimeout(this.statusTimeout);
+    this.statusTimeout = setTimeout(() => {
+      this.justCopied.set(false);
+      this.copiedStatus.set(null);
+    }, 2000);
   }
 }

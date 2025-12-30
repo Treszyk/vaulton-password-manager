@@ -78,7 +78,7 @@ import { zeroize } from '../../core/crypto/zeroize';
                 
                 <div class="space-y-2">
                   <header class="flex items-center justify-between px-1">
-                     <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Account Identifier</label>
+                     <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Account ID</label>
                   </header>
                   <div class="relative group">
                     <input
@@ -108,7 +108,16 @@ import { zeroize } from '../../core/crypto/zeroize';
                 </div>
 
                 <div class="space-y-2">
-                  <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Master Password</label>
+                  <div class="flex items-center justify-between ml-1">
+                    <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Master Password</label>
+                    <button 
+                      (click)="onForgotPassword()"
+                      class="text-[9px] font-black uppercase tracking-widest text-white/30 hover:text-vault-purple transition-all flex items-center gap-1.5 group/forgot"
+                    >
+                      <span>Forgot?</span>
+                      <span class="px-1 py-0.5 rounded-md bg-white/5 border border-white/5 text-[7px] text-white/20 group-hover/forgot:border-vault-purple/30 group-hover/forgot:text-vault-purple/60 transition-all">SOON</span>
+                    </button>
+                  </div>
                   <div class="relative group">
                     <input
                       type="password"
@@ -502,6 +511,10 @@ export class AuthPageComponent {
     navigator.clipboard.writeText(text).then(() => {
       this.toast.trigger('Copied to Clipboard', true);
     });
+  }
+
+  onForgotPassword(): void {
+    this.toast.trigger('RECOVERY FLOW NOT IMPLEMENTED YET', false);
   }
 
   onSubmit(): void {

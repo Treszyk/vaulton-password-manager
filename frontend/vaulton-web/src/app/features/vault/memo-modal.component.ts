@@ -53,7 +53,7 @@ import { VaultRecord } from './vault-record.model';
           class="w-full btn-primary !rounded-2xl !py-4 flex items-center justify-center font-black uppercase tracking-[0.2em]"
           (click)="close.emit()"
         >
-          Acknowledge
+          Dismiss
         </button>
       </div>
     </div>

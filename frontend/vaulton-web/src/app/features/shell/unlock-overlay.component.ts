@@ -155,24 +155,30 @@ import { firstValueFrom } from 'rxjs';
         </div>
       </div>
 
-      <div class="mt-8 flex items-center justify-center gap-4">
-        <button
-          type="button"
-          class="py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-vault-purple transition-all active:scale-[0.98]"
-          (click)="triggerLogout()"
-          [disabled]="isWorking()"
-        >
-          Logout
-        </button>
+      <div class="mt-8 grid grid-cols-[1fr_auto_1fr] items-center gap-4 w-full max-w-[320px] mx-auto">
+        <div class="flex justify-end">
+          <button
+            type="button"
+            class="py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-vault-purple transition-all active:scale-[0.98]"
+            (click)="triggerLogout()"
+            [disabled]="isWorking()"
+          >
+            Logout
+          </button>
+        </div>
+        
         <div class="w-1 h-1 rounded-full bg-white/10"></div>
-        <button
-          type="button"
-          class="py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-red-400 transition-all active:scale-[0.98]"
-          (click)="triggerWipe()"
-          [disabled]="isWorking()"
-        >
-          Wipe Device
-        </button>
+        
+        <div class="flex justify-start">
+          <button
+            type="button"
+            class="py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/55 hover:text-red-400 transition-all active:scale-[0.98]"
+            (click)="triggerWipe()"
+            [disabled]="isWorking()"
+          >
+            Wipe Device
+          </button>
+        </div>
       </div>
     </div>
   `,
