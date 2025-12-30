@@ -30,7 +30,10 @@ import { zeroize } from '../../core/crypto/zeroize';
       <div class="w-full max-w-[440px] animate-slide-up relative z-10">
         <div class="auth-panel p-10 rounded-[2.5rem] relative flex flex-col gap-8">
           <div class="text-center relative z-10">
-            <h1 class="text-4xl font-black text-white tracking-tighter mb-3">
+            <h1 
+              (click)="onLogoClick()"
+              class="text-4xl font-black text-white tracking-tighter mb-3 cursor-pointer hover:opacity-80 transition-opacity"
+            >
               Vaulton<span class="text-vault-purple">.</span>
             </h1>
             <div class="h-6 relative">
@@ -384,6 +387,10 @@ export class AuthPageComponent {
   }
 
   private init(): void {
+    if (this.authState.accessToken()) {
+      this.router.navigate(['/vault']);
+      return;
+    }
     this.loadPersistentId();
   }
 
@@ -478,6 +485,12 @@ export class AuthPageComponent {
     }
   }
 
+  onLogoClick(): void {
+    if (this.authState.accessToken()) {
+      this.router.navigate(['/vault']);
+    }
+  }
+
   private reportError(msg: string): void {
     this.toast.trigger(msg, false);
     this.isWorking.set(false);
@@ -519,7 +532,6 @@ export class AuthPageComponent {
                   .then(() => {
                     this.authState.setAccessToken(res.Token);
                     this.authState.setAccountId(accountId);
-                    this.authState.setInitialized(true);
                     this.persistence.saveAccountId(accountId);
                     this.persistence
                       .saveBundle({

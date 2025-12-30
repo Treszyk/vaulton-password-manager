@@ -15,6 +15,7 @@ import { SettingsService } from '../../core/settings/settings.service';
 import { AuthPersistenceService } from '../../core/auth/auth-persistence.service';
 import { zeroize } from '../../core/crypto/zeroize';
 import { AuthStateService } from '../../core/auth/auth-state.service';
+import { SessionService } from '../../core/auth/session.service';
 import { VaultDataService } from '../vault/vault-data.service';
 import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 import { AuthApiService } from '../../core/api/auth-api.service';
@@ -197,7 +198,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 
                         <div class="space-y-4 text-center">
                             <div class="flex items-center justify-between px-1">
-                              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Choose 6-Digit PASSCODE</label>
+                              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Choose 6-Character PASSCODE</label>
                               <button (click)="togglePinVisibility()" class="text-white/30 hover:text-white transition-colors">
                                 <svg *ngIf="pinVisibility()" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -214,8 +215,6 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
                                 #pinInput
                                 [type]="pinVisibility() ? 'text' : 'password'"
                                 maxlength="1"
-                                pattern="[0-9]*"
-                                inputmode="numeric"
                                 class="w-8 h-10 bg-white/5 border border-white/10 rounded focus:border-vault-purple text-center text-white text-lg font-bold !px-0"
                                 (input)="onPinInput($event, i)"
                                 (keydown)="onPinKeyDown($event, i)"
@@ -524,6 +523,7 @@ export class SettingsComponent implements OnInit {
   protected readonly crypto = inject(AuthCryptoService);
   protected readonly toast = inject(ToastService);
   protected readonly router = inject(Router);
+  protected readonly session = inject(SessionService);
   protected readonly authState = inject(AuthStateService);
   protected readonly vaultData = inject(VaultDataService);
   private readonly route = inject(ActivatedRoute);
@@ -597,7 +597,6 @@ export class SettingsComponent implements OnInit {
       this.benchmarkStatus.set('');
       this.standardTime.set(null);
       this.hardenedTime.set(null);
-      this.kdfMode.set(2);
       this.kdfMode.set(2);
       this.rekeyStatus.set('');
       this.isRekeySuccess.set(false);
@@ -824,12 +823,10 @@ export class SettingsComponent implements OnInit {
 
       this.isRekeySuccess.set(true);
       this.toast.queue('Password Updated. Please log in again.');
-      this.toast.queue('Password Updated. Please log in again.');
       setTimeout(async () => {
         await this.persistence.clearBundle();
         await this.persistence.clearLocalPasscode();
-
-        window.location.href = '/auth';
+        await this.session.logout();
       }, 2000);
     } catch (err: any) {
       if (err.status == 401 || err.message?.includes('401')) {
@@ -841,7 +838,6 @@ export class SettingsComponent implements OnInit {
       if (!this.isRekeySuccess()) {
         this.isRekeyBusy.set(false);
       }
-      this.rekeyStatus.set('');
       this.rekeyStatus.set('');
       this.rekeyNewPassword = '';
       this.rekeyConfirmPassword = '';

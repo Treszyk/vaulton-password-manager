@@ -21,6 +21,5 @@ export class AuthStateService {
   clear(): void {
     this.accessToken.set(null);
     this.accountId.set(null);
-    this.isInitialized.set(false);
   }
 }

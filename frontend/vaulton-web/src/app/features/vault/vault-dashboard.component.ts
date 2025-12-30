@@ -198,6 +198,15 @@ export class VaultDashboardComponent implements OnDestroy {
   ) {
     this.checkPasscodePrompt();
     effect(() => {
+      if (!this.crypto.isUnlocked()) {
+        this.closeEditor();
+        this.activeMemo.set(null);
+        this.searchQueryInput.set('');
+        this.searchQuery.set('');
+      }
+    });
+
+    effect(() => {
       if (this.crypto.isUnlocked() && this.router.url.includes('/vault')) {
         this.vault.loadRecords();
       }
@@ -222,6 +231,8 @@ export class VaultDashboardComponent implements OnDestroy {
   }
 
   filteredRecords = computed(() => {
+    if (!this.crypto.isUnlocked()) return [];
+
     const query = this.searchQuery().toLowerCase().trim();
     const scope = this.searchScope();
     const allRecords = this.vault.records();
@@ -304,7 +315,10 @@ export class VaultDashboardComponent implements OnDestroy {
   }
 
   async goToPasscodeSetup() {
+    await this.persistence.setPasscodePrompted(true);
     this.showPasscodePrompt.set(false);
-    this.router.navigate(['/settings'], { queryParams: { tab: 'SECURITY', setupPasscode: true } });
+    this.router.navigate(['/vault/settings'], {
+      queryParams: { tab: 'SECURITY', setupPasscode: true },
+    });
   }
 }

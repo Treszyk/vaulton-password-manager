@@ -111,7 +111,7 @@ import { firstValueFrom } from 'rxjs';
         <div *ngIf="mode() === 'PASSCODE'" class="flex flex-col items-center gap-8 animate-fade-in">
           <div class="space-y-4 text-center w-full">
             <div class="flex items-center justify-between px-1">
-              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">6-Digit Passcode</label>
+              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">6-Character Passcode</label>
               <button (click)="togglePinVisibility()" class="text-white/30 hover:text-white transition-colors">
                 <svg *ngIf="pinVisibility()" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -128,9 +128,7 @@ import { firstValueFrom } from 'rxjs';
                  #pinInput
                  [type]="pinVisibility() ? 'text' : 'password'"
                  maxlength="1"
-                 pattern="[0-9]*"
-                 inputmode="numeric"
-                 class="w-10 h-14 bg-white/5 border border-white/10 rounded-xl focus:border-vault-purple text-center text-white text-2xl font-bold transition-all !px-0"
+                  class="w-10 h-14 bg-white/5 border border-white/10 rounded-xl focus:border-vault-purple text-center text-white text-2xl font-bold transition-all !px-0"
                  (input)="onPinInput($event, i)"
                  (keydown)="onPinKeyDown($event, i)"
                  [(ngModel)]="pinDigits[i]"

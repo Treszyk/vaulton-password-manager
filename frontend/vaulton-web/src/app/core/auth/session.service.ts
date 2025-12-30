@@ -64,26 +64,38 @@ export class SessionService {
       })
     );
   }
-  logout(): void {
-    this.authState.clear();
-    this.crypto.clearKeys();
-    this.vault.clearData();
-    this.showLogoutConfirm.set(false);
+  async logout(): Promise<void> {
+    await this.crypto.clearKeys();
 
-    this.authApi.logout().subscribe();
+    this.authState.clear();
+    this.vault.clearData();
+
     this.toast.queue('Logged out successfully');
-    window.location.href = '/auth';
+    this.authApi.logout().subscribe({
+      complete: () => {
+        window.location.href = '/auth';
+      },
+      error: () => {
+        window.location.href = '/auth';
+      },
+    });
   }
 
-  wipeDevice(): void {
-    this.authState.clear();
-    this.crypto.clearKeys();
-    this.vault.clearData();
-    this.persistence.clearAll();
-    this.showWipeConfirm.set(false);
+  async wipeDevice(): Promise<void> {
+    await this.crypto.clearKeys();
 
-    this.authApi.logout().subscribe();
+    this.authState.clear();
+    this.vault.clearData();
+    await this.persistence.clearAll();
+
     this.toast.queue('Device wiped successfully');
-    window.location.href = '/auth';
+    this.authApi.logout().subscribe({
+      complete: () => {
+        window.location.href = '/auth';
+      },
+      error: () => {
+        window.location.href = '/auth';
+      },
+    });
   }
 }
