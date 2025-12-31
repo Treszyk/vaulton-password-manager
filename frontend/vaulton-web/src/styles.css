@@ -13,7 +13,10 @@
   --font-inter: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-html,
+html {
+  font-size: 14px;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -26,27 +29,27 @@ body {
   overflow: hidden;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1500px) {
   html {
     font-size: 18px;
   }
 }
 
-@media (min-width: 2500px) {
+@media (min-width: 2500px) and (min-height: 1200px) {
   html {
-    font-size: 24px;
+    font-size: 28px;
   }
 }
 
-@media (min-width: 3800px) {
+@media (min-width: 3800px) and (min-height: 1800px) {
   html {
-    font-size: 36px;
+    font-size: 42px;
   }
 }
 
-@media (min-width: 5000px) {
+@media (min-width: 5000px) and (min-height: 2500px) {
   html {
-    font-size: 44px;
+    font-size: 64px;
   }
 }
 
