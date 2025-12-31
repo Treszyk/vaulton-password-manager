@@ -11,7 +11,7 @@ COPY frontend/vaulton-web/ ./
 RUN npm run build -- --configuration production
 
 # Stage 2: Serve with Caddy
-FROM caddy:latest AS final-stage
+FROM caddy:2.8.4-alpine AS final-stage
 
 # Copy built assets from build-stage
 # Note: Angular outputs to dist/vaulton-web/browser by default in newer versions
