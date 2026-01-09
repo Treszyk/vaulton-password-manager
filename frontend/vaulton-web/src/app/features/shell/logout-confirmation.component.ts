@@ -26,13 +26,13 @@ import { CommonModule } from '@angular/common';
         </svg>
       </div>
 
-      <h2 class="text-2xl font-bold uppercase tracking-[0.2em] text-white/90 mb-4">End Session</h2>
-      <p class="text-sm md:text-base text-white/40 mb-8 font-medium leading-relaxed">
+      <h2 class="text-2xl font-bold uppercase tracking-[0.2em] text-zinc-100 mb-4">End Session</h2>
+      <p class="text-sm md:text-base text-zinc-400 mb-8 font-medium leading-relaxed">
         This will invalidate your current session on this device.
         <br /><br />
-        Your <span class="text-white/70">Account Login</span> will remain pre-filled for your next
+        Your <span class="text-zinc-300">Account Login</span> will remain pre-filled for your next
         visit, but you must enter your password to re-enter the vault. <br /><br />
-        <span class="text-white/30 italic"
+        <span class="text-zinc-400 italic"
           >Note: For a full data removal on public computers, use the
         </span>
         <span
@@ -40,7 +40,7 @@ import { CommonModule } from '@angular/common';
           class="text-red-400 font-bold cursor-pointer hover:text-red-300 underline decoration-red-400/30 underline-offset-4 transition-all"
           >WIPE</span
         >
-        <span class="text-white/30 italic"> action.</span>
+        <span class="text-zinc-400 italic"> action.</span>
       </p>
 
       <div class="flex flex-col gap-4">
@@ -55,7 +55,7 @@ import { CommonModule } from '@angular/common';
 
         <button
           (click)="cancel.emit()"
-          class="py-4 text-[0.625rem] md:text-[0.75rem] font-bold uppercase tracking-[0.2em] text-white/55 hover:text-white transition-all"
+          class="py-4 text-xs md:text-[0.75rem] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-all"
         >
           Go Back
         </button>

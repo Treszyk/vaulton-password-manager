@@ -31,25 +31,25 @@ body {
 
 @media (min-width: 1500px) {
   html {
-    font-size: 18px;
+    font-size: 14.5px;
   }
 }
 
 @media (min-width: 2500px) and (min-height: 1200px) {
   html {
-    font-size: 28px;
+    font-size: 23px;
   }
 }
 
 @media (min-width: 3800px) and (min-height: 1800px) {
   html {
-    font-size: 42px;
+    font-size: 33px;
   }
 }
 
 @media (min-width: 5000px) and (min-height: 2500px) {
   html {
-    font-size: 64px;
+    font-size: 48px;
   }
 }
 
@@ -65,7 +65,7 @@ app-root {
 input,
 select,
 textarea {
-  @apply bg-vault-grey/40 border border-white/10 rounded-xl px-4 py-3 outline-none 
+  @apply bg-vault-grey/40 border border-zinc-700 rounded-xl px-4 py-3 outline-none 
          focus:border-vault-purple/50 focus:ring-4 focus:ring-vault-purple/10 
          transition-all placeholder:text-white/20 text-sm;
 }
@@ -77,12 +77,12 @@ button.btn-primary {
 }
 
 button.btn-secondary {
-  @apply bg-white/5 hover:bg-white/10 text-white/70 hover:text-white px-6 py-3 
+  @apply bg-zinc-900 hover:bg-zinc-800 text-white/70 hover:text-white px-6 py-3 
          rounded-xl font-semibold transition-all active:scale-[0.98];
 }
 
 .glass {
-  @apply bg-white/[0.03] backdrop-blur-xl border border-white/5;
+  @apply bg-zinc-950 backdrop-blur-xl border border-zinc-800;
 }
 
 .auth-panel {
@@ -141,7 +141,7 @@ button.btn-secondary {
 }
 
 [data-auth-mode='REGISTER'] .mode-indicator {
-  transform: translateX(calc(100% + 3px));
+  transform: translateX(100%);
 }
 
 .form-view {
@@ -193,8 +193,8 @@ button.btn-secondary {
 }
 
 .kdf-option {
-  @apply flex-1 p-4 rounded-xl bg-white/[0.05] border border-white/10 
-         text-center cursor-pointer transition-all hover:bg-white/[0.08]
+  @apply flex-1 p-4 rounded-xl bg-zinc-950 border border-zinc-800 
+         text-center cursor-pointer transition-all hover:bg-zinc-900
          flex flex-col gap-1 items-center relative;
 }
 
@@ -203,7 +203,7 @@ button.btn-secondary {
 }
 
 .kdf-option.active {
-  @apply bg-vault-purple/[0.15] border-vault-purple/50 ring-2 ring-vault-purple/10;
+  @apply bg-zinc-900 border-vault-purple/50 ring-2 ring-vault-purple/10;
 }
 
 .kdf-option .grade-title {
@@ -215,11 +215,11 @@ button.btn-secondary {
 }
 
 .kdf-option .grade-desc {
-  @apply text-[0.5625rem] md:text-[0.625rem] font-bold text-white/30 uppercase tracking-tight;
+  @apply text-[0.5625rem] md:text-[0.625rem] font-bold text-zinc-400 uppercase tracking-tight;
 }
 
 .kdf-option.active .grade-desc {
-  @apply text-white/50;
+  @apply text-zinc-200;
 }
 
 .tooltip-trigger {
@@ -238,7 +238,7 @@ button.btn-secondary {
   max-width: 250px;
 
   transform: translateY(5px);
-  @apply px-4 py-2 rounded-xl bg-vault-grey border border-white/10 text-[0.625rem] 
+  @apply px-4 py-2 rounded-xl bg-vault-grey border border-zinc-700 text-[0.625rem] 
          font-bold text-white/70 opacity-0 pointer-events-none 
          transition-all duration-300 z-[1000] backdrop-blur-md shadow-2xl
          text-center leading-relaxed;
@@ -375,7 +375,7 @@ button.btn-secondary {
   @apply bg-transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-white/10 rounded-full hover:bg-white/20 transition-all;
+  @apply bg-zinc-800 rounded-full hover:bg-zinc-700 transition-all;
 }
 
 @keyframes slideInLeft {
@@ -397,7 +397,7 @@ button.btn-secondary {
 .revealed-text {
   display: inline-block !important;
   width: fit-content !important;
-  background: linear-gradient(to right, #7c3aed 50%, #4b5563 50%);
+  background: linear-gradient(to right, #7c3aed 50%, #a1a1aa 50%);
   background-size: 200% 100%;
   background-position: 0% 0%;
   -webkit-background-clip: text;
@@ -446,7 +446,7 @@ button.btn-secondary {
 }
 
 .overlay-card {
-  @apply bg-transparent border-none shadow-none md:bg-[#0D0D0E] md:border md:border-white/10 md:shadow-2xl;
+  @apply bg-transparent border-none shadow-none md:bg-[#0D0D0E] md:border md:border-zinc-700 md:shadow-2xl;
 }
 
 .modal-glass {

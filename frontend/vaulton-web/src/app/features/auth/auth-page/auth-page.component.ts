@@ -112,6 +112,8 @@ export class AuthPageComponent {
     }
 
     this.isBenchmarking.set(true);
+    this.standardTime.set(null);
+    this.hardenedTime.set(null);
     const pwd = this.password();
 
     try {

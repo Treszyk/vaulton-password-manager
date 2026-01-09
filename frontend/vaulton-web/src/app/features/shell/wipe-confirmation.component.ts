@@ -21,17 +21,17 @@ import { CommonModule } from '@angular/common';
         </svg>
       </div>
 
-      <h2 class="text-2xl font-bold uppercase tracking-[0.2em] text-white/90 mb-4">Destructive Wipe</h2>
-      <p class="text-sm md:text-base text-white/40 mb-8 font-medium leading-relaxed">
-        This will permanently remove your <span class="text-white/70">Vault Bundle</span>, 
-        <span class="text-white/70">Account ID</span>, and all local session data.
+      <h2 class="text-2xl font-bold uppercase tracking-[0.2em] text-zinc-100 mb-4">Destructive Wipe</h2>
+      <p class="text-sm md:text-base text-zinc-400 mb-8 font-medium leading-relaxed">
+        This will permanently remove your <span class="text-zinc-300">Vault Bundle</span>, 
+        <span class="text-zinc-300">Account ID</span>, and all local session data.
         <br><br>
         <span class="text-red-400">Only use this on public or shared computers.</span>
       </p>
 
       <div class="flex flex-col gap-4">
         <div 
-          class="relative h-16 rounded-2xl overflow-hidden group cursor-pointer select-none border border-white/15 hover:border-red-500/50 transition-all"
+          class="relative h-16 rounded-2xl overflow-hidden group cursor-pointer select-none border border-zinc-600 hover:border-red-500/50 transition-all"
           [class.unstable-shake]="isHolding()"
           [style.--shake-intensity]="shakeIntensity()"
           (mousedown)="startHold()"
@@ -51,7 +51,7 @@ import { CommonModule } from '@angular/common';
           >
             <span class="font-bold uppercase tracking-[0.2em] text-xs md:text-base transition-all"
                   [class.text-red-400]="isHolding()"
-                  [class.text-white/70]="!isHolding()">
+                  [class.text-zinc-300]="!isHolding()">
               {{ buttonLabel() }}
             </span>
           </button>
@@ -59,7 +59,7 @@ import { CommonModule } from '@angular/common';
 
         <button 
           (click)="cancel.emit()"
-          class="py-4 text-[0.625rem] md:text-[0.75rem] font-bold uppercase tracking-[0.2em] text-white/55 hover:text-white transition-all"
+          class="py-4 text-xs md:text-[0.75rem] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-all"
         >
           Go Back
         </button>

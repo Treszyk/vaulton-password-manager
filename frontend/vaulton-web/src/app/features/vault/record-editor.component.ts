@@ -25,28 +25,29 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
       [class.animate-fade-out]="isClosing()"
     >
       <div
-        class="w-full md:max-w-lg bg-transparent md:bg-zinc-950 border-none md:border border-white/15 rounded-t-[2rem] md:rounded-3xl shadow-none md:shadow-2xl overflow-hidden flex flex-col max-h-[85vh] relative !z-[9001]"
+        class="w-full md:max-w-lg bg-transparent md:bg-zinc-950 border-none md:border border-zinc-600 rounded-t-[2rem] md:rounded-3xl shadow-none md:shadow-2xl overflow-hidden flex flex-col max-h-[85vh] relative !z-[9001]"
         [class.animate-slide-up-mobile]="!isClosing()"
         [class.animate-slide-down-mobile]="isClosing()"
         [class.md:animate-slide-up]="!isClosing()"
         (click)="$event.stopPropagation()"
       >
         <div
-          class="flex-none p-5 md:p-6 border-b border-transparent md:border-white/10 flex items-center justify-between bg-transparent md:bg-zinc-950"
+          class="flex-none p-5 md:p-6 border-b border-transparent md:border-zinc-700 flex items-center justify-between bg-transparent md:bg-zinc-950"
         >
           <div>
-            <h2 class="text-base md:text-xl font-bold uppercase tracking-[0.2em] text-white/90">
+            <h2 class="text-base md:text-xl font-bold uppercase tracking-[0.2em] text-zinc-100">
               {{ record ? 'Edit Secret' : 'Add a New Secret' }}
             </h2>
             <p
-              class="text-[0.4375rem] md:text-[0.625rem] text-white/55 uppercase tracking-[0.3em] mt-0.5 italic"
+              class="text-[0.625rem] md:text-xs text-zinc-400 uppercase tracking-[0.3em] mt-0.5 italic"
             >
               Locally Encrypted Before Transit
             </p>
           </div>
           <button
             (click)="triggerClose()"
-            class="p-2 md:p-3 rounded-full hover:bg-white/5 text-white/35 hover:text-white transition-all outline-none"
+            class="p-2 md:p-3 rounded-full hover:bg-zinc-900 text-zinc-500 hover:text-white transition-all outline-none min-w-[24px] min-h-[24px] flex items-center justify-center"
+            aria-label="Close Editor"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +71,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="space-y-1.5">
                 <label
-                  class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
+                  class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Title</label
                 >
                 <input
@@ -79,13 +80,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [(ngModel)]="form.title"
                   required
                   placeholder="e.g. My Google Account"
-                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
+                  class="w-full !bg-zinc-950 !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
                 />
               </div>
 
               <div class="space-y-1.5">
                 <label
-                  class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
+                  class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Website</label
                 >
                 <input
@@ -93,13 +94,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   name="website"
                   [(ngModel)]="form.website"
                   placeholder="e.g. google.com"
-                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
+                  class="w-full !bg-zinc-950 !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
                 />
               </div>
 
               <div class="space-y-1.5">
                 <label
-                  class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
+                  class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Username / Email</label
                 >
                 <input
@@ -108,13 +109,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [(ngModel)]="form.username"
                   required
                   placeholder="email@example.com"
-                  class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
+                  class="w-full !bg-zinc-950 !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
                 />
               </div>
 
               <div class="space-y-1.5">
                 <label
-                  class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
+                  class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                   >Password</label
                 >
                 <div class="relative group">
@@ -124,12 +125,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                     [(ngModel)]="form.password"
                     required
                     placeholder="••••••••••••"
-                    class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !pr-10 !text-xs md:!text-sm/relaxed transition-all"
+                    class="w-full !bg-zinc-950 !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !pr-10 !text-xs md:!text-sm/relaxed transition-all"
                   />
                   <button
                     type="button"
                     (click)="showPwd.set(!showPwd())"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-white/35 hover:text-white transition-all"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-all p-2 rounded-lg"
+                    aria-label="Toggle password visibility"
                   >
                     <svg
                       *ngIf="!showPwd()"
@@ -175,9 +177,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   class="block w-full mt-2"
                 ></app-strength-meter>
                 <button
-                  type="button"
                   (click)="generatePassword()"
-                  class="w-full text-center text-[0.5625rem] md:text-[0.75rem] font-bold uppercase tracking-[0.3em] text-vault-purple hover:text-vault-purple-bright transition-all py-2 block mt-1 active:scale-[0.98]"
+                  class="w-full text-center text-xs md:text-[0.75rem] font-bold uppercase tracking-[0.3em] text-[#985eff] hover:text-[#ac82ff] transition-all py-2 block mt-1 active:scale-[0.98]"
                 >
                   Auto-Generate Password
                 </button>
@@ -186,7 +187,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
 
             <div class="space-y-1.5">
               <label
-                class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
+                class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                 >Notes</label
               >
               <textarea
@@ -194,12 +195,12 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 [(ngModel)]="form.notes"
                 rows="2"
                 placeholder="Private annotations..."
-                class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-xl !py-3.5 transition-all resize-none !text-xs md:!text-base"
+                class="w-full !bg-zinc-950 !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 transition-all resize-none !text-xs md:!text-base"
               ></textarea>
             </div>
 
             <div
-              class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-transparent md:border-white/10"
+              class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-transparent md:border-zinc-700"
             >
               <button
                 type="submit"
@@ -208,7 +209,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
               >
                 <div
                   *ngIf="isSubmitting()"
-                  class="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin"
+                  class="w-4 h-4 border-2 border-zinc-600 border-t-white rounded-full animate-spin"
                 ></div>
                 <span
                   *ngIf="!isSubmitting()"
@@ -220,7 +221,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
               <button
                 type="button"
                 (click)="triggerClose()"
-                class="w-full py-3 rounded-xl border border-white/10 bg-white/[0.02] text-sm md:text-base font-bold uppercase tracking-[0.3em] text-white/55 hover:text-white transition-all shadow-inner hidden md:block"
+                class="w-full py-3 rounded-xl border border-zinc-800 bg-zinc-950 text-sm md:text-base font-bold uppercase tracking-[0.3em] text-zinc-400 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all shadow-inner hidden md:block"
+                aria-label="Discard changes"
               >
                 Discard
               </button>

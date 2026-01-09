@@ -30,20 +30,20 @@ import { VaultRecord } from './vault-record.model';
               />
             </svg>
           </div>
-          <h2 class="text-2xl md:text-3xl font-black uppercase tracking-[0.2em] text-white/90">
+          <h2 class="text-2xl md:text-3xl font-black uppercase tracking-[0.2em] text-zinc-100">
             Description
           </h2>
-          <p class="text-sm md:text-base text-white/40 mt-2 font-medium italic truncate max-w-full">
+          <p class="text-sm md:text-base text-zinc-400 mt-2 font-medium italic truncate max-w-full">
             {{ record.title }}
           </p>
         </div>
 
         <div class="space-y-4 mb-8">
           <div
-            class="bg-white/5 border border-white/10 rounded-2xl p-6 max-h-[40vh] overflow-y-auto"
+            class="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 max-h-[40vh] overflow-y-auto"
           >
             <p
-              class="text-[0.875rem] md:text-[1.125rem] text-white/70 leading-relaxed whitespace-pre-wrap selection:bg-vault-purple/30"
+              class="text-[0.875rem] md:text-[1.125rem] text-zinc-300 leading-relaxed whitespace-pre-wrap selection:bg-vault-purple/30"
             >
               {{ record.notes }}
             </p>

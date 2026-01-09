@@ -40,12 +40,12 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
         class="flex-none mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8 px-4"
       >
         <div>
-          <h2 class="text-[0.625rem] font-black uppercase tracking-[0.4em] text-white/55 mb-1">
+          <h1 class="text-xs font-black uppercase tracking-[0.4em] text-zinc-400 mb-1">
             Vault Storage
-          </h2>
+          </h1>
           <div class="flex items-center gap-3">
-            <span class="text-4xl font-black text-white/90">{{ filteredRecords().length }}</span>
-            <span class="text-[0.625rem] font-black uppercase tracking-[0.2em] text-white/55 mb-1.5"
+            <span class="text-4xl font-black text-zinc-100">{{ filteredRecords().length }}</span>
+            <span class="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-1.5"
               >Results</span
             >
           </div>
@@ -59,7 +59,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
             <svg
               *ngIf="!isSearching()"
               xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5 text-white/20"
+              class="w-5 h-5 text-zinc-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -74,13 +74,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
           </div>
           <button
             (click)="searchScope.set(searchScope() === 'titles' ? 'all' : 'titles')"
-            class="absolute inset-y-0 right-2 my-auto px-3 py-1.5 h-fit rounded-lg text-[0.625rem] font-black uppercase tracking-wider transition-all"
-            [ngClass]="{
-              'text-vault-purple bg-vault-purple/10 border border-vault-purple/20':
-                searchScope() === 'titles',
-              'text-white/55 hover:text-white/40 hover:bg-white/5 border border-transparent':
-                searchScope() === 'all'
-            }"
+            class="absolute inset-y-0 right-2 my-auto px-3 py-1.5 h-fit rounded-lg text-xs font-black uppercase tracking-wider transition-all text-zinc-400 hover:text-zinc-400 hover:bg-zinc-900 border border-transparent"
           >
             {{ searchScope() === 'titles' ? 'Title/Website' : 'All' }}
           </button>
@@ -89,7 +83,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
             type="text"
             [(ngModel)]="searchQueryInput"
             placeholder="Search Vault..."
-            class="w-full !bg-white/[0.02] !border-white/10 focus:!border-vault-purple/30 !rounded-2xl !py-4 !pl-14 !pr-6 !text-xs !tracking-[0.1em] !font-bold transition-all placeholder:text-white/20"
+            class="w-full !bg-zinc-950 !border-zinc-800 focus:!border-vault-purple/30 !rounded-2xl !py-4 !pl-14 !pr-6 !text-xs !tracking-[0.1em] !font-bold transition-all placeholder:text-zinc-600"
           />
         </div>
       </div>
@@ -98,11 +92,9 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
         class="flex-none flex flex-col items-center justify-center py-20 animate-fade-in text-center"
       >
         <div
-          class="w-12 h-12 border-2 border-white/10 border-t-white/40 rounded-full animate-spin mb-4"
+          class="w-12 h-12 border-2 border-zinc-700 border-t-white/40 rounded-full animate-spin mb-4"
         ></div>
-        <p
-          class="text-white/55 text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.4em]"
-        >
+        <p class="text-zinc-400 text-xs md:text-xs font-bold uppercase tracking-[0.4em]">
           Unlocking Secure Vault...
         </p>
       </div>
@@ -113,15 +105,16 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
         <button
           *ngIf="!searchQuery()"
           (click)="showAddModal.set(true)"
-          class="group relative h-[16rem] flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white/[0.01] border-2 border-dashed border-white/10 hover:border-vault-purple/40 hover:bg-white/[0.02] transition-all duration-500 animate-scale-in"
+          class="group relative h-[16rem] flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-zinc-950 border-2 border-dashed border-zinc-800 hover:border-vault-purple/40 hover:bg-zinc-950 transition-all duration-500 animate-scale-in"
           [style.animation-delay]="'0ms'"
+          aria-label="Add a New Entry"
         >
           <div
-            class="w-16 h-16 rounded-full bg-white/[0.02] border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-vault-purple/10 group-hover:border-vault-purple/20 transition-all duration-500"
+            class="w-16 h-16 rounded-full bg-zinc-950 border border-zinc-700 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-vault-purple/10 group-hover:border-vault-purple/20 transition-all duration-500"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="w-6 h-6 text-white/55 group-hover:text-vault-purple"
+              class="w-6 h-6 text-zinc-400 group-hover:text-vault-purple"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -135,7 +128,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
             </svg>
           </div>
           <span
-            class="text-[0.6875rem] md:text-[0.75rem] font-bold uppercase tracking-[0.4em] text-white/70 group-hover:text-white/60 transition-colors"
+            class="text-[0.6875rem] md:text-[0.75rem] font-bold uppercase tracking-[0.4em] text-zinc-300 group-hover:text-zinc-300 transition-colors"
             >Add a New Entry</span
           >
         </button>
@@ -153,7 +146,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
           *ngIf="filteredRecords().length === 0 && searchQuery()"
           class="col-span-full py-20 text-center"
         >
-          <p class="text-white/35 text-[0.625rem] font-black uppercase tracking-[0.5em]">
+          <p class="text-zinc-500 text-xs font-black uppercase tracking-[0.5em]">
             No matching secrets found
           </p>
         </div>

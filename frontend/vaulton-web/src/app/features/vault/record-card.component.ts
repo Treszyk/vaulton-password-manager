@@ -10,60 +10,96 @@ import { VaultRecord } from './vault-record.model';
     class: 'h-full',
   },
   template: `
-    <div 
-      class="group relative h-[16rem] p-6 rounded-[2rem] md:rounded-[2.5rem] bg-white/[0.02] border border-white/10 hover:border-vault-purple/30 transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col"
+    <div
+      class="group relative h-[16rem] p-6 rounded-[2rem] md:rounded-[2.5rem] bg-zinc-950 border border-zinc-800 hover:border-vault-purple/30 transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col"
     >
       <div class="relative flex items-center justify-between mb-4">
         <div class="flex items-center gap-4">
-          <div class="w-10 h-10 rounded-2xl bg-white/[0.04] flex items-center justify-center border border-white/10 group-hover:bg-vault-purple/10 group-hover:border-vault-purple/20 transition-all">
-             <span class="text-lg font-black text-white/35 group-hover:text-vault-purple/60 uppercase">
-                {{ record.title.charAt(0) }}
-             </span>
+          <div
+            class="w-10 h-10 rounded-2xl bg-zinc-950 flex items-center justify-center border border-zinc-700 group-hover:bg-vault-purple/10 group-hover:border-vault-purple/20 transition-all"
+          >
+            <span class="text-lg font-black text-zinc-300 group-hover:text-vault-purple uppercase">
+              {{ record.title.charAt(0) }}
+            </span>
           </div>
           <div class="space-y-0.5">
-            <h3 class="font-black text-white/90 text-sm uppercase tracking-widest truncate max-w-[120px]">
+            <h2
+              class="font-black text-zinc-100 text-sm uppercase tracking-widest truncate max-w-[120px]"
+            >
               {{ record.title }}
-            </h3>
-            <p class="text-[0.625rem] text-white/40 uppercase tracking-widest truncate max-w-[120px] font-black">
+            </h2>
+            <p
+              class="text-xs text-zinc-400 uppercase tracking-widest truncate max-w-[120px] font-black"
+            >
               {{ record.website || 'INTERNAL' }}
             </p>
           </div>
         </div>
 
         <div class="flex items-center justify-end gap-1.5 flex-shrink-0 min-w-[4.5rem]">
-          <button  
+          <button
             type="button"
             (click)="onEdit.emit(record)"
-            class="edit-btn h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center text-white/35 hover:text-white transition-all hover:bg-white/5"
+            class="edit-btn h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white transition-all hover:bg-zinc-900"
             title="Edit Entry"
+            aria-label="Edit Entry"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" class="w-5 h-5" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
             </svg>
           </button>
 
           <div class="relative flex items-center justify-end h-8 md:h-10">
-            <button 
+            <button
               type="button"
               (click)="onDeleteClick(record.id)"
-              class="flex items-center justify-center transition-all duration-300 rounded-xl overflow-hidden px-2.5 h-full w-fit max-w-[150px]"
+              class="flex items-center justify-center transition-[background-color,color,border-color,box-shadow,fill,stroke] duration-500 rounded-xl overflow-hidden px-2.5 h-full w-fit max-w-[150px]"
               [class.trash-btn]="!deleteConfirmActive()"
               [ngClass]="{
                 'bg-red-500 text-white shadow-lg shadow-red-500/20': deleteConfirmActive(),
-                'text-red-500/50 hover:bg-red-500/10': !deleteConfirmActive()
+                'text-red-500/50 hover:bg-red-500/10 shadow-none': !deleteConfirmActive()
               }"
               title="Delete Entry"
+              [attr.aria-label]="deleteConfirmActive() ? 'Confirm Delete' : 'Delete Entry'"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                class="w-5 h-5 flex-shrink-0"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
               </svg>
-              <span 
-                class="text-[0.625rem] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all duration-300 overflow-hidden"
-                [style.max-width]="deleteConfirmActive() ? '100px' : '0px'"
+              <span
+                class="grid transition-all duration-300 ease-out"
+                [style.grid-template-columns]="deleteConfirmActive() ? '1fr' : '0fr'"
                 [style.opacity]="deleteConfirmActive() ? '1' : '0'"
                 [style.margin-left]="deleteConfirmActive() ? '0.5rem' : '0px'"
               >
-                Delete?
+                <span class="overflow-hidden min-h-[1.25rem] flex items-center">
+                  <span
+                    class="text-xs font-black uppercase tracking-[0.2em] whitespace-nowrap min-w-max"
+                  >
+                    Delete?
+                  </span>
+                </span>
               </span>
             </button>
           </div>
@@ -72,28 +108,56 @@ import { VaultRecord } from './vault-record.model';
 
       <div class="space-y-2 flex-1 flex flex-col justify-end">
         <div class="relative">
-          <p class="text-[0.625rem] font-black uppercase tracking-widest text-white/55 mb-1">Login</p>
+          <p class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-1">Login</p>
           <div class="flex items-center justify-between">
-            <p class="text-sm text-white/80 truncate font-medium">{{ record.username }}</p>
+            <p class="text-sm text-zinc-200 truncate font-medium">{{ record.username }}</p>
             <div class="flex items-center justify-end h-8 md:h-10">
-              <button 
-                (click)="copyUsername(record.username)" 
-                class="flex items-center justify-center transition-all duration-300 rounded-xl overflow-hidden px-2.5 h-full w-fit max-w-[150px]"
+              <button
+                (click)="copyUsername(record.username)"
+                class="flex items-center justify-center transition-[background-color,color,border-color,box-shadow,fill,stroke] duration-500 rounded-xl overflow-hidden px-2.5 h-full w-fit max-w-[200px]"
                 [ngClass]="{
-                  'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20': justCopied() && copiedStatus() === 'username',
-                  'text-white/35 hover:text-white hover:bg-white/5': !justCopied() || copiedStatus() !== 'username'
+                  'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20':
+                    justCopied() && copiedStatus() === 'username',
+                  'text-zinc-500 hover:text-white hover:bg-zinc-900 shadow-none':
+                    !justCopied() || copiedStatus() !== 'username'
                 }"
+                [attr.aria-label]="
+                  justCopied() && copiedStatus() === 'username'
+                    ? 'Username Copied'
+                    : 'Copy Username'
+                "
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                <span 
-                  class="text-[0.625rem] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all duration-300 overflow-hidden"
-                  [style.max-width]="(justCopied() && copiedStatus() === 'username') ? '100px' : '0px'"
-                  [style.opacity]="(justCopied() && copiedStatus() === 'username') ? '1' : '0'"
-                  [style.margin-left]="(justCopied() && copiedStatus() === 'username') ? '0.5rem' : '0px'"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  Copied
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+                <span
+                  class="grid transition-all duration-300 ease-out"
+                  [style.grid-template-columns]="
+                    justCopied() && copiedStatus() === 'username' ? '1fr' : '0fr'
+                  "
+                  [style.opacity]="justCopied() && copiedStatus() === 'username' ? '1' : '0'"
+                  [style.margin-left]="
+                    justCopied() && copiedStatus() === 'username' ? '0.5rem' : '0px'
+                  "
+                >
+                  <span class="overflow-hidden min-h-[1.25rem] flex items-center">
+                    <span
+                      class="text-xs font-black uppercase tracking-[0.2em] whitespace-nowrap min-w-max"
+                    >
+                      Copied
+                    </span>
+                  </span>
                 </span>
               </button>
             </div>
@@ -101,71 +165,149 @@ import { VaultRecord } from './vault-record.model';
         </div>
 
         <div class="relative">
-          <p class="text-[0.625rem] font-black uppercase tracking-widest text-white/55 mb-1">Secret</p>
+          <p class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-1">Secret</p>
           <div class="flex items-center justify-between gap-4">
             <div class="relative flex-1 overflow-hidden flex items-center h-5">
-               <p 
+              <p
                 class="text-sm font-mono tracking-widest transition-all duration-300 w-fit leading-none"
                 [class.revealed-text]="reveal()"
-                [class.text-white/35]="!reveal()"
-               >
+                [class.text-zinc-400]="!reveal()"
+              >
                 {{ reveal() ? record.password : '••••••••' }}
-               </p>
+              </p>
             </div>
-            
+
             <div class="flex items-center justify-end h-8 md:h-10">
-              <button (click)="toggleReveal()" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-white/35 hover:text-white transition-all rounded-xl hover:bg-white/5 mr-1">
-                <svg *ngIf="!reveal()" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              <button
+                (click)="toggleReveal()"
+                class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-zinc-500 hover:text-white transition-all rounded-xl hover:bg-zinc-900 mr-1"
+                [attr.aria-label]="reveal() ? 'Hide Password' : 'Show Password'"
+              >
+                <svg
+                  *ngIf="!reveal()"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
                 </svg>
-                <svg *ngIf="reveal()" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-vault-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                <svg
+                  *ngIf="reveal()"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5 text-vault-purple"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"
+                  />
                 </svg>
               </button>
 
-              <button 
-                (click)="copyPassword(record.password)" 
-                class="flex items-center justify-center transition-all duration-300 rounded-xl overflow-hidden px-2.5 h-full w-fit max-w-[150px]"
+              <button
+                (click)="copyPassword(record.password)"
+                class="flex items-center justify-center transition-[background-color,color,border-color,box-shadow,fill,stroke] duration-500 rounded-xl overflow-hidden px-2.5 h-full w-fit max-w-[200px]"
                 [ngClass]="{
-                  'bg-orange-500 text-white shadow-lg shadow-orange-500/20': copyConfirmActive() && !justCopied(),
-                  'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20': justCopied() && copiedStatus() === 'password',
-                  'text-white/35 hover:text-white hover:bg-white/5': !copyConfirmActive() && (copiedStatus() !== 'password' || !justCopied())
+                  'bg-orange-500 text-white shadow-lg shadow-orange-500/20':
+                    copyConfirmActive() && !justCopied(),
+                  'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20':
+                    justCopied() && copiedStatus() === 'password',
+                  'text-zinc-500 hover:text-white hover:bg-zinc-900 shadow-none':
+                    !copyConfirmActive() && (copiedStatus() !== 'password' || !justCopied())
                 }"
+                [attr.aria-label]="
+                  justCopied() && copiedStatus() === 'password'
+                    ? 'Password Copied'
+                    : copyConfirmActive()
+                    ? 'Confirm Copy Password'
+                    : 'Copy Password'
+                "
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
                 </svg>
-                <span 
-                  class="text-[0.625rem] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all duration-300 overflow-hidden"
-                  [style.max-width]="(copyConfirmActive() && !justCopied()) ? '100px' : '0px'"
-                  [style.opacity]="(copyConfirmActive() && !justCopied()) ? '1' : '0'"
-                  [style.margin-left]="(copyConfirmActive() && !justCopied()) ? '0.5rem' : '0px'"
+                <span
+                  class="text-xs font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all duration-300 overflow-hidden grid grid-cols-1 place-items-center"
+                  [style.max-width]="
+                    copyConfirmActive() || (justCopied() && copiedStatus() === 'password')
+                      ? '300px'
+                      : '0px'
+                  "
+                  [style.opacity]="
+                    copyConfirmActive() || (justCopied() && copiedStatus() === 'password')
+                      ? '1'
+                      : '0'
+                  "
+                  [style.margin-left]="
+                    copyConfirmActive() || (justCopied() && copiedStatus() === 'password')
+                      ? '0.5rem'
+                      : '0px'
+                  "
                 >
-                  Copy?
-                </span>
-                <span 
-                  class="text-[0.625rem] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all duration-300 overflow-hidden"
-                  [style.max-width]="(justCopied() && copiedStatus() === 'password') ? '100px' : '0px'"
-                  [style.opacity]="(justCopied() && copiedStatus() === 'password') ? '1' : '0'"
-                  [style.margin-left]="(justCopied() && copiedStatus() === 'password') ? '0.5rem' : '0px'"
-                >
-                  Copied
+                  <span
+                    [class.opacity-0]="justCopied() && copiedStatus() === 'password'"
+                    class="transition-opacity duration-300 col-start-1 row-start-1"
+                    >Copy?</span
+                  >
+                  <span
+                    [class.opacity-0]="!justCopied() || copiedStatus() !== 'password'"
+                    class="transition-opacity duration-300 col-start-1 row-start-1"
+                    >Copied</span
+                  >
                 </span>
               </button>
             </div>
           </div>
         </div>
 
-        <button 
+        <button
           [class.invisible]="!record.notes"
           [class.pointer-events-none]="!record.notes"
           (click)="record.notes && onShowMemo.emit(record)"
-          class="w-fit py-1 text-[0.625rem] font-black uppercase tracking-widest text-white/40 hover:text-vault-purple hover:opacity-100 active:scale-95 transition-all flex items-center gap-2 group/btn"
+          class="w-fit py-1 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-vault-purple hover:opacity-100 active:scale-95 transition-all flex items-center gap-2 group/btn"
         >
           View Description
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover/btn:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-3 h-3 transition-transform group-hover/btn:translate-x-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 8l4 4m0 0l-4 4m4-4H3"
+            />
           </svg>
         </button>
       </div>
