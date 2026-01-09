@@ -1,5 +1,5 @@
 import { Injectable, signal, inject, NgZone, OnDestroy, effect, untracked } from '@angular/core';
-import { AuthCryptoService } from './auth-crypto.service';
+import { AuthStateService } from './auth-state.service';
 import { SettingsService } from '../../core/settings/settings.service';
 import { Router } from '@angular/router';
 import {
@@ -16,10 +16,11 @@ import {
   tap,
   EMPTY,
 } from 'rxjs';
+import { SessionService } from './session.service';
 
 @Injectable({ providedIn: 'root' })
 export class SessionTimerService implements OnDestroy {
-  readonly crypto = inject(AuthCryptoService);
+  readonly session = inject(SessionService);
   readonly settings = inject(SettingsService);
   private readonly router = inject(Router);
   private readonly ngZone = inject(NgZone);
@@ -123,9 +124,7 @@ export class SessionTimerService implements OnDestroy {
   }
 
   private lockVault() {
-    if (this.crypto.isUnlocked()) {
-      this.crypto.clearKeys();
-    }
+    this.session.lock();
   }
 
   getFormattedTime(): string {

@@ -15,7 +15,7 @@ import { RecordCardComponent } from './record-card.component';
 import { RecordEditorComponent } from './record-editor.component';
 import { MemoModalComponent } from './memo-modal.component';
 import { VaultRecord, VaultRecordInput } from './vault-record.model';
-import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
+import { AuthStateService } from '../../core/auth/auth-state.service';
 import { ToastService } from '../../shared/ui/toast/toast.service';
 import { PasscodePromptModalComponent } from '../../shared/ui/passcode-prompt-modal.component';
 import { AuthPersistenceService } from '../../core/auth/auth-persistence.service';
@@ -193,14 +193,14 @@ export class VaultDashboardComponent implements OnDestroy {
 
   constructor(
     protected readonly vault: VaultDataService,
-    private readonly crypto: AuthCryptoService,
     private readonly persistence: AuthPersistenceService,
     private readonly router: Router,
-    private readonly toast: ToastService
+    private readonly toast: ToastService,
+    private readonly authState: AuthStateService
   ) {
     this.checkPasscodePrompt();
     effect(() => {
-      if (!this.crypto.isUnlocked()) {
+      if (!this.authState.isUnlocked()) {
         this.closeEditor();
         this.activeMemo.set(null);
         this.searchQueryInput.set('');
@@ -209,7 +209,7 @@ export class VaultDashboardComponent implements OnDestroy {
     });
 
     effect(() => {
-      if (this.crypto.isUnlocked() && this.router.url.includes('/vault')) {
+      if (this.authState.isUnlocked() && this.router.url.includes('/vault')) {
         this.vault.loadRecords();
       }
     });
@@ -233,7 +233,7 @@ export class VaultDashboardComponent implements OnDestroy {
   }
 
   filteredRecords = computed(() => {
-    if (!this.crypto.isUnlocked()) return [];
+    if (!this.authState.isUnlocked()) return [];
 
     const query = this.searchQuery().toLowerCase().trim();
     const scope = this.searchScope();

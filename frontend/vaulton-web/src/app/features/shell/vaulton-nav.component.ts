@@ -118,7 +118,6 @@ import { SessionService } from '../../core/auth/session.service';
 export class VaultonNavComponent {
   public readonly router = inject(Router);
   protected readonly timer = inject(SessionTimerService);
-  private readonly crypto = inject(AuthCryptoService);
   private readonly session = inject(SessionService);
 
   isAuthPage(): boolean {
@@ -131,7 +130,7 @@ export class VaultonNavComponent {
   }
 
   lock(): void {
-    this.crypto.clearKeys();
+    this.session.lock();
   }
 
   triggerLogout(): void {

@@ -1,5 +1,5 @@
-import { Injectable, signal } from '@angular/core';
-import { catchError, map, of, Observable, switchMap } from 'rxjs';
+import { Injectable, signal, inject } from '@angular/core';
+import { catchError, map, of, Observable, switchMap, firstValueFrom } from 'rxjs';
 import { AuthApiService } from '../api/auth-api.service';
 import { AuthStateService } from './auth-state.service';
 import { AuthCryptoService } from './auth-crypto.service';
@@ -9,6 +9,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 
 import { VaultDataService } from '../../features/vault/vault-data.service';
 import { SettingsService } from '../../core/settings/settings.service';
+import { zeroize } from '../../core/crypto/zeroize';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -66,6 +67,79 @@ export class SessionService {
       })
     );
   }
+
+  async login(accountId: string, password: string): Promise<void> {
+    const preLogin = await firstValueFrom(this.authApi.preLogin(accountId));
+    const { verifier } = await this.crypto.buildLogin(password, preLogin);
+    const res = await firstValueFrom(
+      this.authApi.login({ AccountId: accountId, Verifier: verifier })
+    );
+
+    this.authState.setAccessToken(res.Token);
+    this.authState.setAccountId(accountId);
+    await this.crypto.finalizeLogin(res.MkWrapPwd!, preLogin.CryptoSchemaVer, accountId);
+    this.authState.isUnlocked.set(true);
+
+    await this.persistence.saveBundle({
+      S_Pwd: preLogin.S_Pwd,
+      KdfMode: preLogin.KdfMode,
+      CryptoSchemaVer: preLogin.CryptoSchemaVer,
+      MkWrapPwd: res.MkWrapPwd!,
+      MkWrapRk: res.MkWrapRk || null,
+      AccountId: accountId,
+    });
+
+    await this.persistence.saveAccountId(accountId);
+  }
+
+  async register(
+    accountId: string,
+    password: string,
+    kdfMode: number,
+    schemaVer: number
+  ): Promise<void> {
+    const { registerBody } = await this.crypto.buildRegister(
+      accountId,
+      password,
+      kdfMode,
+      schemaVer
+    );
+    await firstValueFrom(this.authApi.register(registerBody));
+    await this.login(accountId, password);
+  }
+
+  async unlock(password: string): Promise<void> {
+    const bundle = await this.persistence.getBundle();
+    if (bundle) {
+      try {
+        await this.crypto.unlock(password, bundle);
+        this.authState.isUnlocked.set(true);
+      } catch (e) {
+        throw e;
+      }
+    } else {
+      const accountId = await this.persistence.getAccountId();
+      if (!accountId) throw new Error('No account found on this device');
+      await this.login(accountId, password);
+    }
+  }
+
+  async unlockViaPasscode(passcode: string): Promise<void> {
+    const accountId = await this.persistence.getAccountId();
+    if (!accountId) throw new Error('No account found');
+
+    const wrap = await this.persistence.getLocalPasscode(accountId);
+    if (!wrap) throw new Error('Passcode not set up');
+
+    await this.crypto.unlockViaPasscode(passcode, wrap.S_Local, wrap.MkWrapLocal, accountId);
+    this.authState.isUnlocked.set(true);
+  }
+
+  async lock(): Promise<void> {
+    await this.crypto.clearKeys();
+    this.authState.isUnlocked.set(false);
+  }
+
   async logout(): Promise<void> {
     await this.crypto.clearKeys();
 
@@ -73,6 +147,7 @@ export class SessionService {
     this.vault.clearData();
 
     this.toast.queue('Logged out successfully');
+
     this.authApi.logout().subscribe({
       complete: () => {
         window.location.href = '/auth';
@@ -94,7 +169,6 @@ export class SessionService {
       await this.persistence.clearUserData(accountId);
       this.settings.clearSettings(accountId);
     } else {
-      // fallback if no ID found: wipe all to be safe (Nuclear option as fallback)
       await this.persistence.clearAll();
       localStorage.clear();
     }
@@ -108,5 +182,18 @@ export class SessionService {
         window.location.href = '/auth';
       },
     });
+  }
+
+  getNewAccount(): Observable<{ AccountId: string; CryptoSchemaVer: number }> {
+    return this.authApi.preRegister();
+  }
+
+  async benchmarkKdf(password: string, mode: number): Promise<number> {
+    const salt = new Uint8Array(16);
+    try {
+      return await this.crypto.benchmarkKdf(password, salt, mode);
+    } finally {
+      zeroize(salt);
+    }
   }
 }
