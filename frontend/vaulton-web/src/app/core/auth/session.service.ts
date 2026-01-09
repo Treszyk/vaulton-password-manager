@@ -136,12 +136,12 @@ export class SessionService {
   }
 
   async lock(): Promise<void> {
-    await this.crypto.clearKeys();
+    await this.crypto.clearKeys(false);
     this.authState.isUnlocked.set(false);
   }
 
   async logout(): Promise<void> {
-    await this.crypto.clearKeys();
+    await this.crypto.clearKeys(true);
 
     this.authState.clear();
     this.vault.clearData();
@@ -161,7 +161,7 @@ export class SessionService {
   async wipeDevice(): Promise<void> {
     const accountId = this.authState.accountId() || (await this.persistence.getAccountId());
 
-    await this.crypto.clearKeys();
+    await this.crypto.clearKeys(true);
     this.authState.clear();
     this.vault.clearData();
 

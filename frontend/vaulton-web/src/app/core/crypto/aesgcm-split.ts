@@ -16,7 +16,10 @@ export async function encryptSplit(
 
   const ctTag = new Uint8Array(ctTagBuf);
   const tagLen = 16;
-  const ct = ctTag.subarray(0, ctTag.length - tagLen);
-  const tag = ctTag.subarray(ctTag.length - tagLen);
+  const ct = ctTag.slice(0, ctTag.length - tagLen);
+  const tag = ctTag.slice(ctTag.length - tagLen);
+
+  zeroize(ctTag);
+
   return { Nonce: nonce, CipherText: ct, Tag: tag };
 }

@@ -212,8 +212,18 @@ export class AuthCryptoService {
     }
   }
 
-  async clearKeys(): Promise<void> {
-    await this.postToWorker('CLEAR_KEYS', {});
+  async clearKeys(forceTerminate = false): Promise<void> {
+    if (this.isWorking && !forceTerminate) {
+      throw new Error('Crypto worker is busy');
+    }
+
+    try {
+      await this.postToWorker('CLEAR_KEYS', {});
+    } catch {}
+
+    if (forceTerminate) {
+      this.terminate();
+    }
   }
 
   async checkStatus(): Promise<boolean> {
