@@ -17,7 +17,6 @@ export class AuthCryptoService {
     { resolve: (val: any) => void; reject: (err: any) => void; timeoutId: any }
   >();
   private isWorking = false;
-  readonly isUnlocked = signal(false);
 
   constructor(private workerFactory: CryptoWorkerFactory) {}
 
@@ -186,7 +185,6 @@ export class AuthCryptoService {
       CryptoSchemaVer: schemaVer,
       AccountId: accountId,
     });
-    this.isUnlocked.set(true);
   }
 
   async benchmarkKdf(password: string, salt: Uint8Array, kdfMode: number): Promise<number> {
@@ -214,9 +212,18 @@ export class AuthCryptoService {
     }
   }
 
-  async clearKeys(): Promise<void> {
-    await this.postToWorker('CLEAR_KEYS', {});
-    this.isUnlocked.set(false);
+  async clearKeys(forceTerminate = false): Promise<void> {
+    if (this.isWorking && !forceTerminate) {
+      throw new Error('Crypto worker is busy');
+    }
+
+    try {
+      await this.postToWorker('CLEAR_KEYS', {});
+    } catch {}
+
+    if (forceTerminate) {
+      this.terminate();
+    }
   }
 
   async checkStatus(): Promise<boolean> {
@@ -258,7 +265,6 @@ export class AuthCryptoService {
         },
         [passwordBuffer]
       );
-      this.isUnlocked.set(true);
     } finally {
       if (pwdBytes) {
         try {
@@ -345,7 +351,6 @@ export class AuthCryptoService {
         { passcodeBuffer, saltB64, mkWrapLocal, accountId },
         [passcodeBuffer]
       );
-      this.isUnlocked.set(true);
     } finally {
       if (pinBytes) {
         try {

@@ -1,22 +1,22 @@
 import { Injectable, signal, inject, effect } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { VaultApiService } from '../../core/api/vault-api.service';
-import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
+import { AuthStateService } from '../../core/auth/auth-state.service';
 import { VaultCryptoService } from '../../core/vault/vault-crypto.service';
 import { VaultRecord, VaultRecordInput } from './vault-record.model';
 
 @Injectable({ providedIn: 'root' })
 export class VaultDataService {
   private readonly api = inject(VaultApiService);
-  private readonly authCrypto = inject(AuthCryptoService);
   private readonly vaultCrypto = inject(VaultCryptoService);
+  private readonly authState = inject(AuthStateService);
 
   readonly records = signal<VaultRecord[]>([]);
   readonly isLoading = signal(false);
 
   constructor() {
     effect(() => {
-      if (!this.authCrypto.isUnlocked()) {
+      if (!this.authState.isUnlocked()) {
         this.records.set([]);
       }
     });

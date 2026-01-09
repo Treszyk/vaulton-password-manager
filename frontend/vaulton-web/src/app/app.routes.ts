@@ -5,7 +5,7 @@ export const routes: Routes = [
   {
     path: 'auth',
     loadComponent: () =>
-      import('./features/auth/auth-page.component').then((m) => m.AuthPageComponent),
+      import('./features/auth/auth-page/auth-page.component').then((m) => m.AuthPageComponent),
   },
   {
     path: 'vault',

@@ -41,16 +41,16 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
             <h1 class="text-3xl font-black text-white tracking-tighter">
               Settings<span class="text-vault-purple">.</span>
             </h1>
-            <p class="text-white/40 text-sm font-medium">Manage your vault configuration.</p>
+            <p class="text-zinc-400 text-sm font-medium">Manage your vault configuration.</p>
           </header>
 
 
-          <div class="flex p-1.5 bg-white/5 rounded-2xl relative z-20 border border-white/5 backdrop-blur-md">
+          <div class="flex p-1.5 bg-zinc-950 rounded-2xl relative z-20 border border-zinc-800 backdrop-blur-md">
             <button
               (click)="setTab('GENERAL')"
               class="flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 z-10 relative"
               [class.text-white]="activeTab() === 'GENERAL'"
-              [class.text-white/40]="activeTab() !== 'GENERAL'"
+              [class.text-zinc-400]="activeTab() !== 'GENERAL'"
             >
               General
             </button>
@@ -58,16 +58,15 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
               (click)="setTab('SECURITY')"
               class="flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 z-10 relative"
               [class.text-white]="activeTab() === 'SECURITY'"
-              [class.text-white/40]="activeTab() !== 'SECURITY'"
+              [class.text-zinc-400]="activeTab() !== 'SECURITY'"
             >
               Security
             </button>
             
 
             <div
-              class="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-vault-purple rounded-xl transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)"
+              class="absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] bg-vault-purple rounded-xl transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)"
               [style.transform]="activeTab() === 'GENERAL' ? 'translateX(0)' : 'translateX(100%)'"
-              [style.left.px]="activeTab() === 'GENERAL' ? 6 : 0" 
             ></div>
           </div>
         </div>
@@ -80,8 +79,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
             
 
             <section class="space-y-4">
-              <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-white/40">Account</h2>
-              <div class="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl gap-6">
+              <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Account</h2>
+              <div class="flex items-center justify-between p-4 bg-zinc-950 border border-zinc-800 rounded-2xl gap-6">
                 <div class="space-y-1 flex-1 min-w-0">
                    <div class="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2 flex-wrap">Account ID</div>
                     <div class="relative group">
@@ -89,40 +88,45 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                         type="text"
                         [ngModel]="accountId()"
                         readonly
-                        class="w-full pl-5 pr-12 py-4 bg-white/5 border border-white/10 rounded-2xl transition-all text-white/60 font-mono"
+                        aria-label="Account ID"
+                        class="w-full pl-5 pr-12 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl transition-all text-zinc-300 font-mono"
                       />
                       <button 
                         (click)="copyToClipboard(accountId())"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white/55 hover:text-vault-purple hover:bg-white/10 transition-all"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-zinc-800 transition-all"
                         title="Copy ID"
+                        aria-label="Copy Account ID"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                         </svg>
                       </button>
                     </div>
-                    <p class="text-[0.625rem] md:text-[0.75rem] text-white/30 pt-1">This is your unique vault identifier. Keep it safe. You need it to log in to your vault.</p>
+                    <p class="text-xs md:text-[0.75rem] text-orange-400 pt-1">This is your unique vault identifier. Keep it safe. You need it to log in to your vault.</p>
                  </div>
               </div>
             </section>
 
 
             <section class="space-y-4">
-              <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-white/40">Visuals</h2>
-              <div class="bg-zinc-900/50 border border-white/5 rounded-2xl p-6 flex items-center justify-between group hover:border-white/10 transition-colors">
+              <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Visuals</h2>
+              <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 flex items-center justify-between group hover:border-zinc-800 transition-colors">
                 <div class="flex flex-col gap-1">
                   <span class="text-sm font-bold text-white tracking-tight">Background Stars</span>
-                  <span class="text-xs text-white/40">Toggle the animated starfield background.</span>
+                  <span class="text-xs text-zinc-400">Toggle the animated starfield background.</span>
                 </div>
                 
                 <button 
                   (click)="settings.toggleStarfield(accountId())"
-                  class="w-12 h-7 rounded-full transition-colors duration-300 relative focus:outline-none"
+                  aria-label="Toggle background stars"
+                  class="w-12 h-7 rounded-full transition-all duration-300 relative focus:outline-none border"
                   [class.bg-vault-purple]="settings.showStarfield()"
-                  [class.bg-white/10]="!settings.showStarfield()"
+                  [class.border-vault-purple]="settings.showStarfield()"
+                  [class.bg-zinc-950]="!settings.showStarfield()"
+                  [class.border-zinc-800]="!settings.showStarfield()"
                 >
                   <div 
-                    class="w-5 h-5 bg-white rounded-full absolute top-1 transition-transform duration-300 shadow-md"
+                    class="w-5 h-5 bg-white rounded-full absolute top-[2px] transition-transform duration-300 shadow-md"
                     [class.translate-x-6]="settings.showStarfield()"
                     [class.translate-x-1]="!settings.showStarfield()"
                   ></div>
@@ -137,27 +141,30 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
             
             <section class="space-y-4">
               <div class="flex items-center justify-between">
-                <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-white/40">Device Security</h2>
+                <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Device Security</h2>
                 <div *ngIf="isPasscodeEnabled()" class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                   <div class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
-                  <span class="text-[0.5625rem] font-bold text-emerald-500 uppercase tracking-tighter">Active</span>
+                  <span class="text-xs font-bold text-emerald-500 uppercase tracking-tighter">Active</span>
                 </div>
               </div>
 
-              <div class="bg-zinc-900/50 border border-white/5 rounded-2xl p-6 flex items-center justify-between group hover:border-white/10 transition-colors gap-6">
+              <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 flex items-center justify-between group hover:border-zinc-800 transition-colors gap-6">
                 <div class="flex flex-col gap-1 flex-1 min-w-0">
                   <span class="text-sm font-bold text-white tracking-tight">Local PASSCODE Unlock</span>
-                  <span class="text-xs text-white/40 leading-relaxed">Quickly unlock with a 6-digit passcode on this device.</span>
+                  <span class="text-xs text-zinc-400 leading-relaxed">Quickly unlock with a 6-digit passcode on this device.</span>
                 </div>
                 
                 <button 
                   (click)="togglePasscode()"
-                  class="w-12 h-7 rounded-full transition-colors duration-300 relative focus:outline-none shrink-0"
+                  aria-label="Toggle local passcode unlock"
+                  class="w-12 h-7 rounded-full transition-all duration-300 relative focus:outline-none shrink-0 border"
                   [class.bg-vault-purple]="isPasscodeEnabled()"
-                  [class.bg-white/10]="!isPasscodeEnabled()"
+                  [class.border-vault-purple]="isPasscodeEnabled()"
+                  [class.bg-zinc-950]="!isPasscodeEnabled()"
+                  [class.border-zinc-800]="!isPasscodeEnabled()"
                 >
                   <div 
-                    class="w-5 h-5 bg-white rounded-full absolute top-1 transition-transform duration-300 shadow-md"
+                    class="w-5 h-5 bg-white rounded-full absolute top-[2px] transition-transform duration-300 shadow-md"
                     [class.translate-x-6]="isPasscodeEnabled()"
                     [class.translate-x-1]="!isPasscodeEnabled()"
                   ></div>
@@ -176,10 +183,10 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                    [class.mt-6]="showPasscodeSetup()">
                    
                  <div class="overflow-hidden min-h-0">
-                   <div class="bg-zinc-900/80 border border-vault-purple/30 rounded-2xl p-6 space-y-6">
+                   <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 space-y-6">
                      <div class="flex items-center justify-between">
                         <h3 class="text-xs font-black text-white uppercase tracking-widest">Setup PASSCODE</h3>
-                        <button (click)="cancelPasscodeSetup()" class="text-white/30 hover:text-white transition-colors">
+                        <button (click)="cancelPasscodeSetup()" aria-label="Cancel passcode setup" class="text-zinc-500 hover:text-white transition-colors">
                           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                           </svg>
@@ -188,19 +195,20 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
 
                      <div class="space-y-4">
                         <div class="space-y-2">
-                           <label class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Master Password</label>
+                           <label class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Master Password</label>
                            <input 
                             type="password" 
                             [(ngModel)]="confirmPasswordForPasscode"
                             name="confirmPassword"
-                            class="w-full pl-5 pr-5 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
+                            aria-label="Master Password"
+                            class="w-full pl-5 pr-5 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
                             placeholder="Verify for re-wrap">
                         </div>
 
                         <div class="space-y-4 text-center">
                             <div class="flex items-center justify-between px-1">
-                              <label class="text-[0.5625rem] md:text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Choose 6-Character PASSCODE</label>
-                              <button (click)="togglePinVisibility()" class="text-white/30 hover:text-white transition-colors">
+                              <label class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Choose 6-Character PASSCODE</label>
+                              <button (click)="togglePinVisibility()" aria-label="Toggle PIN visibility" class="text-zinc-500 hover:text-white transition-colors">
                                 <svg *ngIf="pinVisibility()" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -216,11 +224,12 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                                 #pinInput
                                 [type]="pinVisibility() ? 'text' : 'password'"
                                 maxlength="1"
-                                class="w-8 h-10 bg-white/5 border border-white/10 rounded focus:border-vault-purple text-center text-white text-lg font-bold !px-0"
+                                class="w-8 h-10 bg-zinc-950 border border-zinc-800 rounded focus:border-vault-purple text-center text-white text-lg font-bold !px-0"
                                 (input)="onPinInput($event, i)"
                                 (keydown)="onPinKeyDown($event, i)"
                                 [(ngModel)]="pinDigits[i]"
                                 [name]="'pin' + i"
+                                [attr.aria-label]="'Digit ' + (i + 1)"
                                 autocomplete="off"
                               >
                            </div>
@@ -229,7 +238,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                         <button 
                           (click)="finishPasscodeSetup()"
                           [disabled]="isPasscodeBusy()"
-                          class="w-full py-3 rounded-xl bg-vault-purple hover:bg-vault-purple-hover text-white text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2 relative overflow-hidden"
+                          class="w-full py-3 rounded-xl bg-vault-purple hover:brightness-110 text-white text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2 relative overflow-hidden"
                         >
                           <span *ngIf="!isPasscodeBusy()">Activate PASSCODE</span>
                           
@@ -248,29 +257,29 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
             </section>
 
             <section class="space-y-4">
-              <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-white/40">Auto-Lock Timeout</h2>
+              <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Auto-Lock Timeout</h2>
               
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
                 <button
                   (click)="settings.updateTimeout(accountId(), 60)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
-                  [class.bg-vault-purple/10]="settings.timeoutSeconds() === 60"
+                  [class.bg-zinc-900]="settings.timeoutSeconds() === 60"
                   [class.border-vault-purple]="settings.timeoutSeconds() === 60"
-                  [class.bg-zinc-900/50]="settings.timeoutSeconds() !== 60"
-                  [class.border-white/5]="settings.timeoutSeconds() !== 60"
-                  [class.hover:border-white/20]="settings.timeoutSeconds() !== 60"
+                  [class.bg-zinc-950]="settings.timeoutSeconds() !== 60"
+                  [class.border-zinc-800]="settings.timeoutSeconds() !== 60"
+                  [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 60"
                 >
-                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 group-hover:bg-white/10 transition-colors"
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-900 group-hover:bg-zinc-800 transition-colors"
                        [class.text-vault-purple]="settings.timeoutSeconds() === 60"
-                       [class.text-white/40]="settings.timeoutSeconds() !== 60">
+                       [class.text-zinc-400]="settings.timeoutSeconds() !== 60">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
                     <div class="text-sm font-bold text-white">1 Minute</div>
-                    <div class="text-[0.625rem] text-white/40 uppercase tracking-wider">Paranoid</div>
+                    <div class="text-xs text-zinc-400 uppercase tracking-wider">Paranoid</div>
                   </div>
                 </button>
 
@@ -278,22 +287,22 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 <button
                   (click)="settings.updateTimeout(accountId(), 300)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
-                  [class.bg-vault-purple/10]="settings.timeoutSeconds() === 300"
+                  [class.bg-zinc-900]="settings.timeoutSeconds() === 300"
                   [class.border-vault-purple]="settings.timeoutSeconds() === 300"
-                  [class.bg-zinc-900/50]="settings.timeoutSeconds() !== 300"
-                  [class.border-white/5]="settings.timeoutSeconds() !== 300"
-                  [class.hover:border-white/20]="settings.timeoutSeconds() !== 300"
+                  [class.bg-zinc-950]="settings.timeoutSeconds() !== 300"
+                  [class.border-zinc-800]="settings.timeoutSeconds() !== 300"
+                  [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 300"
                 >
-                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 group-hover:bg-white/10 transition-colors"
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-900 group-hover:bg-zinc-800 transition-colors"
                        [class.text-vault-purple]="settings.timeoutSeconds() === 300"
-                       [class.text-white/40]="settings.timeoutSeconds() !== 300">
+                       [class.text-zinc-400]="settings.timeoutSeconds() !== 300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
                     <div class="text-sm font-bold text-white">5 Minutes</div>
-                    <div class="text-[0.625rem] text-white/40 uppercase tracking-wider">Recommended</div>
+                    <div class="text-xs text-zinc-400 uppercase tracking-wider">Recommended</div>
                   </div>
                 </button>
 
@@ -301,22 +310,22 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 <button
                   (click)="settings.updateTimeout(accountId(), 1800)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
-                  [class.bg-orange-500/10]="settings.timeoutSeconds() === 1800"
+                  [class.bg-zinc-900]="settings.timeoutSeconds() === 1800"
                   [class.border-orange-500]="settings.timeoutSeconds() === 1800"
-                  [class.bg-zinc-900/50]="settings.timeoutSeconds() !== 1800"
-                  [class.border-white/5]="settings.timeoutSeconds() !== 1800"
-                  [class.hover:border-white/20]="settings.timeoutSeconds() !== 1800"
+                  [class.bg-zinc-950]="settings.timeoutSeconds() !== 1800"
+                  [class.border-zinc-800]="settings.timeoutSeconds() !== 1800"
+                  [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 1800"
                 >
-                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 group-hover:bg-white/10 transition-colors"
-                       [class.text-orange-500]="settings.timeoutSeconds() === 1800"
-                       [class.text-white/40]="settings.timeoutSeconds() !== 1800">
+                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-900 group-hover:bg-zinc-800 transition-colors"
+                       [class.text-orange-400]="settings.timeoutSeconds() === 1800"
+                       [class.text-zinc-400]="settings.timeoutSeconds() !== 1800">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                   </div>
                   <div>
                     <div class="text-sm font-bold text-white group-hover:text-orange-200 transition-colors">30 Minutes</div>
-                    <div class="text-[0.625rem] text-orange-500/80 uppercase tracking-wider font-bold">Decreased Security</div>
+                     <div class="text-xs text-orange-400 uppercase tracking-wider font-bold">Decreased Security</div>
                   </div>
                 </button>
 
@@ -324,22 +333,22 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 <button
                   (click)="settings.updateTimeout(accountId(), 3600)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
-                  [class.bg-red-500/10]="settings.timeoutSeconds() === 3600"
+                  [class.bg-zinc-900]="settings.timeoutSeconds() === 3600"
                   [class.border-red-500]="settings.timeoutSeconds() === 3600"
-                  [class.bg-zinc-900/50]="settings.timeoutSeconds() !== 3600"
-                  [class.border-white/5]="settings.timeoutSeconds() !== 3600"
-                  [class.hover:border-white/20]="settings.timeoutSeconds() !== 3600"
+                  [class.bg-zinc-950]="settings.timeoutSeconds() !== 3600"
+                  [class.border-zinc-800]="settings.timeoutSeconds() !== 3600"
+                  [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 3600"
                 >
-                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 group-hover:bg-white/10 transition-colors"
+                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-900 group-hover:bg-zinc-800 transition-colors"
                        [class.text-red-500]="settings.timeoutSeconds() === 3600"
-                       [class.text-white/40]="settings.timeoutSeconds() !== 3600">
+                       [class.text-zinc-400]="settings.timeoutSeconds() !== 3600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
                   <div>
                     <div class="text-sm font-bold text-white group-hover:text-red-200 transition-colors">1 Hour</div>
-                    <div class="text-[0.625rem] text-red-500 uppercase tracking-wider font-bold">Danger: High Risk</div>
+                     <div class="text-xs text-red-500 uppercase tracking-wider font-bold">Danger: High Risk</div>
                   </div>
                 </button>
               </div>
@@ -347,8 +356,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
 
 
             <section class="space-y-4">
-               <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-white/40">Master Password</h2>
-               <div class="bg-zinc-900/50 border border-white/5 rounded-2xl p-6 space-y-6">
+               <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Master Password</h2>
+               <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 space-y-6">
                   
                   <div class="flex items-start gap-4 p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -361,20 +370,22 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
 
                   <div class="space-y-4">
                      <div class="space-y-2">
-                        <label class="text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Current Password</label>
+                        <label class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Current Password</label>
                         <input 
                           type="password" 
                           [(ngModel)]="rekeyOldPassword"
-                          class="w-full pl-5 pr-5 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
+                          aria-label="Current Password"
+                          class="w-full pl-5 pr-5 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
                           placeholder="••••••••">
                      </div>
                      <div class="space-y-2">
-                        <label class="text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">New Master Password</label>
+                        <label class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">New Master Password</label>
                         <input 
                           type="password" 
                           [(ngModel)]="rekeyNewPassword"
                           (ngModelChange)="isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
-                          class="w-full pl-5 pr-5 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
+                          aria-label="New Master Password"
+                          class="w-full pl-5 pr-5 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
                           placeholder="••••••••">
 
                         <app-strength-meter
@@ -384,11 +395,12 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                         ></app-strength-meter>
                      </div>
                      <div class="space-y-2 animate-fade-in" *ngIf="rekeyNewPassword">
-                        <label class="text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 ml-1">Confirm New Password</label>
+                        <label class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Confirm New Password</label>
                         <input 
                           type="password" 
                           [(ngModel)]="rekeyConfirmPassword"
-                          class="w-full pl-5 pr-5 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
+                          aria-label="Confirm New Password"
+                          class="w-full pl-5 pr-5 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
                           placeholder="••••••••">
                      </div>
 
@@ -397,13 +409,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                         <div class="flex items-center justify-between ml-1 mb-1 relative">
                           <div class="flex items-center gap-1.5 group/info cursor-help tooltip-full" 
                                data-tooltip="This setting influences both vault security and login time.">
-                            <label class="text-[0.625rem] font-bold uppercase tracking-[0.2em] text-white/55 cursor-help">Vault Hardening Grade</label>
+                            <label class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 cursor-help">Vault Hardening Grade</label>
                           </div>
                           
                           <div class="flex items-center gap-2 h-5">
                             <span 
                               *ngIf="isBenchmarking()"
-                              class="text-[0.4375rem] md:text-[0.5625rem] font-black uppercase tracking-wider text-vault-purple-bright animate-pulse"
+                              class="text-[0.5625rem] md:text-xs font-black uppercase tracking-wider text-vault-purple-bright animate-pulse"
                             >
                               Benchmarking {{ benchmarkStatus() }}...
                             </span>
@@ -411,12 +423,12 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                             <button 
                               *ngIf="isOptimized() && !isBenchmarking()"
                               (click)="onOptimizeKdf()"
-                              class="group/rerun flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-white/5 transition-all animate-fade-in"
+                              class="group/rerun flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-zinc-900 transition-all animate-fade-in"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 text-vault-purple transition-transform group-hover/rerun:rotate-180 duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                               </svg>
-                              <span class="text-[0.5rem] md:text-[0.625rem] font-black uppercase tracking-widest text-vault-purple/70 group-hover/rerun:text-vault-purple transition-colors">Rerun</span>
+                              <span class="text-[0.625rem] md:text-xs font-black uppercase tracking-widest text-vault-purple/70 group-hover/rerun:text-vault-purple transition-colors">Rerun</span>
                             </button>
                           </div>
                         </div>
@@ -435,7 +447,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                               <span class="grade-desc" *ngIf="!standardTime()">Fast & Secure</span>
                               <span class="grade-desc" *ngIf="standardTime()">Estimated time: {{ standardTime()?.toFixed(1) }}s</span>
                               <div *ngIf="standardTime() && !isBenchmarking()" 
-                                   class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.4375rem] md:text-[0.5rem] font-black uppercase tracking-tighter"
+                                   class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.5625rem] md:text-[0.625rem] font-black uppercase tracking-tighter"
                                    [class.text-green-400]="recommendedMode() === 1"
                                    [class.text-orange-400]="recommendedMode() !== 1 && standardTime()! <= 4.0"
                                    [class.text-red-400]="recommendedMode() !== 1 && standardTime()! > 4.0">
@@ -453,7 +465,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                               <span class="grade-desc" *ngIf="!hardenedTime()">Maximum Resistance</span>
                               <span class="grade-desc" *ngIf="hardenedTime()">Estimated time: {{ hardenedTime()?.toFixed(1) }}s</span>
                               <div *ngIf="hardenedTime() && !isBenchmarking()" 
-                                   class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.4375rem] md:text-[0.5rem] font-black uppercase tracking-tighter"
+                                   class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.5625rem] md:text-[0.625rem] font-black uppercase tracking-tighter"
                                    [class.text-green-400]="recommendedMode() === 2"
                                    [class.text-orange-400]="recommendedMode() !== 2 && hardenedTime()! <= 3.25"
                                    [class.text-red-400]="recommendedMode() !== 2 && hardenedTime()! > 3.25">
@@ -465,8 +477,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                           <div *ngIf="!isOptimized() && !isBenchmarking()" 
                                class="absolute inset-x-0 inset-y-0 z-10 flex flex-col items-center justify-center animate-fade-in pointer-events-none">
                             <div class="flex flex-col items-center justify-center p-4 pointer-events-auto w-full">
-                              <p class="text-[0.625rem] md:text-[0.6875rem] font-bold uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
-                                 [class.text-white/80]="isPasswordStrong()"
+                              <p class="text-xs md:text-[0.6875rem] font-bold uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
+                                 [class.text-zinc-200]="isPasswordStrong()"
                                  [class.text-red-400]="!isPasswordStrong()">
                                 {{ isPasswordStrong() ? 'Benchmark required to select grade' : 'Minimum "Fair" strength required' }}
                               </p>
@@ -474,9 +486,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                               <button 
                                 (click)="onOptimizeKdf()"
                                 [disabled]="!rekeyNewPassword || !isPasswordStrong()"
-                                class="flex items-center gap-2.5 px-6 py-3 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-white/20 disabled:opacity-50 disabled:pointer-events-none"
+                                class="flex items-center gap-2.5 px-6 py-3 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-zinc-600 disabled:opacity-50 disabled:pointer-events-none hover:brightness-110"
                                 [class.bg-vault-purple]="isPasswordStrong()"
-                                [class.hover:bg-vault-purple-bright]="isPasswordStrong()"
                                 [class.shadow-vault-purple/40]="isPasswordStrong()"
                                 [class.bg-red-600]="!isPasswordStrong()"
                                 [class.border-red-400/50]="!isPasswordStrong()"
@@ -489,7 +500,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                                 <svg *ngIf="!isPasswordStrong()" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
-                                <span class="text-[0.625rem] font-black uppercase tracking-widest leading-none">
+                                <span class="text-xs font-black uppercase tracking-widest leading-none">
                                   {{ isPasswordStrong() ? 'Benchmark & Select' : 'Weak Password' }}
                                 </span>
                               </button>
@@ -502,9 +513,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                      <button 
                       (click)="updateMasterKey()"
                       [disabled]="isRekeyBusy() || !isOptimized() || isRekeySuccess() || !isPasswordStrong()"
-                      class="w-full py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg"
+                      class="w-full py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg hover:brightness-110"
                       [class.bg-vault-purple]="!isRekeySuccess()"
-                      [class.hover:bg-vault-purple-bright]="!isRekeySuccess()"
                       [class.text-white]="!isRekeySuccess()"
                       [class.shadow-vault-purple_20]="!isRekeySuccess()"
                       [class.bg-green-500]="isRekeySuccess()"

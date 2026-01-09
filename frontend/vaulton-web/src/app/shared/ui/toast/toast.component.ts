@@ -16,7 +16,7 @@ import { ToastService } from './toast.service';
       [class.translate-y-0]="toast.show()"
     >
       <div
-        class="inline-block px-6 py-3 rounded-full bg-black/80 backdrop-blur-md transition-colors border border-white/10"
+        class="inline-block px-6 py-3 rounded-full bg-black/80 backdrop-blur-md transition-colors border border-zinc-700"
       >
         <p
           class="text-xs font-black uppercase tracking-[0.2em] drop-shadow-lg"

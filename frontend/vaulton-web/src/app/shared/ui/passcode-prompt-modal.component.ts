@@ -29,13 +29,13 @@ import { CommonModule } from '@angular/common';
               />
             </svg>
           </div>
-          <h2 class="text-2xl font-bold uppercase tracking-[0.2em] text-white/90">
+          <h2 class="text-2xl font-bold uppercase tracking-[0.2em] text-zinc-100">
             Enable Quick Unlock?
           </h2>
           <div class="mt-4 p-4 rounded-2xl bg-orange-500/5 border border-orange-500/20 text-left">
             <p class="text-xs md:text-sm text-orange-200/70 leading-relaxed font-medium">
               <span
-                class="text-orange-400 font-bold block mb-1 uppercase tracking-wider text-[0.625rem] md:text-[0.6875rem]"
+                class="text-orange-400 font-bold block mb-1 uppercase tracking-wider text-xs md:text-[0.6875rem]"
                 >Security Notice</span
               >
               This feature enables a 6-digit passcode for faster access. It is
@@ -71,7 +71,7 @@ import { CommonModule } from '@angular/common';
 
           <button
             type="button"
-            class="w-full py-4 text-[0.625rem] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors"
+            class="w-full py-4 text-xs font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors"
             (click)="skip.emit()"
           >
             Maybe Later

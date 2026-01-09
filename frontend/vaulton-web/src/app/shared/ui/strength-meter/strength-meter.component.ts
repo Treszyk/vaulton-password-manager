@@ -13,28 +13,28 @@ import { translations as plTranslations, dictionary as plDictionary } from '@zxc
     <div class="w-full space-y-1.5 opacity-90 hover:opacity-100 transition-opacity">
       <div class="flex gap-1 h-1 w-full">
         <div
-          class="flex-1 rounded-full bg-white/5 overflow-hidden transition-all duration-300"
+          class="flex-1 rounded-full bg-zinc-900 overflow-hidden transition-all duration-300"
           [style.background-color]="(score() >= 0 || !visible) && password ? segmentColor : ''"
           [style.box-shadow]="
             (score() >= 0 || !visible) && password ? '0 0 10px ' + segmentColor + '80' : ''
           "
         ></div>
         <div
-          class="flex-1 rounded-full bg-white/5 overflow-hidden transition-all duration-300"
+          class="flex-1 rounded-full bg-zinc-900 overflow-hidden transition-all duration-300"
           [style.background-color]="(score() >= 2 || !visible) && password ? segmentColor : ''"
           [style.box-shadow]="
             (score() >= 2 || !visible) && password ? '0 0 10px ' + segmentColor + '80' : ''
           "
         ></div>
         <div
-          class="flex-1 rounded-full bg-white/5 overflow-hidden transition-all duration-300"
+          class="flex-1 rounded-full bg-zinc-900 overflow-hidden transition-all duration-300"
           [style.background-color]="(score() >= 3 || !visible) && password ? segmentColor : ''"
           [style.box-shadow]="
             (score() >= 3 || !visible) && password ? '0 0 10px ' + segmentColor + '80' : ''
           "
         ></div>
         <div
-          class="flex-1 rounded-full bg-white/5 overflow-hidden transition-all duration-300"
+          class="flex-1 rounded-full bg-zinc-900 overflow-hidden transition-all duration-300"
           [style.background-color]="(score() >= 4 || !visible) && password ? segmentColor : ''"
           [style.box-shadow]="
             (score() >= 4 || !visible) && password ? '0 0 10px ' + segmentColor + '80' : ''
@@ -43,7 +43,7 @@ import { translations as plTranslations, dictionary as plDictionary } from '@zxc
       </div>
 
       <div
-        class="flex justify-between items-center text-[0.5625rem] font-black uppercase tracking-[0.2em] transition-colors duration-300"
+        class="flex justify-between items-center text-xs font-black uppercase tracking-[0.2em] transition-colors duration-300"
         [ngClass]="colorClass"
       >
         <span>{{ label() }}</span>
@@ -130,7 +130,7 @@ export class StrengthMeterComponent implements OnChanges {
   }
 
   get colorClass() {
-    if (!this.password) return 'text-white/30';
+    if (!this.password) return 'text-zinc-500';
     if (!this.visible) return 'text-vault-purple-bright';
     const s = this.score();
     switch (s) {
@@ -144,7 +144,7 @@ export class StrengthMeterComponent implements OnChanges {
       case 4:
         return 'text-green-500';
       default:
-        return 'text-white/30';
+        return 'text-zinc-500';
     }
   }
 }

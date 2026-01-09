@@ -4,6 +4,7 @@ import { Injectable, signal } from '@angular/core';
 export class AuthStateService {
   readonly accessToken = signal<string | null>(null);
   readonly accountId = signal<string | null>(null);
+  readonly isUnlocked = signal(false);
   readonly isInitialized = signal(false);
 
   setAccessToken(token: string | null): void {
@@ -21,5 +22,6 @@ export class AuthStateService {
   clear(): void {
     this.accessToken.set(null);
     this.accountId.set(null);
+    this.isUnlocked.set(false);
   }
 }

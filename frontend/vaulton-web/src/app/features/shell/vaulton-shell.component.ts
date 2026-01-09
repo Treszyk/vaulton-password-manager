@@ -6,7 +6,7 @@ import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { SessionService } from '../../core/auth/session.service';
 import { SettingsService } from '../../core/settings/settings.service';
-import { UnlockOverlayComponent } from './unlock-overlay.component';
+import { UnlockOverlayComponent } from './unlock-overlay/unlock-overlay.component';
 import { WipeConfirmationComponent } from './wipe-confirmation.component';
 import { LogoutConfirmationComponent } from './logout-confirmation.component';
 
@@ -34,7 +34,7 @@ import { LogoutConfirmationComponent } from './logout-confirmation.component';
 
       <div
         *ngIf="
-          (authState.isInitialized() && !crypto.isUnlocked()) ||
+          (authState.isInitialized() && !authState.isUnlocked()) ||
           session.showWipeConfirm() ||
           session.showLogoutConfirm()
         "
@@ -65,7 +65,6 @@ import { LogoutConfirmationComponent } from './logout-confirmation.component';
   encapsulation: ViewEncapsulation.None,
 })
 export class VaultonShellComponent {
-  protected readonly crypto = inject(AuthCryptoService);
   protected readonly authState = inject(AuthStateService);
   protected readonly session = inject(SessionService);
   protected readonly settings = inject(SettingsService);
