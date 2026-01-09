@@ -69,27 +69,34 @@ export class SessionService {
   }
 
   async login(accountId: string, password: string): Promise<void> {
-    const preLogin = await firstValueFrom(this.authApi.preLogin(accountId));
-    const { verifier } = await this.crypto.buildLogin(password, preLogin);
-    const res = await firstValueFrom(
-      this.authApi.login({ AccountId: accountId, Verifier: verifier })
-    );
+    try {
+      const preLogin = await firstValueFrom(this.authApi.preLogin(accountId));
+      let { verifier } = await this.crypto.buildLogin(password, preLogin);
+      const res = await firstValueFrom(
+        this.authApi.login({ AccountId: accountId, Verifier: verifier! })
+      );
+      verifier = null as any; // this isn't deleted from memory instantly sadly, but hopefully GC will take care of it on the next cleanup
 
-    this.authState.setAccessToken(res.Token);
-    this.authState.setAccountId(accountId);
-    await this.crypto.finalizeLogin(res.MkWrapPwd!, preLogin.CryptoSchemaVer, accountId);
-    this.authState.isUnlocked.set(true);
+      await this.crypto.finalizeLogin(res.MkWrapPwd!, preLogin.CryptoSchemaVer, accountId);
+      await this.persistence.saveBundle({
+        S_Pwd: preLogin.S_Pwd,
+        KdfMode: preLogin.KdfMode,
+        CryptoSchemaVer: preLogin.CryptoSchemaVer,
+        MkWrapPwd: res.MkWrapPwd!,
+        MkWrapRk: res.MkWrapRk || null,
+        AccountId: accountId,
+      });
 
-    await this.persistence.saveBundle({
-      S_Pwd: preLogin.S_Pwd,
-      KdfMode: preLogin.KdfMode,
-      CryptoSchemaVer: preLogin.CryptoSchemaVer,
-      MkWrapPwd: res.MkWrapPwd!,
-      MkWrapRk: res.MkWrapRk || null,
-      AccountId: accountId,
-    });
+      await this.persistence.saveAccountId(accountId);
 
-    await this.persistence.saveAccountId(accountId);
+      this.authState.setAccessToken(res.Token);
+      this.authState.setAccountId(accountId);
+      this.authState.isUnlocked.set(true);
+    } catch (e) {
+      this.authState.clear();
+      this.authApi.logout().subscribe();
+      throw e;
+    }
   }
 
   async register(
@@ -137,6 +144,7 @@ export class SessionService {
 
   async lock(): Promise<void> {
     await this.crypto.clearKeys(false);
+    this.vault.clearData();
     this.authState.isUnlocked.set(false);
   }
 
