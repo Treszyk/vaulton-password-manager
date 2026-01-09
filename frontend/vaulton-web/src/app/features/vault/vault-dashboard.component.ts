@@ -108,12 +108,12 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
       </div>
       <div
         *ngIf="!vault.isLoading()"
-        class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth pb-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 [3000px]:grid-cols-4 gap-8 items-stretch animate-fade-in px-1"
+        class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth pb-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 [3000px]:grid-cols-4 gap-8 items-stretch animate-fade-in px-4 -mx-4"
       >
         <button
           *ngIf="!searchQuery()"
           (click)="showAddModal.set(true)"
-          class="group relative h-[15rem] flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white/[0.01] border-2 border-dashed border-white/10 hover:border-vault-purple/40 hover:bg-white/[0.02] transition-all duration-500 animate-scale-in"
+          class="group relative h-[16rem] flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white/[0.01] border-2 border-dashed border-white/10 hover:border-vault-purple/40 hover:bg-white/[0.02] transition-all duration-500 animate-scale-in"
           [style.animation-delay]="'0ms'"
         >
           <div
