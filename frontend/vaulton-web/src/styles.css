@@ -31,25 +31,25 @@ body {
 
 @media (min-width: 1500px) {
   html {
-    font-size: 14.5px;
+    font-size: 18px;
   }
 }
 
 @media (min-width: 2500px) and (min-height: 1200px) {
   html {
-    font-size: 23px;
+    font-size: 28px;
   }
 }
 
 @media (min-width: 3800px) and (min-height: 1800px) {
   html {
-    font-size: 33px;
+    font-size: 42px;
   }
 }
 
 @media (min-width: 5000px) and (min-height: 2500px) {
   html {
-    font-size: 48px;
+    font-size: 64px;
   }
 }
 
@@ -500,4 +500,53 @@ button.btn-secondary {
 
 .unstable-shake {
   animation: intense-shake 0.08s infinite;
+}
+
+.demo-disclaimer {
+  @apply w-full flex justify-center py-2 px-4 animate-fade-in pointer-events-none select-none text-center;
+}
+
+.demo-disclaimer-text {
+  @apply font-black uppercase text-red-500/80;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+}
+
+@media (max-width: 767px) {
+  .demo-disclaimer {
+    @apply py-2;
+  }
+}
+
+@media (min-width: 768px) {
+  .demo-disclaimer {
+    @apply fixed bottom-0 left-0 z-[100] bg-black/5 backdrop-blur-[2px] py-3;
+  }
+}
+
+.nav-link {
+  @apply text-xs font-black uppercase text-zinc-200 hover:text-white transition-all active:scale-[0.98] no-underline;
+  letter-spacing: 0.25em;
+}
+
+.vault-actions-container {
+  @apply fixed bottom-5 right-4 z-[30] flex flex-col items-end gap-3 md:top-8 md:right-8 md:bottom-auto md:flex-row md:items-center md:gap-4 animate-fade-in pointer-events-auto;
+}
+
+.timer-pill {
+  @apply flex items-center gap-3 px-3 md:px-4 h-10 rounded-full bg-zinc-950 border border-zinc-700 transition-all animate-fade-in shadow-xl md:shadow-none box-border;
+}
+
+.session-dot {
+  @apply w-1.5 h-1.5 rounded-full bg-vault-purple;
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.5);
+}
+
+.nav-v-divider {
+  @apply w-[1px] h-4 bg-zinc-800;
+}
+
+.session-label {
+  @apply hidden md:block text-xs font-black uppercase text-zinc-300 leading-none mb-0.5;
+  letter-spacing: 0.2em;
 }

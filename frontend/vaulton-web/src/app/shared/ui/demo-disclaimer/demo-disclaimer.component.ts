@@ -7,10 +7,8 @@ import { interval, Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div
-      class="w-full flex justify-center py-2 px-4 animate-fade-in pointer-events-none select-none text-center md:fixed md:bottom-0 md:left-0 md:z-[100] md:bg-black/5 md:backdrop-blur-[2px]"
-    >
-      <div class="text-[0.75rem] font-black uppercase tracking-[0.2em] text-red-500/80">
+    <div class="demo-disclaimer">
+      <div class="demo-disclaimer-text">
         Public Demo • All Data purged in:
         <span class="font-black text-red-500">{{ countdown() }}</span>
       </div>
