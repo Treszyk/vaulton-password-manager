@@ -40,7 +40,7 @@ import { VaultRecord } from './vault-record.model';
 
         <div class="space-y-4 mb-8">
           <div
-            class="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 max-h-[40vh] overflow-y-auto"
+            class="bg-vault-dark border border-zinc-700 rounded-2xl p-6 max-h-[40vh] overflow-y-auto"
           >
             <p
               class="text-[0.875rem] md:text-[1.125rem] text-zinc-300 leading-relaxed whitespace-pre-wrap selection:bg-vault-purple/30"

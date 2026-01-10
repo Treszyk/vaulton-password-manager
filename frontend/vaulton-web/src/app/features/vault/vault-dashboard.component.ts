@@ -74,7 +74,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
           </div>
           <button
             (click)="searchScope.set(searchScope() === 'titles' ? 'all' : 'titles')"
-            class="absolute inset-y-0 right-2 my-auto px-3 py-1.5 h-fit rounded-lg text-xs font-black uppercase tracking-wider transition-all text-zinc-400 hover:text-zinc-400 hover:bg-zinc-900 border border-transparent"
+            class="absolute inset-y-0 right-2 my-auto px-3 py-1.5 h-fit rounded-lg text-xs font-black uppercase tracking-wider transition-all text-zinc-400 hover:text-zinc-400 hover:bg-vault-dark border border-transparent"
           >
             {{ searchScope() === 'titles' ? 'Title/Website' : 'All' }}
           </button>
@@ -83,7 +83,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
             type="text"
             [(ngModel)]="searchQueryInput"
             placeholder="Search Vault..."
-            class="w-full !bg-zinc-950 !border-zinc-800 focus:!border-vault-purple/30 !rounded-2xl !py-4 !pl-14 !pr-6 !text-xs !tracking-[0.1em] !font-bold transition-all placeholder:text-zinc-600"
+            class="w-full !bg-vault-black !border-zinc-800 focus:!border-vault-purple/30 !rounded-2xl !py-4 !pl-14 !pr-6 !text-xs !tracking-[0.1em] !font-bold transition-all placeholder:text-zinc-600"
           />
         </div>
       </div>
@@ -105,12 +105,12 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
         <button
           *ngIf="!searchQuery()"
           (click)="showAddModal.set(true)"
-          class="group relative h-[16rem] flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-zinc-950 border-2 border-dashed border-zinc-800 hover:border-vault-purple/40 hover:bg-zinc-950 transition-all duration-500 animate-scale-in"
-          [style.animation-delay]="'0ms'"
+          class="group relative h-[16rem] flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-vault-black border-2 border-dashed border-zinc-800 hover:border-vault-purple/40 hover:bg-vault-black transition-all duration-500 animate-scale-in"
+          [style.--delay]="'0ms'"
           aria-label="Add a New Entry"
         >
           <div
-            class="w-16 h-16 rounded-full bg-zinc-950 border border-zinc-700 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-vault-purple/10 group-hover:border-vault-purple/20 transition-all duration-500"
+            class="w-16 h-16 rounded-full bg-vault-black border border-zinc-700 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-vault-purple/10 group-hover:border-vault-purple/20 transition-all duration-500"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -135,7 +135,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
 
         <app-record-card
           *ngFor="let record of filteredRecords(); let i = index; trackBy: trackByQuery"
-          [style.animation-delay]="(i < 10 ? (i + (searchQuery() ? 0 : 1)) * 100 : 1000) + 'ms'"
+          [style.--delay]="(i < 10 ? (i + (searchQuery() ? 0 : 1)) * 100 : 1000) + 'ms'"
           class="animate-scale-in"
           [record]="record"
           (onDelete)="deleteRecord($event)"

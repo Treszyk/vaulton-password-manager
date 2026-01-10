@@ -10,36 +10,15 @@ import { translations as plTranslations, dictionary as plDictionary } from '@zxc
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="w-full space-y-1.5 opacity-90 hover:opacity-100 transition-opacity">
+    <div
+      class="w-full space-y-1.5 opacity-90 hover:opacity-100 transition-opacity"
+      [attr.data-strength]="label().toLowerCase().replace(' ', '-')"
+    >
       <div class="flex gap-1 h-1 w-full">
-        <div
-          class="flex-1 rounded-full bg-zinc-900 overflow-hidden transition-all duration-300"
-          [style.background-color]="(score() >= 0 || !visible) && password ? segmentColor : ''"
-          [style.box-shadow]="
-            (score() >= 0 || !visible) && password ? '0 0 10px ' + segmentColor + '80' : ''
-          "
-        ></div>
-        <div
-          class="flex-1 rounded-full bg-zinc-900 overflow-hidden transition-all duration-300"
-          [style.background-color]="(score() >= 2 || !visible) && password ? segmentColor : ''"
-          [style.box-shadow]="
-            (score() >= 2 || !visible) && password ? '0 0 10px ' + segmentColor + '80' : ''
-          "
-        ></div>
-        <div
-          class="flex-1 rounded-full bg-zinc-900 overflow-hidden transition-all duration-300"
-          [style.background-color]="(score() >= 3 || !visible) && password ? segmentColor : ''"
-          [style.box-shadow]="
-            (score() >= 3 || !visible) && password ? '0 0 10px ' + segmentColor + '80' : ''
-          "
-        ></div>
-        <div
-          class="flex-1 rounded-full bg-zinc-900 overflow-hidden transition-all duration-300"
-          [style.background-color]="(score() >= 4 || !visible) && password ? segmentColor : ''"
-          [style.box-shadow]="
-            (score() >= 4 || !visible) && password ? '0 0 10px ' + segmentColor + '80' : ''
-          "
-        ></div>
+        <div class="strength-segment segment-1"></div>
+        <div class="strength-segment segment-2"></div>
+        <div class="strength-segment segment-3"></div>
+        <div class="strength-segment segment-4"></div>
       </div>
 
       <div
@@ -130,21 +109,21 @@ export class StrengthMeterComponent implements OnChanges {
   }
 
   get colorClass() {
-    if (!this.password) return 'text-zinc-500';
+    if (!this.password) return 'text-zinc-400';
     if (!this.visible) return 'text-vault-purple-bright';
     const s = this.score();
     switch (s) {
       case 0:
       case 1:
-        return 'text-red-500';
+        return 'text-red-400';
       case 2:
-        return 'text-orange-500';
+        return 'text-orange-400';
       case 3:
-        return 'text-yellow-400';
+        return 'text-yellow-300';
       case 4:
-        return 'text-green-500';
+        return 'text-green-400';
       default:
-        return 'text-zinc-500';
+        return 'text-zinc-400';
     }
   }
 }

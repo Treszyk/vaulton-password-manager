@@ -25,7 +25,7 @@
           </div>
         </div>
 
-        <div class="flex p-1.5 bg-zinc-950 rounded-2xl relative z-20 border border-zinc-800 backdrop-blur-md">
+        <div class="flex p-1.5 bg-vault-black rounded-2xl relative z-20 border border-zinc-800 backdrop-blur-md">
           <button
             (click)="setMode('LOGIN')"
             class="flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 z-10"
@@ -62,14 +62,14 @@
                     type="text"
                     [ngModel]="accountId()"
                     (ngModelChange)="accountId.set($event)"
-                    class="w-full pl-5 pr-12 py-4 bg-zinc-950 border border-zinc-800 hover:bg-zinc-900 focus:bg-zinc-900 focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
+                    class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
                     placeholder="vault-xxxx-xxxx"
                     (keyup.enter)="onSubmit()"
                   />
                   <button 
                     *ngIf="accountId()"
                     (click)="copyToClipboard(accountId())"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-zinc-800 transition-all animate-fade-in"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-vault-grey transition-all animate-fade-in"
                     title="Copy ID"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,7 +92,7 @@
                     class="text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-vault-purple transition-all flex items-center gap-1.5 group/forgot"
                   >
                     <span>Forgot?</span>
-                    <span class="px-1 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-[0.625rem] text-zinc-600 group-hover/forgot:border-vault-purple/30 group-hover/forgot:text-vault-purple/60 transition-all">SOON</span>
+                    <span class="px-1 py-0.5 rounded-md bg-vault-dark border border-zinc-800 text-[0.625rem] text-zinc-600 group-hover/forgot:border-vault-purple/30 group-hover/forgot:text-vault-purple/60 transition-all">SOON</span>
                   </button>
                 </div>
                 <div class="relative group">
@@ -101,7 +101,7 @@
                     [ngModel]="password()"
                     [disabled]="isWorking() || isBenchmarking()"
                     (ngModelChange)="password.set($event); isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
-                    class="w-full pl-5 pr-11 py-4 bg-zinc-950 border border-zinc-800 hover:bg-zinc-900 focus:bg-zinc-900 focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
+                    class="w-full pl-5 pr-11 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
                     placeholder="••••••••••••"
                     (keyup.enter)="onSubmit()"
                   />
@@ -141,13 +141,13 @@
                     [ngModel]="accountId()"
                     readonly
                     [disabled]="isWorking() || isBenchmarking()"
-                    class="w-full pl-5 pr-12 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl transition-all text-zinc-300"
+                    class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 rounded-2xl transition-all text-zinc-300"
                     placeholder="Generating..."
                   />
                   <button 
                     *ngIf="accountId()"
                     (click)="copyToClipboard(accountId())"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-zinc-800 transition-all animate-fade-in"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-vault-grey transition-all animate-fade-in"
                     title="Copy ID"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -174,7 +174,7 @@
                     [ngModel]="password()"
                     [disabled]="isWorking() || isBenchmarking()"
                     (ngModelChange)="password.set($event); isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
-                    class="w-full pl-5 pr-11 py-4 bg-zinc-950 border border-zinc-800 hover:bg-zinc-900 focus:bg-zinc-900 focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
+                    class="w-full pl-5 pr-11 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
                     placeholder="••••••••••••"
                   />
                   <div class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-vault-purple/40 transition-colors">
@@ -212,7 +212,7 @@
                       <button 
                         *ngIf="isOptimized() && !isBenchmarking()"
                         (click)="onOptimizeKdf()"
-                        class="group/rerun flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-zinc-900 transition-all animate-fade-in"
+                        class="group/rerun flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-vault-dark transition-all animate-fade-in"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 text-vault-purple transition-transform group-hover/rerun:rotate-180 duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />

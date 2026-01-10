@@ -57,7 +57,7 @@ import { SessionService } from '../../core/auth/session.service';
       >
         <div 
           *ngIf="timer.remainingSeconds() < timer.settings.timeoutSeconds()"
-          class="flex items-center gap-3 px-3 md:px-4 h-10 rounded-full bg-zinc-950 md:bg-zinc-950 border border-zinc-700 transition-all animate-fade-in shadow-xl md:shadow-none box-border"
+          class="flex items-center gap-3 px-3 md:px-4 h-10 rounded-full bg-vault-black md:bg-vault-black border border-zinc-700 transition-all animate-fade-in shadow-xl md:shadow-none box-border"
           [class.border-red-500/30]="timer.isAboutToLock()"
           [class.bg-red-500/5]="timer.isAboutToLock()"
         >
@@ -76,9 +76,9 @@ import { SessionService } from '../../core/auth/session.service';
                [class.shadow-red-500/50]="timer.isAboutToLock()"></div>
         </div>
 
-        <div class="flex items-center gap-2 p-1 rounded-full bg-zinc-950 md:bg-zinc-950 border border-zinc-700 shadow-xl md:shadow-none">
+        <div class="flex items-center gap-2 p-1 rounded-full bg-vault-black md:bg-vault-black border border-zinc-700 shadow-xl md:shadow-none">
           <button
-            class="px-2 md:px-5 py-2 rounded-full hover:bg-zinc-900 text-zinc-300 hover:text-white transition-all text-xs font-black uppercase tracking-[0.2em] active:scale-[0.98] flex items-center justify-center"
+            class="px-2 md:px-5 py-2 rounded-full hover:bg-vault-dark text-zinc-300 hover:text-white transition-all text-xs font-black uppercase tracking-[0.2em] active:scale-[0.98] flex items-center justify-center"
             (click)="lock()"
             title="Lock Vault"
           >
@@ -87,7 +87,7 @@ import { SessionService } from '../../core/auth/session.service';
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </button>
-          <div class="w-[1px] h-4 bg-zinc-800"></div>
+          <div class="w-[1px] h-4 bg-vault-grey"></div>
           <button
             class="px-2 md:px-5 py-2 rounded-full hover:bg-vault-purple/10 text-zinc-300 hover:text-vault-purple transition-all text-xs font-black uppercase tracking-[0.2em] active:scale-[0.98] flex items-center justify-center"
             (click)="triggerLogout()"
@@ -98,7 +98,7 @@ import { SessionService } from '../../core/auth/session.service';
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
           </button>
-          <div class="w-[1px] h-4 bg-zinc-800"></div>
+          <div class="w-[1px] h-4 bg-vault-grey"></div>
           <button
             class="px-2 md:px-5 py-2 rounded-full hover:bg-red-500/10 text-zinc-300 hover:text-red-400 transition-all text-xs font-black uppercase tracking-[0.2em] active:scale-[0.98] flex items-center justify-center"
             (click)="triggerWipe()"

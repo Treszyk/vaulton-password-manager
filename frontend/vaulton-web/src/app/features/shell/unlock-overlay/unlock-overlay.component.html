@@ -24,7 +24,7 @@
 
   <div
     *ngIf="hasPasscode()"
-    class="flex p-1.5 bg-zinc-950 rounded-2xl mb-8 border border-zinc-800 relative"
+    class="flex p-1.5 bg-vault-black rounded-2xl mb-8 border border-zinc-800 relative"
   >
     <button
       (click)="setMode('PASSWORD')"
@@ -43,10 +43,7 @@
       Passcode
     </button>
 
-    <div
-      class="absolute top-1 bottom-1 left-1.5 w-[calc(50%-0.375rem)] bg-vault-purple rounded-xl transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) -z-0"
-      [style.transform]="mode() === 'PASSWORD' ? 'translateX(0)' : 'translateX(100%)'"
-    ></div>
+    <div class="tab-indicator" [attr.data-mode]="mode()"></div>
   </div>
 
   <div class="relative min-h-[8.75rem]">
@@ -59,7 +56,7 @@
           [(ngModel)]="password"
           name="password"
           placeholder="Master Password"
-          class="w-full !bg-zinc-950 !border-zinc-800 focus:!border-vault-purple !rounded-2xl !py-4 transition-all"
+          class="w-full !bg-vault-black !border-zinc-800 focus:!border-vault-purple !rounded-2xl !py-4 transition-all"
           [disabled]="isWorking()"
           autofocus
         />
@@ -156,7 +153,7 @@
             #pinInput
             [type]="pinVisibility() ? 'text' : 'password'"
             maxlength="1"
-            class="w-10 h-14 bg-zinc-950 border border-zinc-800 rounded-xl focus:border-vault-purple text-center text-white text-2xl font-bold transition-all !px-0"
+            class="w-10 h-14 bg-vault-black border border-zinc-800 rounded-xl focus:border-vault-purple text-center text-white text-2xl font-bold transition-all !px-0"
             (input)="onPinInput($event, i)"
             (keydown)="onPinKeyDown($event, i)"
             [(ngModel)]="pinDigits[i]"
@@ -214,7 +211,7 @@
       </button>
     </div>
 
-    <div class="w-1 h-1 rounded-full bg-zinc-800"></div>
+    <div class="w-1 h-1 rounded-full bg-vault-grey"></div>
 
     <div class="flex justify-start">
       <button

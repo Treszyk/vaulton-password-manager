@@ -3,13 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --v-black: #050505;
-  --v-dark: #0f0f10;
-  --v-grey: #1c1c1e;
-  --v-grey-light: #2c2c2e;
-  --v-grey-lighter: #5c5c5e;
+  --v-black: #0a0a0a;
+  --v-dark: #141414;
+  --v-grey: #262626;
+  --v-grey-light: #404040;
+  --v-grey-lighter: #525252;
+
+  --v-text-primary: #ffffff;
+  --v-text-regular: #e5e5e5;
+  --v-text-muted: #a3a3a3;
+  --v-text-dim: #737373;
+
   --v-purple: #7c3aed;
-  --v-purple-bright: #a78bfa;
+  --v-purple-bright: #9f68ff;
   --font-inter: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -77,12 +83,12 @@ button.btn-primary {
 }
 
 button.btn-secondary {
-  @apply bg-zinc-900 hover:bg-zinc-800 text-white/70 hover:text-white px-6 py-3 
+  @apply bg-vault-dark hover:bg-vault-grey text-white/70 hover:text-white px-6 py-3 
          rounded-xl font-semibold transition-all active:scale-[0.98];
 }
 
 .glass {
-  @apply bg-zinc-950 backdrop-blur-xl border border-zinc-800;
+  @apply bg-vault-black backdrop-blur-xl border border-zinc-800;
 }
 
 .auth-panel {
@@ -191,8 +197,8 @@ button.btn-secondary {
 }
 
 .kdf-option {
-  @apply flex-1 p-4 rounded-xl bg-zinc-950 border border-zinc-800 
-         text-center cursor-pointer transition-all hover:bg-zinc-900
+  @apply flex-1 p-4 rounded-xl bg-vault-black border border-zinc-800 
+         text-center cursor-pointer transition-all hover:bg-vault-dark
          flex flex-col gap-1 items-center relative;
 }
 
@@ -201,7 +207,7 @@ button.btn-secondary {
 }
 
 .kdf-option.active {
-  @apply bg-zinc-900 border-vault-purple/50 ring-2 ring-vault-purple/10;
+  @apply bg-vault-dark border-vault-purple/50 ring-2 ring-vault-purple/10;
 }
 
 .kdf-option .grade-title {
@@ -373,7 +379,7 @@ button.btn-secondary {
   @apply bg-transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-zinc-800 rounded-full hover:bg-zinc-700 transition-all;
+  @apply bg-vault-grey rounded-full hover:bg-vault-grey-light transition-all;
 }
 
 @keyframes slideInLeft {
@@ -395,7 +401,7 @@ button.btn-secondary {
 .revealed-text {
   display: inline-block !important;
   width: fit-content !important;
-  background: linear-gradient(to right, #7c3aed 50%, #a1a1aa 50%);
+  background: linear-gradient(to right, #a855f7 50%, #a1a1aa 50%);
   background-size: 200% 100%;
   background-position: 0% 0%;
   -webkit-background-clip: text;
@@ -405,6 +411,19 @@ button.btn-secondary {
   animation: drain 8s linear forwards;
 }
 
+.tab-indicator {
+  @apply absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] bg-vault-purple rounded-xl transition-all duration-300;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tab-indicator[data-active-tab='GENERAL'] {
+  transform: translateX(0);
+}
+
+.tab-indicator[data-active-tab='SECURITY'] {
+  transform: translateX(100%);
+}
+
 @keyframes drain {
   from {
     background-position: 0% 0%;
@@ -412,6 +431,41 @@ button.btn-secondary {
   to {
     background-position: 100% 0%;
   }
+}
+
+.strength-segment {
+  @apply flex-1 rounded-full bg-zinc-900 overflow-hidden transition-all duration-300;
+}
+
+[data-strength='very-weak'] .segment-1 {
+  background-color: #ef4444;
+  box-shadow: 0 0 10px #ef444480;
+}
+[data-strength='weak'] .segment-1 {
+  background-color: #ef4444;
+  box-shadow: 0 0 10px #ef444480;
+}
+[data-strength='fair'] .segment-1,
+[data-strength='fair'] .segment-2 {
+  background-color: #f97316;
+  box-shadow: 0 0 10px #f9731680;
+}
+[data-strength='good'] .segment-1,
+[data-strength='good'] .segment-2,
+[data-strength='good'] .segment-3 {
+  background-color: #facc15;
+  box-shadow: 0 0 10px #facc1580;
+}
+[data-strength='strong'] .segment-1,
+[data-strength='strong'] .segment-2,
+[data-strength='strong'] .segment-3,
+[data-strength='strong'] .segment-4 {
+  background-color: #22c55e;
+  box-shadow: 0 0 10px #22c55e80;
+}
+[data-strength='hidden'] .strength-segment {
+  background-color: var(--v-purple);
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
 }
 
 .trash-btn {
@@ -444,7 +498,7 @@ button.btn-secondary {
 }
 
 .overlay-card {
-  @apply bg-transparent border-none shadow-none md:bg-[#0D0D0E] md:border md:border-zinc-700 md:shadow-2xl;
+  @apply bg-transparent border-none shadow-none md:bg-vault-black md:border md:border-zinc-700 md:shadow-2xl;
 }
 
 .modal-glass {
@@ -457,6 +511,7 @@ button.btn-secondary {
 .animate-scale-in {
   animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
+  animation-delay: var(--delay, 0ms);
 }
 
 @keyframes scaleIn {
@@ -468,6 +523,14 @@ button.btn-secondary {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+.tab-indicator[data-mode='PASSWORD'] {
+  transform: translateX(0);
+}
+
+.tab-indicator[data-mode='PASSCODE'] {
+  transform: translateX(100%);
 }
 
 .wipe-progress {
@@ -494,6 +557,28 @@ button.btn-secondary {
       calc(var(--shake-intensity) * -1.5px)
     );
   }
+}
+
+.confirm-label {
+  @apply grid transition-all duration-300 ease-out;
+  grid-template-columns: 0fr;
+  opacity: 0;
+  margin-left: 0px;
+}
+
+.confirm-label.active {
+  grid-template-columns: 1fr;
+  opacity: 1;
+  margin-left: 0.5rem;
+}
+
+.confirm-label.password-confirm {
+  @apply place-items-center grid-cols-1 text-xs font-black uppercase tracking-[0.2em] whitespace-nowrap;
+  max-width: 0px;
+}
+
+.confirm-label.password-confirm.active {
+  max-width: 300px;
 }
 
 .unstable-shake {

@@ -56,6 +56,8 @@ services:
     volumes:
       - ./frontend/vaulton-web/src:/app/src
       - ./frontend/vaulton-web/public:/app/public
+      - ./frontend/vaulton-web/tailwind.config.js:/app/tailwind.config.js
+      - ./frontend/vaulton-web/postcss.config.js:/app/postcss.config.js
     depends_on:
       vaulton-api:
         condition: service_healthy

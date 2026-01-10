@@ -45,7 +45,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
           </header>
 
 
-          <div class="flex p-1.5 bg-zinc-950 rounded-2xl relative z-20 border border-zinc-800 backdrop-blur-md">
+          <div class="flex p-1.5 bg-vault-black rounded-2xl relative z-20 border border-zinc-800 backdrop-blur-md">
             <button
               (click)="setTab('GENERAL')"
               class="flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 z-10 relative"
@@ -65,8 +65,8 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
             
 
             <div
-              class="absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] bg-vault-purple rounded-xl transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)"
-              [style.transform]="activeTab() === 'GENERAL' ? 'translateX(0)' : 'translateX(100%)'"
+              class="tab-indicator"
+              [attr.data-active-tab]="activeTab()"
             ></div>
           </div>
         </div>
@@ -80,7 +80,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
 
             <section class="space-y-4">
               <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Account</h2>
-              <div class="flex items-center justify-between p-4 bg-zinc-950 border border-zinc-800 rounded-2xl gap-6">
+              <div class="flex items-center justify-between p-4 bg-vault-black border border-zinc-800 rounded-2xl gap-6">
                 <div class="space-y-1 flex-1 min-w-0">
                    <div class="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2 flex-wrap">Account ID</div>
                     <div class="relative group">
@@ -89,11 +89,11 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                         [ngModel]="accountId()"
                         readonly
                         aria-label="Account ID"
-                        class="w-full pl-5 pr-12 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl transition-all text-zinc-300 font-mono"
+                        class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 rounded-2xl transition-all text-zinc-300 font-mono"
                       />
                       <button 
                         (click)="copyToClipboard(accountId())"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-zinc-800 transition-all"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-vault-grey transition-all"
                         title="Copy ID"
                         aria-label="Copy Account ID"
                       >
@@ -110,7 +110,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
 
             <section class="space-y-4">
               <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Visuals</h2>
-              <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 flex items-center justify-between group hover:border-zinc-800 transition-colors">
+              <div class="bg-vault-black border border-zinc-800 rounded-2xl p-6 flex items-center justify-between group hover:border-zinc-800 transition-colors">
                 <div class="flex flex-col gap-1">
                   <span class="text-sm font-bold text-white tracking-tight">Background Stars</span>
                   <span class="text-xs text-zinc-400">Toggle the animated starfield background.</span>
@@ -122,7 +122,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   class="w-12 h-7 rounded-full transition-all duration-300 relative focus:outline-none border"
                   [class.bg-vault-purple]="settings.showStarfield()"
                   [class.border-vault-purple]="settings.showStarfield()"
-                  [class.bg-zinc-950]="!settings.showStarfield()"
+                  [class.bg-vault-black]="!settings.showStarfield()"
                   [class.border-zinc-800]="!settings.showStarfield()"
                 >
                   <div 
@@ -148,7 +148,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 </div>
               </div>
 
-              <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 flex items-center justify-between group hover:border-zinc-800 transition-colors gap-6">
+              <div class="bg-vault-black border border-zinc-800 rounded-2xl p-6 flex items-center justify-between group hover:border-zinc-800 transition-colors gap-6">
                 <div class="flex flex-col gap-1 flex-1 min-w-0">
                   <span class="text-sm font-bold text-white tracking-tight">Local PASSCODE Unlock</span>
                   <span class="text-xs text-zinc-400 leading-relaxed">Quickly unlock with a 6-digit passcode on this device.</span>
@@ -160,7 +160,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   class="w-12 h-7 rounded-full transition-all duration-300 relative focus:outline-none shrink-0 border"
                   [class.bg-vault-purple]="isPasscodeEnabled()"
                   [class.border-vault-purple]="isPasscodeEnabled()"
-                  [class.bg-zinc-950]="!isPasscodeEnabled()"
+                  [class.bg-vault-black]="!isPasscodeEnabled()"
                   [class.border-zinc-800]="!isPasscodeEnabled()"
                 >
                   <div 
@@ -183,7 +183,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                    [class.mt-6]="showPasscodeSetup()">
                    
                  <div class="overflow-hidden min-h-0">
-                   <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 space-y-6">
+                   <div class="bg-vault-black border border-zinc-800 rounded-2xl p-6 space-y-6">
                      <div class="flex items-center justify-between">
                         <h3 class="text-xs font-black text-white uppercase tracking-widest">Setup PASSCODE</h3>
                         <button (click)="cancelPasscodeSetup()" aria-label="Cancel passcode setup" class="text-zinc-500 hover:text-white transition-colors">
@@ -201,7 +201,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                             [(ngModel)]="confirmPasswordForPasscode"
                             name="confirmPassword"
                             aria-label="Master Password"
-                            class="w-full pl-5 pr-5 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
+                            class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
                             placeholder="Verify for re-wrap">
                         </div>
 
@@ -224,7 +224,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                                 #pinInput
                                 [type]="pinVisibility() ? 'text' : 'password'"
                                 maxlength="1"
-                                class="w-8 h-10 bg-zinc-950 border border-zinc-800 rounded focus:border-vault-purple text-center text-white text-lg font-bold !px-0"
+                                class="w-8 h-10 bg-vault-black border border-zinc-800 rounded focus:border-vault-purple text-center text-white text-lg font-bold !px-0"
                                 (input)="onPinInput($event, i)"
                                 (keydown)="onPinKeyDown($event, i)"
                                 [(ngModel)]="pinDigits[i]"
@@ -264,13 +264,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 <button
                   (click)="settings.updateTimeout(accountId(), 60)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
-                  [class.bg-zinc-900]="settings.timeoutSeconds() === 60"
+                  [class.bg-vault-dark]="settings.timeoutSeconds() === 60"
                   [class.border-vault-purple]="settings.timeoutSeconds() === 60"
-                  [class.bg-zinc-950]="settings.timeoutSeconds() !== 60"
+                  [class.bg-vault-black]="settings.timeoutSeconds() !== 60"
                   [class.border-zinc-800]="settings.timeoutSeconds() !== 60"
                   [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 60"
                 >
-                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-900 group-hover:bg-zinc-800 transition-colors"
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-vault-dark group-hover:bg-vault-grey transition-colors"
                        [class.text-vault-purple]="settings.timeoutSeconds() === 60"
                        [class.text-zinc-400]="settings.timeoutSeconds() !== 60">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -287,13 +287,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 <button
                   (click)="settings.updateTimeout(accountId(), 300)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
-                  [class.bg-zinc-900]="settings.timeoutSeconds() === 300"
+                  [class.bg-vault-dark]="settings.timeoutSeconds() === 300"
                   [class.border-vault-purple]="settings.timeoutSeconds() === 300"
-                  [class.bg-zinc-950]="settings.timeoutSeconds() !== 300"
+                  [class.bg-vault-black]="settings.timeoutSeconds() !== 300"
                   [class.border-zinc-800]="settings.timeoutSeconds() !== 300"
                   [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 300"
                 >
-                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-900 group-hover:bg-zinc-800 transition-colors"
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-vault-dark group-hover:bg-vault-grey transition-colors"
                        [class.text-vault-purple]="settings.timeoutSeconds() === 300"
                        [class.text-zinc-400]="settings.timeoutSeconds() !== 300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -310,13 +310,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 <button
                   (click)="settings.updateTimeout(accountId(), 1800)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
-                  [class.bg-zinc-900]="settings.timeoutSeconds() === 1800"
+                  [class.bg-vault-dark]="settings.timeoutSeconds() === 1800"
                   [class.border-orange-500]="settings.timeoutSeconds() === 1800"
-                  [class.bg-zinc-950]="settings.timeoutSeconds() !== 1800"
+                  [class.bg-vault-black]="settings.timeoutSeconds() !== 1800"
                   [class.border-zinc-800]="settings.timeoutSeconds() !== 1800"
                   [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 1800"
                 >
-                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-900 group-hover:bg-zinc-800 transition-colors"
+                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-vault-dark group-hover:bg-vault-grey transition-colors"
                        [class.text-orange-400]="settings.timeoutSeconds() === 1800"
                        [class.text-zinc-400]="settings.timeoutSeconds() !== 1800">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -333,13 +333,13 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 <button
                   (click)="settings.updateTimeout(accountId(), 3600)"
                   class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
-                  [class.bg-zinc-900]="settings.timeoutSeconds() === 3600"
+                  [class.bg-vault-dark]="settings.timeoutSeconds() === 3600"
                   [class.border-red-500]="settings.timeoutSeconds() === 3600"
-                  [class.bg-zinc-950]="settings.timeoutSeconds() !== 3600"
+                  [class.bg-vault-black]="settings.timeoutSeconds() !== 3600"
                   [class.border-zinc-800]="settings.timeoutSeconds() !== 3600"
                   [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 3600"
                 >
-                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-900 group-hover:bg-zinc-800 transition-colors"
+                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-vault-dark group-hover:bg-vault-grey transition-colors"
                        [class.text-red-500]="settings.timeoutSeconds() === 3600"
                        [class.text-zinc-400]="settings.timeoutSeconds() !== 3600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -357,7 +357,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
 
             <section class="space-y-4">
                <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Master Password</h2>
-               <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 space-y-6">
+                <div class="bg-vault-black border border-zinc-800 rounded-2xl p-6 space-y-6">
                   
                   <div class="flex items-start gap-4 p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -375,7 +375,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                           type="password" 
                           [(ngModel)]="rekeyOldPassword"
                           aria-label="Current Password"
-                          class="w-full pl-5 pr-5 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
+                          class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
                           placeholder="••••••••">
                      </div>
                      <div class="space-y-2">
@@ -385,7 +385,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                           [(ngModel)]="rekeyNewPassword"
                           (ngModelChange)="isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
                           aria-label="New Master Password"
-                          class="w-full pl-5 pr-5 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
+                          class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
                           placeholder="••••••••">
 
                         <app-strength-meter
@@ -400,7 +400,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                           type="password" 
                           [(ngModel)]="rekeyConfirmPassword"
                           aria-label="Confirm New Password"
-                          class="w-full pl-5 pr-5 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
+                          class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors" 
                           placeholder="••••••••">
                      </div>
 
@@ -423,7 +423,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                             <button 
                               *ngIf="isOptimized() && !isBenchmarking()"
                               (click)="onOptimizeKdf()"
-                              class="group/rerun flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-zinc-900 transition-all animate-fade-in"
+                              class="group/rerun flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-vault-dark transition-all animate-fade-in"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 text-vault-purple transition-transform group-hover/rerun:rotate-180 duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />

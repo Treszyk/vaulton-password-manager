@@ -11,12 +11,12 @@ import { VaultRecord } from './vault-record.model';
   },
   template: `
     <div
-      class="group relative h-[16rem] p-6 rounded-[2rem] md:rounded-[2.5rem] bg-zinc-950 border border-zinc-800 hover:border-vault-purple/30 transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col"
+      class="group relative h-[16rem] p-6 rounded-[2rem] md:rounded-[2.5rem] bg-vault-black border border-zinc-800 hover:border-vault-purple/30 transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col"
     >
       <div class="relative flex items-center justify-between mb-4">
         <div class="flex items-center gap-4">
           <div
-            class="w-10 h-10 rounded-2xl bg-zinc-950 flex items-center justify-center border border-zinc-700 group-hover:bg-vault-purple/10 group-hover:border-vault-purple/20 transition-all"
+            class="w-10 h-10 rounded-2xl bg-vault-black flex items-center justify-center border border-zinc-700 group-hover:bg-vault-purple/10 group-hover:border-vault-purple/20 transition-all"
           >
             <span class="text-lg font-black text-zinc-300 group-hover:text-vault-purple uppercase">
               {{ record.title.charAt(0) }}
@@ -40,7 +40,7 @@ import { VaultRecord } from './vault-record.model';
           <button
             type="button"
             (click)="onEdit.emit(record)"
-            class="edit-btn h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white transition-all hover:bg-zinc-900"
+            class="edit-btn h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white transition-all hover:bg-vault-900"
             title="Edit Entry"
             aria-label="Edit Entry"
           >
@@ -87,12 +87,7 @@ import { VaultRecord } from './vault-record.model';
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                 />
               </svg>
-              <span
-                class="grid transition-all duration-300 ease-out"
-                [style.grid-template-columns]="deleteConfirmActive() ? '1fr' : '0fr'"
-                [style.opacity]="deleteConfirmActive() ? '1' : '0'"
-                [style.margin-left]="deleteConfirmActive() ? '0.5rem' : '0px'"
-              >
+              <span class="confirm-label" [class.active]="deleteConfirmActive()">
                 <span class="overflow-hidden min-h-[1.25rem] flex items-center">
                   <span
                     class="text-xs font-black uppercase tracking-[0.2em] whitespace-nowrap min-w-max"
@@ -118,7 +113,7 @@ import { VaultRecord } from './vault-record.model';
                 [ngClass]="{
                   'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20':
                     justCopied() && copiedStatus() === 'username',
-                  'text-zinc-500 hover:text-white hover:bg-zinc-900 shadow-none':
+                  'text-zinc-500 hover:text-white hover:bg-vault-dark shadow-none':
                     !justCopied() || copiedStatus() !== 'username'
                 }"
                 [attr.aria-label]="
@@ -142,14 +137,8 @@ import { VaultRecord } from './vault-record.model';
                   />
                 </svg>
                 <span
-                  class="grid transition-all duration-300 ease-out"
-                  [style.grid-template-columns]="
-                    justCopied() && copiedStatus() === 'username' ? '1fr' : '0fr'
-                  "
-                  [style.opacity]="justCopied() && copiedStatus() === 'username' ? '1' : '0'"
-                  [style.margin-left]="
-                    justCopied() && copiedStatus() === 'username' ? '0.5rem' : '0px'
-                  "
+                  class="confirm-label"
+                  [class.active]="justCopied() && copiedStatus() === 'username'"
                 >
                   <span class="overflow-hidden min-h-[1.25rem] flex items-center">
                     <span
@@ -180,7 +169,7 @@ import { VaultRecord } from './vault-record.model';
             <div class="flex items-center justify-end h-8 md:h-10">
               <button
                 (click)="toggleReveal()"
-                class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-zinc-500 hover:text-white transition-all rounded-xl hover:bg-zinc-900 mr-1"
+                class="w-8 h-8 md:w-10 md:w-10 flex items-center justify-center text-zinc-500 hover:text-white transition-all rounded-xl hover:bg-vault-dark mr-1"
                 [attr.aria-label]="reveal() ? 'Hide Password' : 'Show Password'"
               >
                 <svg
@@ -229,7 +218,7 @@ import { VaultRecord } from './vault-record.model';
                     copyConfirmActive() && !justCopied(),
                   'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20':
                     justCopied() && copiedStatus() === 'password',
-                  'text-zinc-500 hover:text-white hover:bg-zinc-900 shadow-none':
+                  'text-zinc-500 hover:text-white hover:bg-vault-dark shadow-none':
                     !copyConfirmActive() && (copiedStatus() !== 'password' || !justCopied())
                 }"
                 [attr.aria-label]="
@@ -255,21 +244,9 @@ import { VaultRecord } from './vault-record.model';
                   />
                 </svg>
                 <span
-                  class="text-xs font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all duration-300 overflow-hidden grid grid-cols-1 place-items-center"
-                  [style.max-width]="
+                  class="confirm-label password-confirm"
+                  [class.active]="
                     copyConfirmActive() || (justCopied() && copiedStatus() === 'password')
-                      ? '300px'
-                      : '0px'
-                  "
-                  [style.opacity]="
-                    copyConfirmActive() || (justCopied() && copiedStatus() === 'password')
-                      ? '1'
-                      : '0'
-                  "
-                  [style.margin-left]="
-                    copyConfirmActive() || (justCopied() && copiedStatus() === 'password')
-                      ? '0.5rem'
-                      : '0px'
                   "
                 >
                   <span

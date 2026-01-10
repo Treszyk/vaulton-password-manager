@@ -25,14 +25,14 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
       [class.animate-fade-out]="isClosing()"
     >
       <div
-        class="w-full md:max-w-lg bg-transparent md:bg-zinc-950 border-none md:border border-zinc-600 rounded-t-[2rem] md:rounded-3xl shadow-none md:shadow-2xl overflow-hidden flex flex-col max-h-[85vh] relative !z-[9001]"
+        class="w-full md:max-w-lg bg-transparent md:bg-vault-black border-none md:border border-zinc-600 rounded-t-[2rem] md:rounded-3xl shadow-none md:shadow-2xl overflow-hidden flex flex-col max-h-[85vh] relative !z-[9001]"
         [class.animate-slide-up-mobile]="!isClosing()"
         [class.animate-slide-down-mobile]="isClosing()"
         [class.md:animate-slide-up]="!isClosing()"
         (click)="$event.stopPropagation()"
       >
         <div
-          class="flex-none p-5 md:p-6 border-b border-transparent md:border-zinc-700 flex items-center justify-between bg-transparent md:bg-zinc-950"
+          class="flex-none p-5 md:p-6 border-b border-transparent md:border-zinc-700 flex items-center justify-between bg-transparent md:bg-vault-black"
         >
           <div>
             <h2 class="text-base md:text-xl font-bold uppercase tracking-[0.2em] text-zinc-100">
@@ -46,7 +46,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
           </div>
           <button
             (click)="triggerClose()"
-            class="p-2 md:p-3 rounded-full hover:bg-zinc-900 text-zinc-500 hover:text-white transition-all outline-none min-w-[24px] min-h-[24px] flex items-center justify-center"
+            class="p-2 md:p-3 rounded-full hover:bg-vault-dark text-zinc-500 hover:text-white transition-all outline-none min-w-[24px] min-h-[24px] flex items-center justify-center"
             aria-label="Close Editor"
           >
             <svg
@@ -80,7 +80,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [(ngModel)]="form.title"
                   required
                   placeholder="e.g. My Google Account"
-                  class="w-full !bg-zinc-950 !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
+                  class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
                 />
               </div>
 
@@ -94,7 +94,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   name="website"
                   [(ngModel)]="form.website"
                   placeholder="e.g. google.com"
-                  class="w-full !bg-zinc-950 !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
+                  class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
                 />
               </div>
 
@@ -109,7 +109,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [(ngModel)]="form.username"
                   required
                   placeholder="email@example.com"
-                  class="w-full !bg-zinc-950 !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
+                  class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
                 />
               </div>
 
@@ -125,7 +125,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                     [(ngModel)]="form.password"
                     required
                     placeholder="••••••••••••"
-                    class="w-full !bg-zinc-950 !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !pr-10 !text-xs md:!text-sm/relaxed transition-all"
+                    class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !pr-10 !text-xs md:!text-sm/relaxed transition-all"
                   />
                   <button
                     type="button"
@@ -177,6 +177,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   class="block w-full mt-2"
                 ></app-strength-meter>
                 <button
+                  type="button"
                   (click)="generatePassword()"
                   class="w-full text-center text-xs md:text-[0.75rem] font-bold uppercase tracking-[0.3em] text-[#985eff] hover:text-[#ac82ff] transition-all py-2 block mt-1 active:scale-[0.98]"
                 >
@@ -195,7 +196,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                 [(ngModel)]="form.notes"
                 rows="2"
                 placeholder="Private annotations..."
-                class="w-full !bg-zinc-950 !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 transition-all resize-none !text-xs md:!text-base"
+                class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 transition-all resize-none !text-xs md:!text-base"
               ></textarea>
             </div>
 
@@ -221,7 +222,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
               <button
                 type="button"
                 (click)="triggerClose()"
-                class="w-full py-3 rounded-xl border border-zinc-800 bg-zinc-950 text-sm md:text-base font-bold uppercase tracking-[0.3em] text-zinc-400 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all shadow-inner hidden md:block"
+                class="w-full py-3 rounded-xl border border-zinc-800 bg-vault-black text-sm md:text-base font-bold uppercase tracking-[0.3em] text-zinc-400 hover:text-white hover:bg-vault-dark hover:border-zinc-700 transition-all shadow-inner hidden md:block"
                 aria-label="Discard changes"
               >
                 Discard
