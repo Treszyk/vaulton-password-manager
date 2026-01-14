@@ -38,14 +38,16 @@ import { CommonModule } from '@angular/common';
         Destructive Wipe
       </h2>
       <p class="text-sm md:text-base text-zinc-400 mb-8 font-medium leading-relaxed">
-        This will permanently remove your <span class="text-zinc-300">Vault Bundle</span>,
-        <span class="text-zinc-300">Account ID</span>, and all local session data. <br /><br />
+        This will permanently remove your <span class="text-vault-purple-bright">Vault Bundle</span>,
+        <span class="text-vault-purple-bright">Account ID</span>, and all local session data. <br /><br />
         <span class="text-red-400">Only use this on public or shared computers.</span>
       </p>
 
       <div class="flex flex-col gap-4">
         <div
-          class="relative h-16 rounded-2xl overflow-hidden group cursor-pointer select-none border border-zinc-600 hover:border-red-500/50 transition-all"
+          class="relative h-16 rounded-2xl overflow-hidden group cursor-pointer select-none border border-zinc-600 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
+          [class.hover:border-red-500/50]="!isHolding()"
+          [class.!border-red-500]="isHolding()"
           [class.unstable-shake]="isHolding()"
           [style.--shake-intensity]="shakeIntensity()"
           (mousedown)="startHold()"
@@ -54,6 +56,13 @@ import { CommonModule } from '@angular/common';
           (touchstart)="$event.preventDefault(); startHold()"
           (touchend)="cancelHold()"
           (touchcancel)="cancelHold()"
+          (keydown.space)="$event.preventDefault(); startHold()"
+          (keyup.space)="cancelHold()"
+          (keydown.enter)="$event.preventDefault(); startHold()"
+          (keyup.enter)="cancelHold()"
+          role="button"
+          tabindex="0"
+          aria-label="Hold spacebar to wipe device"
         >
           <div class="wipe-progress" [style.width.%]="progress()"></div>
 
@@ -102,7 +111,7 @@ export class WipeConfirmationComponent implements OnDestroy {
   });
 
   startHold() {
-    if (this.progress() >= 100) return;
+    if (this.progress() >= 100 || this.isHolding()) return;
     this.isHolding.set(true);
 
     this.interval = setInterval(() => {

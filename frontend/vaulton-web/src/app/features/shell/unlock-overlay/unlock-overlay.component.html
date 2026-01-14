@@ -31,6 +31,7 @@
       class="flex-1 py-3 text-xs md:text-[0.75rem] font-bold uppercase tracking-widest rounded-xl transition-all duration-300 relative z-10"
       [class.text-white]="mode() === 'PASSWORD'"
       [class.text-zinc-400]="mode() !== 'PASSWORD'"
+      [attr.aria-pressed]="mode() === 'PASSWORD'"
     >
       Password
     </button>
@@ -39,6 +40,7 @@
       class="flex-1 py-3 text-xs md:text-[0.75rem] font-bold uppercase tracking-widest rounded-xl transition-all duration-300 relative z-10"
       [class.text-white]="mode() === 'PASSCODE'"
       [class.text-zinc-400]="mode() !== 'PASSCODE'"
+      [attr.aria-pressed]="mode() === 'PASSCODE'"
     >
       Passcode
     </button>

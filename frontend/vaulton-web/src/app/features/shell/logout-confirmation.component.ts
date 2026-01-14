@@ -30,8 +30,8 @@ import { CommonModule } from '@angular/common';
       <p class="text-sm md:text-base text-zinc-400 mb-8 font-medium leading-relaxed">
         This will invalidate your current session on this device.
         <br /><br />
-        Your <span class="text-zinc-300">Account Login</span> will remain pre-filled for your next
-        visit, but you must enter your password to re-enter the vault. <br /><br />
+        Your <span class="text-vault-purple-bright">Account Login</span> will remain pre-filled for
+        your next visit, but you must enter your password to re-enter the vault. <br /><br />
         <span class="text-zinc-400 italic"
           >Note: For a full data removal on public computers, use the
         </span>

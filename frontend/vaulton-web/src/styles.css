@@ -4,6 +4,8 @@
 
 :root {
   --v-black: #0a0a0a;
+  --v-black-pure: #000000;
+  --v-body-bg: var(--v-black-pure);
   --v-dark: #141414;
   --v-grey: #262626;
   --v-grey-light: #404040;
@@ -20,7 +22,7 @@
 }
 
 html {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 body {
@@ -28,7 +30,7 @@ body {
   padding: 0;
   height: 100%;
   min-width: 340px;
-  background-color: var(--v-black);
+  background-color: var(--v-body-bg);
   color: #fafafa;
   font-family: var(--font-inter);
   -webkit-font-smoothing: antialiased;
@@ -73,7 +75,7 @@ select,
 textarea {
   @apply bg-vault-grey/40 border border-zinc-700 rounded-xl px-4 py-3 outline-none 
          focus:border-vault-purple/50 focus:ring-4 focus:ring-vault-purple/10 
-         transition-all placeholder:text-white/20 text-sm;
+         transition-all placeholder:text-white/20 text-base;
 }
 
 button.btn-primary {

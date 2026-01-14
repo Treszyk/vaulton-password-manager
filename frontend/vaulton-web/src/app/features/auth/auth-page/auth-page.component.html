@@ -55,16 +55,18 @@
               
               <div class="space-y-2">
                 <header class="flex items-center justify-between px-1">
-                   <label class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Account ID</label>
+                   <label for="login-account-id" class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Account ID</label>
                 </header>
                 <div class="relative group">
                   <input
+                    id="login-account-id"
                     type="text"
                     [ngModel]="accountId()"
                     (ngModelChange)="accountId.set($event)"
-                    class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
+                    class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 rounded-2xl transition-all outline-none"
                     placeholder="vault-xxxx-xxxx"
                     (keyup.enter)="onSubmit()"
+                    aria-label="Account ID"
                   />
                   <button 
                     *ngIf="accountId()"
@@ -86,24 +88,26 @@
 
               <div class="space-y-2">
                 <div class="flex items-center justify-between ml-1">
-                  <label class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Master Password</label>
+                  <label for="login-password" class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Master Password</label>
                   <button 
                     (click)="onForgotPassword()"
                     class="text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-vault-purple transition-all flex items-center gap-1.5 group/forgot"
                   >
                     <span>Forgot?</span>
-                    <span class="px-1 py-0.5 rounded-md bg-vault-dark border border-zinc-800 text-[0.625rem] text-zinc-600 group-hover/forgot:border-vault-purple/30 group-hover/forgot:text-vault-purple/60 transition-all">SOON</span>
+                    <span class="px-1 py-0.5 rounded-md bg-vault-dark border border-zinc-800 text-[0.625rem] text-zinc-400 group-hover/forgot:border-vault-purple/30 group-hover/forgot:text-vault-purple transition-all">SOON</span>
                   </button>
                 </div>
                 <div class="relative group">
                   <input
+                    id="login-password"
                     type="password"
                     [ngModel]="password()"
                     [disabled]="isWorking() || isBenchmarking()"
                     (ngModelChange)="password.set($event); isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
-                    class="w-full pl-5 pr-11 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
+                    class="w-full pl-5 pr-11 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 rounded-2xl transition-all outline-none"
                     placeholder="••••••••••••"
                     (keyup.enter)="onSubmit()"
+                    aria-label="Master Password"
                   />
                   <div class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-vault-purple/40 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -123,7 +127,7 @@
                 <div class="flex items-center justify-between px-1">
                   <div class="flex items-center gap-1.5 group/info cursor-help tooltip-bottom tooltip-full" 
                        data-tooltip="Anonymous opaque identifier used for platform login.">
-                    <label class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Account ID</label>
+                    <label for="register-account-id" class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Account ID</label>
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-zinc-500 group-hover/info:text-zinc-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -137,12 +141,14 @@
                 </div>
                 <div class="relative group">
                   <input
+                    id="register-account-id"
                     type="text"
                     [ngModel]="accountId()"
                     readonly
                     [disabled]="isWorking() || isBenchmarking()"
-                    class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 rounded-2xl transition-all text-zinc-300"
+                    class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 rounded-2xl transition-all text-zinc-300 focus:ring-2 focus:ring-vault-purple/20 focus:border-vault-purple/50 outline-none"
                     placeholder="Generating..."
+                    aria-label="Generated Account ID"
                   />
                   <button 
                     *ngIf="accountId()"
@@ -167,15 +173,17 @@
               </div>
 
               <div class="space-y-2">
-                <label class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Master Password</label>
+                <label for="register-password" class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Master Password</label>
                 <div class="relative group">
                   <input
+                    id="register-password"
                     type="password"
                     [ngModel]="password()"
                     [disabled]="isWorking() || isBenchmarking()"
                     (ngModelChange)="password.set($event); isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
-                    class="w-full pl-5 pr-11 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 rounded-2xl transition-all outline-none"
+                    class="w-full pl-5 pr-11 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 rounded-2xl transition-all outline-none"
                     placeholder="••••••••••••"
+                    aria-label="Create Master Password"
                   />
                   <div class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-vault-purple/40 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -314,7 +322,7 @@
                   type="submit"
                   (click)="onSubmit()"
                   class="w-full btn-primary !rounded-2xl !py-4 flex items-center justify-center gap-3 relative"
-                  [disabled]="isWorking() || !accountId() || !password()"
+                  [disabled]="isWorking() || !accountId() || !password() || (mode() === 'REGISTER' && !isOptimized())"
                 >
                   <span *ngIf="!isWorking()" class="font-bold uppercase tracking-[0.4em] text-xs md:text-sm relative z-10 transition-transform group-hover:-translate-y-1">
                     {{ mode() === 'LOGIN' ? 'Unlock Vault' : 'Initialize Vault' }}

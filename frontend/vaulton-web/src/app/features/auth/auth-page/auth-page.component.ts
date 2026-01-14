@@ -112,6 +112,7 @@ export class AuthPageComponent {
     }
 
     this.isBenchmarking.set(true);
+    this.isOptimized.set(false);
     this.standardTime.set(null);
     this.hardenedTime.set(null);
     const pwd = this.password();
@@ -188,6 +189,10 @@ export class AuthPageComponent {
 
   async register() {
     if (this.isWorking()) return;
+    if (!this.isOptimized()) {
+      this.toast.trigger('Please run the benchmark first.', false);
+      return;
+    }
     this.isWorking.set(true);
     const pwd = this.password();
     this.password.set('');

@@ -126,7 +126,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [class.border-zinc-800]="!settings.showStarfield()"
                 >
                   <div 
-                    class="w-5 h-5 bg-white rounded-full absolute top-[2px] transition-transform duration-300 shadow-md"
+                    class="w-5 h-5 bg-white rounded-full absolute top-[3px] transition-transform duration-300 shadow-md"
                     [class.translate-x-6]="settings.showStarfield()"
                     [class.translate-x-1]="!settings.showStarfield()"
                   ></div>
@@ -164,7 +164,7 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [class.border-zinc-800]="!isPasscodeEnabled()"
                 >
                   <div 
-                    class="w-5 h-5 bg-white rounded-full absolute top-[2px] transition-transform duration-300 shadow-md"
+                    class="w-5 h-5 bg-white rounded-full absolute top-[3px] transition-transform duration-300 shadow-md"
                     [class.translate-x-6]="isPasscodeEnabled()"
                     [class.translate-x-1]="!isPasscodeEnabled()"
                   ></div>
@@ -270,7 +270,10 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [class.border-zinc-800]="settings.timeoutSeconds() !== 60"
                   [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 60"
                 >
-                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-vault-dark group-hover:bg-vault-grey transition-colors"
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                       [class.bg-vault-dark]="settings.timeoutSeconds() !== 60"
+                       [class.group-hover:bg-vault-grey]="settings.timeoutSeconds() !== 60"
+                       [class.bg-vault-purple/10]="settings.timeoutSeconds() === 60"
                        [class.text-vault-purple]="settings.timeoutSeconds() === 60"
                        [class.text-zinc-400]="settings.timeoutSeconds() !== 60">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -293,7 +296,10 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [class.border-zinc-800]="settings.timeoutSeconds() !== 300"
                   [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 300"
                 >
-                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-vault-dark group-hover:bg-vault-grey transition-colors"
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                       [class.bg-vault-dark]="settings.timeoutSeconds() !== 300"
+                       [class.group-hover:bg-vault-grey]="settings.timeoutSeconds() !== 300"
+                       [class.bg-vault-purple/10]="settings.timeoutSeconds() === 300"
                        [class.text-vault-purple]="settings.timeoutSeconds() === 300"
                        [class.text-zinc-400]="settings.timeoutSeconds() !== 300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -316,7 +322,10 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [class.border-zinc-800]="settings.timeoutSeconds() !== 1800"
                   [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 1800"
                 >
-                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-vault-dark group-hover:bg-vault-grey transition-colors"
+                   <div class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                       [class.bg-vault-dark]="settings.timeoutSeconds() !== 1800"
+                       [class.group-hover:bg-vault-grey]="settings.timeoutSeconds() !== 1800"
+                       [class.bg-orange-500/10]="settings.timeoutSeconds() === 1800"
                        [class.text-orange-400]="settings.timeoutSeconds() === 1800"
                        [class.text-zinc-400]="settings.timeoutSeconds() !== 1800">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -339,7 +348,10 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   [class.border-zinc-800]="settings.timeoutSeconds() !== 3600"
                   [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 3600"
                 >
-                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-vault-dark group-hover:bg-vault-grey transition-colors"
+                   <div class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                       [class.bg-vault-dark]="settings.timeoutSeconds() !== 3600"
+                       [class.group-hover:bg-vault-grey]="settings.timeoutSeconds() !== 3600"
+                       [class.bg-red-500/10]="settings.timeoutSeconds() === 3600"
                        [class.text-red-500]="settings.timeoutSeconds() === 3600"
                        [class.text-zinc-400]="settings.timeoutSeconds() !== 3600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -763,6 +775,7 @@ export class SettingsComponent implements OnInit {
     }
 
     this.isBenchmarking.set(true);
+    this.isOptimized.set(false);
     this.standardTime.set(null);
     this.hardenedTime.set(null);
     const pwd = this.rekeyNewPassword;
