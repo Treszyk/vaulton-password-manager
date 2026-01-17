@@ -16,7 +16,7 @@ import { SessionService } from '../../core/auth/session.service';
       [class.sticky]="!isAuthPage()"
       [class.top-0]="true"
     >
-      <div class="flex items-center h-full gap-10">
+      <div class="flex items-center h-full gap-4 md:gap-10">
         <span
           class="text-xl font-black tracking-tighter cursor-pointer animate-slide-in-left select-none mr-2"
           (click)="router.navigate(['/'])"
@@ -25,45 +25,48 @@ import { SessionService } from '../../core/auth/session.service';
         </span>
 
         <div *ngIf="!isAuthPage()" class="flex items-center gap-6 h-full animate-fade-in pt-1">
-           <a 
-             routerLink="/" 
-             routerLinkActive="!text-vault-purple !opacity-100"
-             [routerLinkActiveOptions]="{exact: true}"
-             class="text-xs font-black uppercase tracking-[0.25em] text-zinc-200 hover:text-white transition-all active:scale-[0.98] decoration-none"
-           >
-             Home
-           </a>
-           <a 
-             routerLink="/vault" 
-             routerLinkActive="!text-vault-purple !opacity-100"
-             [routerLinkActiveOptions]="{exact: true}"
-             class="text-xs font-black uppercase tracking-[0.25em] text-zinc-200 hover:text-white transition-all active:scale-[0.98] decoration-none"
-           >
-             Vault
-           </a>
-           <a 
-             routerLink="/vault/settings" 
-             routerLinkActive="!text-vault-purple !opacity-100"
-             class="text-xs font-black uppercase tracking-[0.25em] text-zinc-200 hover:text-white transition-all active:scale-[0.98] decoration-none"
-           >
-             Settings
-           </a>
+          <a
+            routerLink="/"
+            routerLinkActive="!text-vault-purple !opacity-100"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="text-xs font-black uppercase tracking-[0.25em] text-zinc-200 hover:text-white transition-all active:scale-[0.98] decoration-none"
+          >
+            Home
+          </a>
+          <a
+            routerLink="/vault"
+            routerLinkActive="!text-vault-purple !opacity-100"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="text-xs font-black uppercase tracking-[0.25em] text-zinc-200 hover:text-white transition-all active:scale-[0.98] decoration-none"
+          >
+            Vault
+          </a>
+          <a
+            routerLink="/vault/settings"
+            routerLinkActive="!text-vault-purple !opacity-100"
+            class="text-xs font-black uppercase tracking-[0.25em] text-zinc-200 hover:text-white transition-all active:scale-[0.98] decoration-none"
+          >
+            Settings
+          </a>
         </div>
       </div>
 
-      <div 
-        *ngIf="isVaultPage()" 
+      <div
+        *ngIf="isVaultPage()"
         class="fixed bottom-5 right-4 md:top-8 md:right-8 md:bottom-auto z-[30] flex flex-col md:flex-row items-end md:items-center gap-3 md:gap-4 animate-fade-in pointer-events-auto"
       >
-        <div 
+        <div
           *ngIf="timer.remainingSeconds() < timer.settings.timeoutSeconds()"
           class="flex items-center gap-3 px-3 md:px-4 h-10 rounded-full bg-vault-black md:bg-vault-black border border-zinc-700 transition-all animate-fade-in shadow-xl md:shadow-none box-border"
           [class.border-red-500/30]="timer.isAboutToLock()"
           [class.bg-red-500/5]="timer.isAboutToLock()"
         >
           <div class="flex flex-col items-end justify-center h-full">
-            <span class="hidden md:block text-xs font-black uppercase tracking-[0.2em] text-zinc-300 leading-none mb-0.5">Session</span>
-            <span 
+            <span
+              class="hidden md:block text-xs font-black uppercase tracking-[0.2em] text-zinc-300 leading-none mb-0.5"
+              >Session</span
+            >
+            <span
               class="text-xs font-mono font-bold tracking-widest transition-colors duration-300 leading-none"
               [class.text-red-400]="timer.isAboutToLock()"
               [class.text-zinc-300]="!timer.isAboutToLock()"
@@ -71,20 +74,35 @@ import { SessionService } from '../../core/auth/session.service';
               {{ timer.getFormattedTime() }}
             </span>
           </div>
-          <div class="w-1.5 h-1.5 rounded-full bg-vault-purple shadow-[0_0_8px_rgba(124,58,237,0.5)]"
-               [class.bg-red-500]="timer.isAboutToLock()"
-               [class.shadow-red-500/50]="timer.isAboutToLock()"></div>
+          <div
+            class="w-1.5 h-1.5 rounded-full bg-vault-purple shadow-[0_0_8px_rgba(124,58,237,0.5)]"
+            [class.bg-red-500]="timer.isAboutToLock()"
+            [class.shadow-red-500/50]="timer.isAboutToLock()"
+          ></div>
         </div>
 
-        <div class="flex items-center gap-2 p-1 rounded-full bg-vault-black md:bg-vault-black border border-zinc-700 shadow-xl md:shadow-none">
+        <div
+          class="flex items-center gap-2 p-1 rounded-full bg-vault-black md:bg-vault-black border border-zinc-700 shadow-xl md:shadow-none"
+        >
           <button
             class="px-2 md:px-5 py-2 rounded-full hover:bg-vault-dark text-zinc-300 hover:text-white transition-all text-xs font-black uppercase tracking-[0.2em] active:scale-[0.98] flex items-center justify-center"
             (click)="lock()"
             title="Lock Vault"
           >
             <span class="hidden md:block">Lock</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 md:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4 md:hidden"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
             </svg>
           </button>
           <div class="w-[1px] h-4 bg-vault-grey"></div>
@@ -94,8 +112,19 @@ import { SessionService } from '../../core/auth/session.service';
             title="Logout"
           >
             <span class="hidden md:block">Logout</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 md:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4 md:hidden"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
             </svg>
           </button>
           <div class="w-[1px] h-4 bg-vault-grey"></div>
@@ -105,8 +134,19 @@ import { SessionService } from '../../core/auth/session.service';
             title="Wipe Data"
           >
             <span class="hidden md:block">Wipe</span>
-             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 md:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4 md:hidden"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
             </svg>
           </button>
         </div>

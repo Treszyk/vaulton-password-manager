@@ -10,12 +10,18 @@ import { SessionTimerService } from '../../../core/auth/session-timer.service';
 import { StarfieldComponent } from '../../../shared/ui/starfield/starfield.component';
 import { ToastService } from '../../../shared/ui/toast/toast.service';
 import { StrengthMeterComponent } from '../../../shared/ui/strength-meter/strength-meter.component';
-import { zeroize } from '../../../core/crypto/zeroize';
+import { ScrollIndicatorDirective } from '../../../shared/directives/scroll-indicator.directive';
 
 @Component({
   selector: 'app-auth-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, StarfieldComponent, StrengthMeterComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    StarfieldComponent,
+    StrengthMeterComponent,
+    ScrollIndicatorDirective,
+  ],
   host: {
     class: 'w-full',
   },
@@ -137,7 +143,7 @@ export class AuthPageComponent {
       this.isOptimized.set(true);
       this.toast.trigger(
         `Optimized: ${this.kdfMode() === 2 ? 'Hardened' : 'Standard'} selected.`,
-        true
+        true,
       );
     } catch (e: any) {
       this.toast.trigger('Benchmark failed', false);

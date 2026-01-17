@@ -14,11 +14,12 @@ import { AuthPersistenceService } from '../../../core/auth/auth-persistence.serv
 import { SessionService } from '../../../core/auth/session.service';
 import { SessionTimerService } from '../../../core/auth/session-timer.service';
 import { ToastService } from '../../../shared/ui/toast/toast.service';
+import { ScrollIndicatorDirective } from '../../../shared/directives/scroll-indicator.directive';
 
 @Component({
   selector: 'app-unlock-overlay',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ScrollIndicatorDirective],
   templateUrl: './unlock-overlay.component.html',
   encapsulation: ViewEncapsulation.None,
 })

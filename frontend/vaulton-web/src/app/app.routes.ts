@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
+import { unlockedGuard } from './core/auth/unlocked.guard';
 
 export const routes: Routes = [
   {
@@ -17,11 +18,12 @@ export const routes: Routes = [
         path: '',
         loadComponent: () =>
           import('./features/vault/vault-dashboard.component').then(
-            (m) => m.VaultDashboardComponent
+            (m) => m.VaultDashboardComponent,
           ),
       },
       {
         path: 'settings',
+        canActivate: [unlockedGuard],
         loadComponent: () =>
           import('./features/settings/settings.component').then((m) => m.SettingsComponent),
       },

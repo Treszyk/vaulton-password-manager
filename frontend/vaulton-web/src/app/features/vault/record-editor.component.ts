@@ -13,11 +13,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VaultRecord, VaultRecordInput } from './vault-record.model';
 import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-meter.component';
+import { ScrollIndicatorDirective } from '../../shared/directives/scroll-indicator.directive';
 
 @Component({
   selector: 'app-record-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, StrengthMeterComponent],
+  imports: [CommonModule, FormsModule, StrengthMeterComponent, ScrollIndicatorDirective],
   template: `
     <div
       class="fixed inset-0 !z-[9000] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-md"
@@ -119,14 +120,17 @@ import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-
                   >Password</label
                 >
                 <div class="relative group">
-                  <input
-                    [type]="showPwd() ? 'text' : 'password'"
-                    name="password"
-                    [(ngModel)]="form.password"
-                    required
-                    placeholder="••••••••••••"
-                    class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !pr-10 !text-xs md:!text-sm/relaxed transition-all"
-                  />
+                  <div class="relative w-full">
+                    <input
+                      scroll-indicator
+                      [type]="showPwd() ? 'text' : 'password'"
+                      name="password"
+                      [(ngModel)]="form.password"
+                      required
+                      placeholder="••••••••••••"
+                      class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !pr-10 !text-xs md:!text-sm/relaxed transition-all"
+                    />
+                  </div>
                   <button
                     type="button"
                     (click)="showPwd.set(!showPwd())"

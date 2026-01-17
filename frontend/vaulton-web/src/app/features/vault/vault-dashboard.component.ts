@@ -20,6 +20,8 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 import { PasscodePromptModalComponent } from '../../shared/ui/passcode-prompt-modal.component';
 import { AuthPersistenceService } from '../../core/auth/auth-persistence.service';
 
+import { ScrollIndicatorDirective } from '../../shared/directives/scroll-indicator.directive';
+
 @Component({
   selector: 'app-vault-dashboard',
   standalone: true,
@@ -30,6 +32,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
     RecordEditorComponent,
     MemoModalComponent,
     PasscodePromptModalComponent,
+    ScrollIndicatorDirective,
   ],
   host: {
     class: 'flex-1 min-h-0 flex flex-col',
@@ -83,7 +86,7 @@ import { AuthPersistenceService } from '../../core/auth/auth-persistence.service
             type="text"
             [(ngModel)]="searchQueryInput"
             placeholder="Search Vault..."
-            class="w-full !bg-vault-black !border-zinc-800 focus:!border-vault-purple/30 !rounded-2xl !py-4 !pl-14 !pr-6 !text-xs !tracking-[0.1em] !font-bold transition-all placeholder:text-zinc-600"
+            class="w-full !bg-vault-black !border-zinc-800 focus:!border-vault-purple/30 !rounded-2xl !py-4 !pl-14 !pr-36 !text-xs !tracking-[0.1em] !font-bold transition-all placeholder:text-zinc-600"
           />
         </div>
       </div>
@@ -189,7 +192,7 @@ export class VaultDashboardComponent implements OnDestroy {
     private readonly persistence: AuthPersistenceService,
     private readonly router: Router,
     private readonly toast: ToastService,
-    private readonly authState: AuthStateService
+    private readonly authState: AuthStateService,
   ) {
     this.checkPasscodePrompt();
     effect(() => {

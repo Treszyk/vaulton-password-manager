@@ -14,11 +14,12 @@ import { ToastService } from '../../../../shared/ui/toast/toast.service';
 import { AuthPersistenceService } from '../../../../core/auth/auth-persistence.service';
 import { AuthCryptoService } from '../../../../core/auth/auth-crypto.service';
 import { AuthApiService } from '../../../../core/api/auth-api.service';
+import { ScrollIndicatorDirective } from '../../../../shared/directives/scroll-indicator.directive';
 
 @Component({
   selector: 'app-passcode-setup',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ScrollIndicatorDirective],
   templateUrl: './passcode-setup.component.html',
 })
 export class PasscodeSetupComponent {

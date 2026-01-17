@@ -150,6 +150,7 @@ export class SessionService {
     }
     this.vault.clearData();
     this.authState.isUnlocked.set(false);
+    this.router.navigate(['/vault']);
   }
 
   async logout(): Promise<void> {

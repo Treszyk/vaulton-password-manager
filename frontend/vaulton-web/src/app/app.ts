@@ -19,9 +19,7 @@ export class App {
 
   constructor() {
     this.session.tryRestore().subscribe((ok: boolean) => {
-      const currentPath = window.location.pathname;
-
-      if (ok && (currentPath === '/' || currentPath === '')) {
+      if (ok) {
         this.router.navigateByUrl('/vault').then(() => this.loading.set(false));
       } else {
         this.loading.set(false);

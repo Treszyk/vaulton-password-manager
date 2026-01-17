@@ -39,14 +39,16 @@
         <label class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1"
           >New Master Password</label
         >
-        <input
-          type="password"
-          [(ngModel)]="rekeyNewPassword"
-          (ngModelChange)="isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
-          aria-label="New Master Password"
-          class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors"
-          placeholder="••••••••"
-        />
+        <div class="relative">
+          <input
+            type="password"
+            [(ngModel)]="rekeyNewPassword"
+            (ngModelChange)="isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
+            aria-label="New Master Password"
+            class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors"
+            placeholder="••••••••"
+          />
+        </div>
 
         <app-strength-meter
           [password]="rekeyNewPassword"
@@ -193,7 +195,7 @@
                 >
                   {{
                     isPasswordStrong()
-                      ? 'Benchmark required to select grade'
+                      ? 'Benchmark required to select'
                       : 'Minimum "Fair" strength required'
                   }}
                 </p>

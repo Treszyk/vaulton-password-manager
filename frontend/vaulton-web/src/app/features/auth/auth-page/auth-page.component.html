@@ -1,356 +1,621 @@
-<div 
-    class="w-full min-h-full flex flex-col items-center justify-center p-4 sm:p-6 sm:py-20 selection:bg-vault-purple/30 selection:text-vault-purple-bright relative overflow-x-hidden overflow-y-auto"
-    [attr.data-auth-mode]="mode()"
-  >
-    <app-starfield></app-starfield>
+<div
+  class="w-full min-h-full flex flex-col items-center justify-center p-4 sm:p-6 sm:py-20 selection:bg-vault-purple/30 selection:text-vault-purple-bright relative overflow-x-hidden overflow-y-auto"
+  [attr.data-auth-mode]="mode()"
+>
+  <app-starfield></app-starfield>
 
-    <div class="w-full max-w-[28rem] animate-slide-up relative z-10">
-      <div class="auth-panel p-10 rounded-[2.5rem] relative flex flex-col gap-8">
-        <div class="text-center relative z-10">
-          <h1 
-            (click)="onLogoClick()"
-            class="text-4xl font-black text-white tracking-tighter mb-3 cursor-pointer hover:opacity-80 transition-opacity"
+  <div class="w-full max-w-[28rem] animate-slide-up relative z-10">
+    <div class="auth-panel p-10 rounded-[2.5rem] relative flex flex-col gap-8">
+      <div class="text-center relative z-10">
+        <h1
+          (click)="onLogoClick()"
+          class="text-4xl font-black text-white tracking-tighter mb-3 cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          Vaulton<span class="text-vault-purple">.</span>
+        </h1>
+        <div class="h-6 relative">
+          <p
+            class="text-zinc-400 text-sm font-medium absolute inset-0 w-full header-text login-text"
+            [class.active]="mode() === 'LOGIN'"
           >
-            Vaulton<span class="text-vault-purple">.</span>
-          </h1>
-          <div class="h-6 relative">
-            <p class="text-zinc-400 text-sm font-medium absolute inset-0 w-full header-text login-text"
-               [class.active]="mode() === 'LOGIN'">
-              Welcome back.
-            </p>
-            <p class="text-zinc-400 text-sm font-medium absolute inset-0 w-full header-text register-text"
-               [class.active]="mode() === 'REGISTER'">
-              Start your vault.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex p-1.5 bg-vault-black rounded-2xl relative z-20 border border-zinc-800 backdrop-blur-md">
-          <button
-            (click)="setMode('LOGIN')"
-            class="flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 z-10"
-            [class.text-white]="mode() === 'LOGIN'"
-            [class.text-zinc-400]="mode() !== 'LOGIN'"
+            Welcome back.
+          </p>
+          <p
+            class="text-zinc-400 text-sm font-medium absolute inset-0 w-full header-text register-text"
+            [class.active]="mode() === 'REGISTER'"
           >
-            Login
-          </button>
-          <button
-            (click)="setMode('REGISTER')"
-            class="flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 z-10"
-            [class.text-white]="mode() === 'REGISTER'"
-            [class.text-zinc-400]="mode() !== 'REGISTER'"
-          >
-            Register
-          </button>
-          <div
-            class="absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] bg-vault-purple rounded-xl transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) mode-indicator"
-          ></div>
-        </div>
-
-        <div class="relative z-10">
-          <div class="grid grid-cols-1 grid-rows-1">
-            <div class="col-start-1 row-start-1 flex flex-col gap-8 form-view login-view"
-                 [class.active]="mode() === 'LOGIN'"
-                 [class.pointer-events-none]="mode() !== 'LOGIN'">
-              
-              <div class="space-y-2">
-                <header class="flex items-center justify-between px-1">
-                   <label for="login-account-id" class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Account ID</label>
-                </header>
-                <div class="relative group">
-                  <input
-                    id="login-account-id"
-                    type="text"
-                    [ngModel]="accountId()"
-                    (ngModelChange)="accountId.set($event)"
-                    class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 rounded-2xl transition-all outline-none"
-                    placeholder="vault-xxxx-xxxx"
-                    (keyup.enter)="onSubmit()"
-                    aria-label="Account ID"
-                  />
-                  <button 
-                    *ngIf="accountId()"
-                    (click)="copyToClipboard(accountId())"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-vault-grey transition-all animate-fade-in"
-                    title="Copy ID"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                    </svg>
-                  </button>
-                  <div *ngIf="!accountId()" class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div class="space-y-2">
-                <div class="flex items-center justify-between ml-1">
-                  <label for="login-password" class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Master Password</label>
-                  <button 
-                    (click)="onForgotPassword()"
-                    class="text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-vault-purple transition-all flex items-center gap-1.5 group/forgot"
-                  >
-                    <span>Forgot?</span>
-                    <span class="px-1 py-0.5 rounded-md bg-vault-dark border border-zinc-800 text-[0.625rem] text-zinc-400 group-hover/forgot:border-vault-purple/30 group-hover/forgot:text-vault-purple transition-all">SOON</span>
-                  </button>
-                </div>
-                <div class="relative group">
-                  <input
-                    id="login-password"
-                    type="password"
-                    [ngModel]="password()"
-                    [disabled]="isWorking() || isBenchmarking()"
-                    (ngModelChange)="password.set($event); isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
-                    class="w-full pl-5 pr-11 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 rounded-2xl transition-all outline-none"
-                    placeholder="••••••••••••"
-                    (keyup.enter)="onSubmit()"
-                    aria-label="Master Password"
-                  />
-                  <div class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-vault-purple/40 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-            <div class="col-start-1 row-start-1 flex flex-col gap-8 form-view register-view"
-                 [class.active]="mode() === 'REGISTER'"
-                 [class.pointer-events-none]="mode() !== 'REGISTER'">
-              
-              <div class="space-y-2 tooltip-trigger">
-                <div class="flex items-center justify-between px-1">
-                  <div class="flex items-center gap-1.5 group/info cursor-help tooltip-bottom tooltip-full" 
-                       data-tooltip="Anonymous opaque identifier used for platform login.">
-                    <label for="register-account-id" class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Account ID</label>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-zinc-500 group-hover/info:text-zinc-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <button 
-                    (click)="refreshAccountId()"
-                    class="text-xs font-bold text-vault-purple hover:text-vault-purple-bright transition-colors uppercase"
-                  >
-                    Refresh
-                  </button>
-                </div>
-                <div class="relative group">
-                  <input
-                    id="register-account-id"
-                    type="text"
-                    [ngModel]="accountId()"
-                    readonly
-                    [disabled]="isWorking() || isBenchmarking()"
-                    class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 rounded-2xl transition-all text-zinc-300 focus:ring-2 focus:ring-vault-purple/20 focus:border-vault-purple/50 outline-none"
-                    placeholder="Generating..."
-                    aria-label="Generated Account ID"
-                  />
-                  <button 
-                    *ngIf="accountId()"
-                    (click)="copyToClipboard(accountId())"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-vault-grey transition-all animate-fade-in"
-                    title="Copy ID"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                    </svg>
-                  </button>
-                  <div *ngIf="!accountId()" class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <p class="absolute top-[105%] left-1 text-xs md:text-[0.6875rem] font-medium text-orange-400/80 tracking-wide pointer-events-none whitespace-nowrap opacity-0 animate-fade-in" 
-                     [class.opacity-100]="accountId() && mode() === 'REGISTER'">
-                    Please save this ID safely; it is your only identifier.
-                  </p>
-                </div>
-              </div>
-
-              <div class="space-y-2">
-                <label for="register-password" class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">Master Password</label>
-                <div class="relative group">
-                  <input
-                    id="register-password"
-                    type="password"
-                    [ngModel]="password()"
-                    [disabled]="isWorking() || isBenchmarking()"
-                    (ngModelChange)="password.set($event); isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
-                    class="w-full pl-5 pr-11 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 rounded-2xl transition-all outline-none"
-                    placeholder="••••••••••••"
-                    aria-label="Create Master Password"
-                  />
-                  <div class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-vault-purple/40 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                </div>
-                <app-strength-meter 
-                  [password]="password()" 
-                  [visible]="mode() === 'REGISTER'"
-                  class="block mt-3 px-1"
-                ></app-strength-meter>
-              </div>
-
-              <div class="kdf-container mt-2" [class.expanded]="mode() === 'REGISTER'">
-                <div class="min-h-0 space-y-3">
-                  <div class="flex items-center justify-between ml-1 mb-1 relative">
-                    <div class="flex items-center gap-1.5 group/info cursor-help tooltip-full flex-shrink-0" 
-                         data-tooltip="This setting influences both vault security and login time.">
-                      <label class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 cursor-help whitespace-nowrap">Vault Hardening Grade</label>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-zinc-500 group-hover/info:text-zinc-500 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    
-                    <div class="flex items-center justify-end gap-2 h-5 flex-1">
-                      <span 
-                        *ngIf="isBenchmarking()"
-                        class="text-[0.625rem] font-bold uppercase tracking-wider text-vault-purple-bright animate-pulse truncate min-w-0"
-                      >
-                        {{ benchmarkStatus() }}...
-                      </span>
-
-                      <button 
-                        *ngIf="isOptimized() && !isBenchmarking()"
-                        (click)="onOptimizeKdf()"
-                        class="group/rerun flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-vault-dark transition-all animate-fade-in"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 text-vault-purple transition-transform group-hover/rerun:rotate-180 duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                        </svg>
-                        <span class="text-xs md:text-xs font-bold uppercase tracking-widest text-vault-purple/70 group-hover/rerun:text-vault-purple transition-colors">Rerun</span>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="relative py-1 overflow-visible" [class.min-h-[8.5rem]]="!isOptimized() && mode() === 'REGISTER'">
-                     <div class="flex gap-2 transition-all duration-700 ease-in-out -m-4 p-4" 
-                          [class.opacity-0]="!isOptimized() && !isBenchmarking()"
-                          [class.scale-[0.94]]="!isOptimized() && !isBenchmarking()"
-                         [class.pointer-events-none]="!isOptimized() && !isBenchmarking()">
-                      <div class="kdf-option group/kdf tooltip-trigger tooltip-full relative" 
-                           [class.active]="kdfMode() === 1"
-                           (click)="kdfMode.set(1)"
-                           data-tooltip="Standard protection. Recommended for most devices.">
-                        <div class="flex items-center gap-1.5">
-                          <span class="grade-title">Standard</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-zinc-500 group-hover/kdf:text-zinc-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <span class="grade-desc" *ngIf="!standardTime()">Fast & Secure</span>
-                        <span class="grade-desc" *ngIf="standardTime()">Estimated time: {{ standardTime()?.toFixed(1) }}s</span>
-                        
-                        <div *ngIf="standardTime() && !isBenchmarking()" 
-                             class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.5rem] md:text-[0.625rem] font-bold uppercase tracking-tighter"
-                             [class.text-green-400]="recommendedMode() === 1"
-                             [class.text-orange-400]="recommendedMode() !== 1 && standardTime()! <= 4.0"
-                             [class.text-red-400]="recommendedMode() !== 1 && standardTime()! > 4.0">
-                          {{ recommendedMode() === 1 ? 'RECOMMENDED' : (standardTime()! > 4.0 ? 'VERY SLOW' : 'GOOD') }}
-                        </div>
-                      </div>
-                      
-                      <div class="kdf-option group/kdf tooltip-trigger tooltip-full relative" 
-                           [class.active]="kdfMode() === 2"
-                           (click)="kdfMode.set(2)"
-                           data-tooltip="Strong protection. Best for modern desktops.">
-                        <div class="flex items-center gap-1.5">
-                          <span class="grade-title">Hardened</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-zinc-500 group-hover/kdf:text-zinc-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <span class="grade-desc" *ngIf="!hardenedTime()">Maximum Resistance</span>
-                        <span class="grade-desc" *ngIf="hardenedTime()">Estimated time: {{ hardenedTime()?.toFixed(1) }}s</span>
-
-                        <div *ngIf="hardenedTime() && !isBenchmarking()" 
-                             class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.5rem] md:text-[0.625rem] font-bold uppercase tracking-tighter"
-                             [class.text-green-400]="recommendedMode() === 2"
-                             [class.text-orange-400]="recommendedMode() !== 2 && hardenedTime()! <= 3.25"
-                             [class.text-red-400]="recommendedMode() !== 2 && hardenedTime()! > 3.25">
-                          {{ recommendedMode() === 2 ? 'RECOMMENDED' : (hardenedTime()! > 3.25 ? 'VERY SLOW' : 'GOOD') }}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div *ngIf="!isOptimized() && !isBenchmarking()" 
-                         class="absolute inset-x-0 inset-y-0 z-20 flex flex-col items-center justify-center animate-fade-in pointer-events-none">
-                      <div class="flex flex-col items-center justify-center p-4 pointer-events-auto w-full relative">
-                        <p class="text-xs md:text-[0.6875rem] font-bold uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
-                           [class.text-zinc-200]="isPasswordStrong()"
-                           [class.text-red-400]="!isPasswordStrong()">
-                          {{ isPasswordStrong() ? 'Benchmark required to select grade' : 'Minimum "Fair" strength required' }}
-                        </p>
-                        <button 
-                          (click)="onOptimizeKdf()"
-                          [class.bg-vault-purple]="isPasswordStrong()"
-                          [class.bg-red-600]="!isPasswordStrong()"
-                          [class.border-red-400/50]="!isPasswordStrong()"
-                          [class.animate-pulse]="!isPasswordStrong()"
-                          [class.pointer-events-none]="!isPasswordStrong()"
-                          class="flex items-center gap-2.5 px-6 py-3 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-zinc-600 hover:brightness-110"
-                          [class.shadow-vault-purple/40]="isPasswordStrong()"
-                          [class.shadow-red-600/50]="!isPasswordStrong()"
-                        >
-                          <svg *ngIf="isPasswordStrong()" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                          </svg>
-                          <svg *ngIf="!isPasswordStrong()" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                          </svg>
-                          <span class="text-xs md:text-[0.75rem] font-bold uppercase tracking-widest leading-none">
-                            {{ isPasswordStrong() ? 'Run Benchmark' : 'Weak Password' }}
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex flex-col gap-8 relative z-20">
-          <button 
-                  type="submit"
-                  (click)="onSubmit()"
-                  class="w-full btn-primary !rounded-2xl !py-4 flex items-center justify-center gap-3 relative"
-                  [disabled]="isWorking() || !accountId() || !password() || (mode() === 'REGISTER' && !isOptimized())"
-                >
-                  <span *ngIf="!isWorking()" class="font-bold uppercase tracking-[0.4em] text-xs md:text-sm relative z-10 transition-transform group-hover:-translate-y-1">
-                    {{ mode() === 'LOGIN' ? 'Unlock Vault' : 'Initialize Vault' }}
-                  </span>
-                  
-                  <span *ngIf="isWorking()" class="flex items-center gap-2 relative z-10 font-bold uppercase tracking-[0.2em] text-xs md:text-sm">
-                      <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Working...</span>
-                  </span>
-                </button>
-
-          <p *ngIf="mode() === 'REGISTER'" 
-             class="text-zinc-400 text-sm font-medium text-center sm:hidden animate-fade-in -mt-4">
             Start your vault.
           </p>
         </div>
       </div>
 
-      <div class="mt-[2px] sm:mt-[2px] text-center footer-container">
-        <p class="text-xs text-zinc-400 uppercase tracking-[0.6em] font-black pointer-events-none">
-          <span class="block sm:inline">ZERO-KNOWLEDGE</span>
-          <span class="mx-3 text-vault-purple/30 hidden sm:inline">•</span>
-          <span class="block sm:inline">PRIVACY-FIRST</span>
+      <div
+        class="flex p-1.5 bg-vault-black rounded-2xl relative z-20 border border-zinc-800 backdrop-blur-md"
+      >
+        <button
+          (click)="setMode('LOGIN')"
+          class="flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 z-10"
+          [class.text-white]="mode() === 'LOGIN'"
+          [class.text-zinc-400]="mode() !== 'LOGIN'"
+        >
+          Login
+        </button>
+        <button
+          (click)="setMode('REGISTER')"
+          class="flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 z-10"
+          [class.text-white]="mode() === 'REGISTER'"
+          [class.text-zinc-400]="mode() !== 'REGISTER'"
+        >
+          Register
+        </button>
+        <div
+          class="absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] bg-vault-purple rounded-xl transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) mode-indicator"
+        ></div>
+      </div>
+
+      <div class="relative z-10">
+        <div class="grid grid-cols-1 grid-rows-1">
+          <div
+            class="col-start-1 row-start-1 flex flex-col gap-8 form-view login-view"
+            [class.active]="mode() === 'LOGIN'"
+            [class.pointer-events-none]="mode() !== 'LOGIN'"
+          >
+            <div class="space-y-2">
+              <header class="flex items-center justify-between px-1">
+                <label
+                  for="login-account-id"
+                  class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1"
+                  >Account ID</label
+                >
+              </header>
+              <div class="relative group">
+                <input
+                  id="login-account-id"
+                  type="text"
+                  [ngModel]="accountId()"
+                  (ngModelChange)="accountId.set($event)"
+                  class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 rounded-2xl transition-all outline-none"
+                  placeholder="vault-xxxx-xxxx"
+                  (keyup.enter)="onSubmit()"
+                  aria-label="Account ID"
+                />
+                <button
+                  *ngIf="accountId()"
+                  (click)="copyToClipboard(accountId())"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-vault-grey transition-all animate-fade-in"
+                  title="Copy ID"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
+                    />
+                  </svg>
+                </button>
+                <div
+                  *ngIf="!accountId()"
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center justify-between ml-1">
+                <label
+                  for="login-password"
+                  class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1"
+                  >Master Password</label
+                >
+                <button
+                  (click)="onForgotPassword()"
+                  class="text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-vault-purple transition-all flex items-center gap-1.5 group/forgot"
+                >
+                  <span>Forgot?</span>
+                  <span
+                    class="px-1 py-0.5 rounded-md bg-vault-dark border border-zinc-800 text-[0.625rem] text-zinc-400 group-hover/forgot:border-vault-purple/30 group-hover/forgot:text-vault-purple transition-all"
+                    >SOON</span
+                  >
+                </button>
+              </div>
+              <div class="relative group">
+                <input
+                  id="login-password"
+                  type="password"
+                  [ngModel]="password()"
+                  [disabled]="isWorking() || isBenchmarking()"
+                  (ngModelChange)="
+                    password.set($event);
+                    isOptimized.set(false);
+                    standardTime.set(null);
+                    hardenedTime.set(null)
+                  "
+                  class="w-full pl-5 pr-11 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 rounded-2xl transition-all outline-none"
+                  placeholder="••••••••••••"
+                  (keyup.enter)="onSubmit()"
+                  aria-label="Master Password"
+                />
+                <div
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-vault-purple/40 transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="col-start-1 row-start-1 flex flex-col gap-8 form-view register-view"
+            [class.active]="mode() === 'REGISTER'"
+            [class.pointer-events-none]="mode() !== 'REGISTER'"
+          >
+            <div class="space-y-2 tooltip-trigger">
+              <div class="flex items-center justify-between px-1">
+                <div
+                  class="flex items-center gap-1.5 group/info cursor-help tooltip-bottom tooltip-full"
+                  data-tooltip="Anonymous opaque identifier used for platform login."
+                >
+                  <label
+                    for="register-account-id"
+                    class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1"
+                    >Account ID</label
+                  >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-3 h-3 text-zinc-500 group-hover/info:text-zinc-500 transition-colors"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2.5"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <button
+                  (click)="refreshAccountId()"
+                  class="text-xs font-bold text-vault-purple hover:text-vault-purple-bright transition-colors uppercase"
+                >
+                  Refresh
+                </button>
+              </div>
+              <div class="relative group">
+                <input
+                  id="register-account-id"
+                  type="text"
+                  [ngModel]="accountId()"
+                  readonly
+                  [disabled]="isWorking() || isBenchmarking()"
+                  class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 rounded-2xl transition-all text-zinc-300 focus:ring-2 focus:ring-vault-purple/20 focus:border-vault-purple/50 outline-none"
+                  placeholder="Generating..."
+                  aria-label="Generated Account ID"
+                />
+                <button
+                  *ngIf="accountId()"
+                  (click)="copyToClipboard(accountId())"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-vault-grey transition-all animate-fade-in"
+                  title="Copy ID"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
+                    />
+                  </svg>
+                </button>
+                <div
+                  *ngIf="!accountId()"
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+                <p
+                  class="absolute top-[105%] left-1 text-xs md:text-[0.6875rem] font-medium text-orange-400/80 tracking-wide pointer-events-none whitespace-nowrap opacity-0 animate-fade-in"
+                  [class.opacity-100]="accountId() && mode() === 'REGISTER'"
+                >
+                  Please save this ID safely; it is your only identifier.
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label
+                for="register-password"
+                class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1"
+                >Master Password</label
+              >
+              <div class="relative group">
+                <div class="relative w-full">
+                  <input
+                    id="register-password"
+                    type="password"
+                    [ngModel]="password()"
+                    [disabled]="isWorking() || isBenchmarking()"
+                    (ngModelChange)="
+                      password.set($event);
+                      isOptimized.set(false);
+                      standardTime.set(null);
+                      hardenedTime.set(null)
+                    "
+                    class="w-full pl-5 pr-11 py-4 bg-vault-black border border-zinc-800 hover:bg-vault-dark focus:bg-vault-dark focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 rounded-2xl transition-all outline-none"
+                    placeholder="••••••••••••"
+                    aria-label="Create Master Password"
+                  />
+                </div>
+                <div
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-vault-purple/40 transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <app-strength-meter
+                [password]="password()"
+                [visible]="mode() === 'REGISTER'"
+                class="block mt-3 px-1"
+              ></app-strength-meter>
+            </div>
+
+            <div class="kdf-container mt-2" [class.expanded]="mode() === 'REGISTER'">
+              <div class="min-h-0 space-y-3">
+                <div class="flex items-center justify-between ml-1 mb-1 relative">
+                  <div
+                    class="flex items-center gap-1.5 group/info cursor-help tooltip-full flex-shrink-0"
+                    data-tooltip="This setting influences both vault security and login time."
+                  >
+                    <label
+                      class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 cursor-help whitespace-nowrap"
+                      >Vault Hardening Grade</label
+                    >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-3 h-3 text-zinc-500 group-hover/info:text-zinc-500 transition-colors flex-shrink-0"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+
+                  <div class="flex items-center justify-end gap-2 h-5 flex-1">
+                    <span
+                      *ngIf="isBenchmarking()"
+                      class="text-[0.625rem] font-bold uppercase tracking-wider text-vault-purple-bright animate-pulse truncate min-w-0"
+                    >
+                      {{ benchmarkStatus() }}...
+                    </span>
+
+                    <button
+                      *ngIf="isOptimized() && !isBenchmarking()"
+                      (click)="onOptimizeKdf()"
+                      class="group/rerun flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-vault-dark transition-all animate-fade-in"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-2.5 h-2.5 text-vault-purple transition-transform group-hover/rerun:rotate-180 duration-500"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path
+                          d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+                        />
+                      </svg>
+                      <span
+                        class="text-xs md:text-xs font-bold uppercase tracking-widest text-vault-purple/70 group-hover/rerun:text-vault-purple transition-colors"
+                        >Rerun</span
+                      >
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="relative py-1 overflow-visible"
+                  [class.min-h-[8.5rem]]="!isOptimized() && mode() === 'REGISTER'"
+                >
+                  <div
+                    class="flex gap-2 transition-all duration-700 ease-in-out -m-4 p-4"
+                    [class.opacity-0]="!isOptimized() && !isBenchmarking()"
+                    [class.scale-[0.94]]="!isOptimized() && !isBenchmarking()"
+                    [class.pointer-events-none]="!isOptimized() && !isBenchmarking()"
+                  >
+                    <div
+                      class="kdf-option group/kdf tooltip-trigger tooltip-full relative"
+                      [class.active]="kdfMode() === 1"
+                      (click)="kdfMode.set(1)"
+                      data-tooltip="Standard protection. Recommended for most devices."
+                    >
+                      <div class="flex items-center gap-1.5">
+                        <span class="grade-title">Standard</span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="w-3 h-3 text-zinc-500 group-hover/kdf:text-zinc-500 transition-colors"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.5"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <span class="grade-desc" *ngIf="!standardTime()">Fast & Secure</span>
+                      <span class="grade-desc" *ngIf="standardTime()"
+                        >Estimated time: {{ standardTime()?.toFixed(1) }}s</span
+                      >
+
+                      <div
+                        *ngIf="standardTime() && !isBenchmarking()"
+                        class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.5rem] md:text-[0.625rem] font-bold uppercase tracking-tighter"
+                        [class.text-green-400]="recommendedMode() === 1"
+                        [class.text-orange-400]="recommendedMode() !== 1 && standardTime()! <= 4.0"
+                        [class.text-red-400]="recommendedMode() !== 1 && standardTime()! > 4.0"
+                      >
+                        {{
+                          recommendedMode() === 1
+                            ? 'RECOMMENDED'
+                            : standardTime()! > 4.0
+                              ? 'VERY SLOW'
+                              : 'GOOD'
+                        }}
+                      </div>
+                    </div>
+
+                    <div
+                      class="kdf-option group/kdf tooltip-trigger tooltip-full relative"
+                      [class.active]="kdfMode() === 2"
+                      (click)="kdfMode.set(2)"
+                      data-tooltip="Strong protection. Best for modern desktops."
+                    >
+                      <div class="flex items-center gap-1.5">
+                        <span class="grade-title">Hardened</span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="w-3 h-3 text-zinc-500 group-hover/kdf:text-zinc-500 transition-colors"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.5"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <span class="grade-desc" *ngIf="!hardenedTime()">Maximum Resistance</span>
+                      <span class="grade-desc" *ngIf="hardenedTime()"
+                        >Estimated time: {{ hardenedTime()?.toFixed(1) }}s</span
+                      >
+
+                      <div
+                        *ngIf="hardenedTime() && !isBenchmarking()"
+                        class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.5rem] md:text-[0.625rem] font-bold uppercase tracking-tighter"
+                        [class.text-green-400]="recommendedMode() === 2"
+                        [class.text-orange-400]="recommendedMode() !== 2 && hardenedTime()! <= 3.25"
+                        [class.text-red-400]="recommendedMode() !== 2 && hardenedTime()! > 3.25"
+                      >
+                        {{
+                          recommendedMode() === 2
+                            ? 'RECOMMENDED'
+                            : hardenedTime()! > 3.25
+                              ? 'VERY SLOW'
+                              : 'GOOD'
+                        }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    *ngIf="!isOptimized() && !isBenchmarking()"
+                    class="absolute inset-x-0 inset-y-0 z-20 flex flex-col items-center justify-center animate-fade-in pointer-events-none"
+                  >
+                    <div
+                      class="flex flex-col items-center justify-center p-4 pointer-events-auto w-full relative"
+                    >
+                      <p
+                        class="text-xs md:text-[0.6875rem] font-bold uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
+                        [class.text-zinc-200]="isPasswordStrong()"
+                        [class.text-red-400]="!isPasswordStrong()"
+                      >
+                        {{
+                          isPasswordStrong()
+                            ? 'Benchmark required to select'
+                            : 'Minimum "Fair" strength required'
+                        }}
+                      </p>
+                      <button
+                        (click)="onOptimizeKdf()"
+                        [class.bg-vault-purple]="isPasswordStrong()"
+                        [class.bg-red-600]="!isPasswordStrong()"
+                        [class.border-red-400/50]="!isPasswordStrong()"
+                        [class.animate-pulse]="!isPasswordStrong()"
+                        [class.pointer-events-none]="!isPasswordStrong()"
+                        class="flex items-center gap-2.5 px-6 py-3 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-zinc-600 hover:brightness-110"
+                        [class.shadow-vault-purple/40]="isPasswordStrong()"
+                        [class.shadow-red-600/50]="!isPasswordStrong()"
+                      >
+                        <svg
+                          *ngIf="isPasswordStrong()"
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="w-3.5 h-3.5 text-white"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <svg
+                          *ngIf="!isPasswordStrong()"
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="w-3.5 h-3.5 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.5"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                          />
+                        </svg>
+                        <span
+                          class="text-xs md:text-[0.75rem] font-bold uppercase tracking-widest leading-none"
+                        >
+                          {{ isPasswordStrong() ? 'Run Benchmark' : 'Weak Password' }}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-8 relative z-20">
+        <button
+          type="submit"
+          (click)="onSubmit()"
+          class="w-full btn-primary !rounded-2xl !py-4 flex items-center justify-center gap-3 relative"
+          [disabled]="
+            isWorking() || !accountId() || !password() || (mode() === 'REGISTER' && !isOptimized())
+          "
+        >
+          <span
+            *ngIf="!isWorking()"
+            class="font-bold uppercase tracking-[0.4em] text-xs md:text-sm relative z-10 transition-transform group-hover:-translate-y-1"
+          >
+            {{ mode() === 'LOGIN' ? 'Unlock Vault' : 'Initialize Vault' }}
+          </span>
+
+          <span
+            *ngIf="isWorking()"
+            class="flex items-center gap-2 relative z-10 font-bold uppercase tracking-[0.2em] text-xs md:text-sm"
+          >
+            <svg
+              class="animate-spin h-4 w-4 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span>Working...</span>
+          </span>
+        </button>
+
+        <p
+          *ngIf="mode() === 'REGISTER'"
+          class="text-zinc-400 text-sm font-medium text-center sm:hidden animate-fade-in -mt-4"
+        >
+          Start your vault.
         </p>
       </div>
     </div>
-    
+
+    <div class="mt-[2px] sm:mt-[2px] text-center footer-container">
+      <p class="text-xs text-zinc-400 uppercase tracking-[0.6em] font-black pointer-events-none">
+        <span class="block sm:inline">ZERO-KNOWLEDGE</span>
+        <span class="mx-3 text-vault-purple/30 hidden sm:inline">•</span>
+        <span class="block sm:inline">PRIVACY-FIRST</span>
+      </p>
+    </div>
   </div>
+</div>

@@ -8,11 +8,12 @@ import { AuthApiService } from '../../../../core/api/auth-api.service';
 import { SessionService } from '../../../../core/auth/session.service';
 import { zeroize } from '../../../../core/crypto/zeroize';
 import { StrengthMeterComponent } from '../../../../shared/ui/strength-meter/strength-meter.component';
+import { ScrollIndicatorDirective } from '../../../../shared/directives/scroll-indicator.directive';
 
 @Component({
   selector: 'app-rekey-vault',
   standalone: true,
-  imports: [CommonModule, FormsModule, StrengthMeterComponent],
+  imports: [CommonModule, FormsModule, StrengthMeterComponent, ScrollIndicatorDirective],
   templateUrl: './rekey-vault.component.html',
 })
 export class RekeyVaultComponent {

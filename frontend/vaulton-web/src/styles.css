@@ -159,8 +159,10 @@ button.btn-secondary {
   visibility: hidden;
   overflow: hidden;
   visibility: hidden;
-  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-    max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
+  transition:
+    opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+    max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.8s;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -178,7 +180,8 @@ button.btn-secondary {
   opacity: 0;
   grid-template-rows: 0fr;
   opacity: 0;
-  transition: grid-template-rows 0.8s cubic-bezier(0.2, 0.2, 0.2, 1),
+  transition:
+    grid-template-rows 0.8s cubic-bezier(0.2, 0.2, 0.2, 1),
     opacity 0.8s cubic-bezier(0.2, 0.2, 0.2, 0.2);
   overflow: hidden;
 }
@@ -585,4 +588,26 @@ button.btn-secondary {
 
 .unstable-shake {
   animation: intense-shake 0.08s infinite;
+}
+
+.scroll-fade-mask {
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+}
+
+.input-scroll-thumb {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  height: 3px;
+  background-color: var(--v-purple);
+  border-radius: 99px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.2s,
+    transform 0.1s linear,
+    width 0.1s linear;
+  z-index: 20;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
