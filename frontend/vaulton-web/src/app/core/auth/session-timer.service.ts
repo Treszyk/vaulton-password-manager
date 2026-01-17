@@ -22,6 +22,7 @@ import { SessionService } from './session.service';
 export class SessionTimerService implements OnDestroy {
   readonly session = inject(SessionService);
   readonly settings = inject(SettingsService);
+  readonly authState = inject(AuthStateService);
   private readonly router = inject(Router);
   private readonly ngZone = inject(NgZone);
 
@@ -35,9 +36,15 @@ export class SessionTimerService implements OnDestroy {
 
   constructor() {
     effect(() => {
-      const _ = this.settings.timeoutSeconds();
+      this.settings.timeoutSeconds();
+      const isUnlocked = this.authState.isUnlocked();
+
       untracked(() => {
-        this.restartTracker();
+        if (isUnlocked) {
+          this.restartTracker();
+        } else {
+          this.stopTracker$.next();
+        }
       });
     });
   }
@@ -54,7 +61,7 @@ export class SessionTimerService implements OnDestroy {
         fromEvent(window, 'mousedown'),
         fromEvent(window, 'keydown'),
         fromEvent(window, 'scroll'),
-        fromEvent(window, 'touchstart')
+        fromEvent(window, 'touchstart'),
       );
 
       activity$
@@ -85,9 +92,9 @@ export class SessionTimerService implements OnDestroy {
                 }
 
                 return Math.min(this.settings.timeoutSeconds(), realRemaining);
-              })
+              }),
             );
-          })
+          }),
         )
         .subscribe({
           next: (remaining) => {

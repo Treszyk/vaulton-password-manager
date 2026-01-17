@@ -21,7 +21,7 @@ export class SessionService {
     private readonly vault: VaultDataService,
     private readonly router: Router,
     private readonly toast: ToastService,
-    private readonly settings: SettingsService
+    private readonly settings: SettingsService,
   ) {}
 
   readonly showWipeConfirm = signal(false);
@@ -57,14 +57,14 @@ export class SessionService {
             this.authState.clear();
             this.authState.setInitialized(true);
             return of(false);
-          })
+          }),
         );
       }),
       catchError(() => {
         this.authState.clear();
         this.authState.setInitialized(true);
         return of(false);
-      })
+      }),
     );
   }
 
@@ -73,7 +73,7 @@ export class SessionService {
       const preLogin = await firstValueFrom(this.authApi.preLogin(accountId));
       let { verifier } = await this.crypto.buildLogin(password, preLogin);
       const res = await firstValueFrom(
-        this.authApi.login({ AccountId: accountId, Verifier: verifier! })
+        this.authApi.login({ AccountId: accountId, Verifier: verifier! }),
       );
       verifier = null as any; // this isn't deleted from memory instantly sadly, but hopefully GC will take care of it on the next cleanup
 
@@ -103,13 +103,13 @@ export class SessionService {
     accountId: string,
     password: string,
     kdfMode: number,
-    schemaVer: number
+    schemaVer: number,
   ): Promise<void> {
     const { registerBody } = await this.crypto.buildRegister(
       accountId,
       password,
       kdfMode,
-      schemaVer
+      schemaVer,
     );
     await firstValueFrom(this.authApi.register(registerBody));
     await this.login(accountId, password);
@@ -143,7 +143,11 @@ export class SessionService {
   }
 
   async lock(): Promise<void> {
-    await this.crypto.clearKeys(false);
+    try {
+      await this.crypto.clearKeys(false);
+    } catch (e) {
+      console.warn('Crypto worker was busy during lock attempt:', e);
+    }
     this.vault.clearData();
     this.authState.isUnlocked.set(false);
   }
