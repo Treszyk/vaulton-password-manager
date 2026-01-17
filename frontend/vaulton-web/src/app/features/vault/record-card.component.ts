@@ -1,4 +1,12 @@
-import { Component, Input, Output, EventEmitter, signal, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  signal,
+  ViewEncapsulation,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VaultRecord } from './vault-record.model';
 
@@ -68,7 +76,7 @@ import { VaultRecord } from './vault-record.model';
               [class.trash-btn]="!deleteConfirmActive()"
               [ngClass]="{
                 'bg-red-500 text-white shadow-lg shadow-red-500/20': deleteConfirmActive(),
-                'text-red-500/50 hover:bg-red-500/10 shadow-none': !deleteConfirmActive()
+                'text-red-500/50 hover:bg-red-500/10 shadow-none': !deleteConfirmActive(),
               }"
               title="Delete Entry"
               [attr.aria-label]="deleteConfirmActive() ? 'Confirm Delete' : 'Delete Entry'"
@@ -114,7 +122,7 @@ import { VaultRecord } from './vault-record.model';
                   'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20':
                     justCopied() && copiedStatus() === 'username',
                   'text-zinc-500 hover:text-white hover:bg-vault-dark shadow-none':
-                    !justCopied() || copiedStatus() !== 'username'
+                    !justCopied() || copiedStatus() !== 'username',
                 }"
                 [attr.aria-label]="
                   justCopied() && copiedStatus() === 'username'
@@ -219,14 +227,14 @@ import { VaultRecord } from './vault-record.model';
                   'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20':
                     justCopied() && copiedStatus() === 'password',
                   'text-zinc-500 hover:text-white hover:bg-vault-dark shadow-none':
-                    !copyConfirmActive() && (copiedStatus() !== 'password' || !justCopied())
+                    !copyConfirmActive() && (copiedStatus() !== 'password' || !justCopied()),
                 }"
                 [attr.aria-label]="
                   justCopied() && copiedStatus() === 'password'
                     ? 'Password Copied'
                     : copyConfirmActive()
-                    ? 'Confirm Copy Password'
-                    : 'Copy Password'
+                      ? 'Confirm Copy Password'
+                      : 'Copy Password'
                 "
               >
                 <svg
@@ -292,7 +300,7 @@ import { VaultRecord } from './vault-record.model';
   `,
   encapsulation: ViewEncapsulation.None,
 })
-export class RecordCardComponent {
+export class RecordCardComponent implements OnDestroy {
   @Input({ required: true }) record!: VaultRecord;
   @Output() onDelete = new EventEmitter<string>();
   @Output() onEdit = new EventEmitter<VaultRecord>();
@@ -379,5 +387,12 @@ export class RecordCardComponent {
       this.justCopied.set(false);
       this.copiedStatus.set(null);
     }, 2000);
+  }
+
+  ngOnDestroy() {
+    if (this.revealTimeout) clearTimeout(this.revealTimeout);
+    if (this.deleteTimeout) clearTimeout(this.deleteTimeout);
+    if (this.copyTimeout) clearTimeout(this.copyTimeout);
+    if (this.statusTimeout) clearTimeout(this.statusTimeout);
   }
 }

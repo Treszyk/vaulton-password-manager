@@ -1,0 +1,47 @@
+<section class="space-y-4">
+  <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Account</h2>
+  <div
+    class="flex items-center justify-between p-4 bg-vault-black border border-zinc-800 rounded-2xl gap-6"
+  >
+    <div class="space-y-1 flex-1 min-w-0">
+      <div
+        class="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2 flex-wrap"
+      >
+        Account ID
+      </div>
+      <div class="relative group">
+        <input
+          type="text"
+          [ngModel]="accountId()"
+          readonly
+          aria-label="Account ID"
+          class="w-full pl-5 pr-12 py-4 bg-vault-black border border-zinc-800 rounded-2xl transition-all text-zinc-300 font-mono"
+        />
+        <button
+          (click)="copyToClipboard(accountId())"
+          class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-vault-purple hover:bg-vault-grey transition-all"
+          title="Copy ID"
+          aria-label="Copy Account ID"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
+            />
+          </svg>
+        </button>
+      </div>
+      <p class="text-xs md:text-[0.75rem] text-orange-400 pt-1">
+        This is your unique vault identifier. Keep it safe. You need it to log in to your vault.
+      </p>
+    </div>
+  </div>
+</section>

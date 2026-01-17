@@ -1,0 +1,301 @@
+<section class="space-y-4">
+  <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Master Password</h2>
+  <div class="bg-vault-black border border-zinc-800 rounded-2xl p-6 space-y-6">
+    <div class="flex items-start gap-4 p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-5 h-5 text-amber-500 shrink-0 mt-0.5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+        />
+      </svg>
+      <p class="text-[0.6875rem] md:text-[0.75rem] text-amber-500/70 leading-relaxed font-medium">
+        Changing your password will re-key your entire vault. This is a irreversible local and cloud
+        operation. Ensure you remember your new password.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <div class="space-y-2">
+        <label class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1"
+          >Current Password</label
+        >
+        <input
+          type="password"
+          [(ngModel)]="rekeyOldPassword"
+          aria-label="Current Password"
+          class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors"
+          placeholder="••••••••"
+        />
+      </div>
+      <div class="space-y-2">
+        <label class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1"
+          >New Master Password</label
+        >
+        <input
+          type="password"
+          [(ngModel)]="rekeyNewPassword"
+          (ngModelChange)="isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
+          aria-label="New Master Password"
+          class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors"
+          placeholder="••••••••"
+        />
+
+        <app-strength-meter
+          [password]="rekeyNewPassword"
+          [visible]="!!rekeyNewPassword"
+          class="block w-full mt-2"
+        ></app-strength-meter>
+      </div>
+      <div class="space-y-2 animate-fade-in" *ngIf="rekeyNewPassword">
+        <label class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1"
+          >Confirm New Password</label
+        >
+        <input
+          type="password"
+          [(ngModel)]="rekeyConfirmPassword"
+          aria-label="Confirm New Password"
+          class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors"
+          placeholder="••••••••"
+        />
+      </div>
+
+      <div class="kdf-container expanded mt-2">
+        <div class="min-h-0 space-y-3">
+          <div class="flex items-center justify-between ml-1 mb-1 relative">
+            <div
+              class="flex items-center gap-1.5 group/info cursor-help tooltip-full"
+              data-tooltip="This setting influences both vault security and login time."
+            >
+              <label class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 cursor-help"
+                >Vault Hardening Grade</label
+              >
+            </div>
+
+            <div class="flex items-center gap-2 h-5">
+              <span
+                *ngIf="isBenchmarking()"
+                class="text-[0.5625rem] md:text-xs font-black uppercase tracking-wider text-vault-purple-bright animate-pulse"
+              >
+                Benchmarking {{ benchmarkStatus() }}...
+              </span>
+
+              <button
+                *ngIf="isOptimized() && !isBenchmarking()"
+                (click)="onOptimizeKdf()"
+                class="group/rerun flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-vault-dark transition-all animate-fade-in"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-2.5 h-2.5 text-vault-purple transition-transform group-hover/rerun:rotate-180 duration-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+                  />
+                </svg>
+                <span
+                  class="text-[0.625rem] md:text-xs font-black uppercase tracking-widest text-vault-purple/70 group-hover/rerun:text-vault-purple transition-colors"
+                  >Rerun</span
+                >
+              </button>
+            </div>
+          </div>
+          <div class="relative py-1 overflow-visible">
+            <div
+              class="flex gap-2 transition-all duration-700 ease-in-out -m-4 p-4"
+              [class.opacity-0]="!isOptimized() && !isBenchmarking()"
+              [class.scale-[0.94]]="!isOptimized() && !isBenchmarking()"
+              [class.pointer-events-none]="!isOptimized() && !isBenchmarking()"
+            >
+              <div
+                class="kdf-option group/kdf tooltip-trigger tooltip-full relative"
+                [class.active]="kdfMode() === 1"
+                (click)="kdfMode.set(1)"
+                data-tooltip="Standard protection. Recommended for most devices."
+              >
+                <div class="flex items-center gap-1.5">
+                  <span class="grade-title">Standard</span>
+                </div>
+                <span class="grade-desc" *ngIf="!standardTime()">Fast & Secure</span>
+                <span class="grade-desc" *ngIf="standardTime()"
+                  >Estimated time: {{ standardTime()?.toFixed(1) }}s</span
+                >
+                <div
+                  *ngIf="standardTime() && !isBenchmarking()"
+                  class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.5625rem] md:text-[0.625rem] font-black uppercase tracking-tighter"
+                  [class.text-green-400]="recommendedMode() === 1"
+                  [class.text-orange-400]="recommendedMode() !== 1 && standardTime()! <= 4.0"
+                  [class.text-red-400]="recommendedMode() !== 1 && standardTime()! > 4.0"
+                >
+                  {{
+                    recommendedMode() === 1
+                      ? 'RECOMMENDED'
+                      : standardTime()! > 4.0
+                        ? 'VERY SLOW'
+                        : 'GOOD'
+                  }}
+                </div>
+              </div>
+
+              <div
+                class="kdf-option group/kdf tooltip-trigger tooltip-full relative"
+                [class.active]="kdfMode() === 2"
+                (click)="kdfMode.set(2)"
+                data-tooltip="Strong protection. Best for modern desktops."
+              >
+                <div class="flex items-center gap-1.5">
+                  <span class="grade-title">Hardened</span>
+                </div>
+                <span class="grade-desc" *ngIf="!hardenedTime()">Maximum Resistance</span>
+                <span class="grade-desc" *ngIf="hardenedTime()"
+                  >Estimated time: {{ hardenedTime()?.toFixed(1) }}s</span
+                >
+                <div
+                  *ngIf="hardenedTime() && !isBenchmarking()"
+                  class="absolute top-0.5 right-0.5 px-1.5 py-0.5 rounded text-[0.5625rem] md:text-[0.625rem] font-black uppercase tracking-tighter"
+                  [class.text-green-400]="recommendedMode() === 2"
+                  [class.text-orange-400]="recommendedMode() !== 2 && hardenedTime()! <= 3.25"
+                  [class.text-red-400]="recommendedMode() !== 2 && hardenedTime()! > 3.25"
+                >
+                  {{
+                    recommendedMode() === 2
+                      ? 'RECOMMENDED'
+                      : hardenedTime()! > 3.25
+                        ? 'VERY SLOW'
+                        : 'GOOD'
+                  }}
+                </div>
+              </div>
+            </div>
+
+            <div
+              *ngIf="!isOptimized() && !isBenchmarking()"
+              class="absolute inset-x-0 inset-y-0 z-10 flex flex-col items-center justify-center animate-fade-in pointer-events-none"
+            >
+              <div class="flex flex-col items-center justify-center p-4 pointer-events-auto w-full">
+                <p
+                  class="text-xs md:text-[0.6875rem] font-bold uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
+                  [class.text-zinc-200]="isPasswordStrong()"
+                  [class.text-red-400]="!isPasswordStrong()"
+                >
+                  {{
+                    isPasswordStrong()
+                      ? 'Benchmark required to select grade'
+                      : 'Minimum "Fair" strength required'
+                  }}
+                </p>
+
+                <button
+                  (click)="onOptimizeKdf()"
+                  [disabled]="!rekeyNewPassword || !isPasswordStrong()"
+                  class="flex items-center gap-2.5 px-6 py-3 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-zinc-600 disabled:opacity-50 disabled:pointer-events-none hover:brightness-110"
+                  [class.bg-vault-purple]="isPasswordStrong()"
+                  [class.shadow-vault-purple/40]="isPasswordStrong()"
+                  [class.bg-red-600]="!isPasswordStrong()"
+                  [class.border-red-400/50]="!isPasswordStrong()"
+                  [class.animate-pulse]="!isPasswordStrong()"
+                  [class.shadow-red-600/50]="!isPasswordStrong()"
+                >
+                  <svg
+                    *ngIf="isPasswordStrong()"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-3.5 h-3.5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <svg
+                    *ngIf="!isPasswordStrong()"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-3.5 h-3.5 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2.5"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                  <span class="text-xs font-black uppercase tracking-widest leading-none">
+                    {{ isPasswordStrong() ? 'Benchmark & Select' : 'Weak Password' }}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button
+        (click)="updateMasterKey()"
+        [disabled]="isRekeyBusy() || !isOptimized() || isRekeySuccess() || !isPasswordStrong()"
+        class="w-full py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg hover:brightness-110"
+        [class.bg-vault-purple]="!isRekeySuccess()"
+        [class.text-white]="!isRekeySuccess()"
+        [class.shadow-vault-purple_20]="!isRekeySuccess()"
+        [class.bg-green-500]="isRekeySuccess()"
+        [class.text-white]="isRekeySuccess()"
+        [class.shadow-none]="isRekeySuccess()"
+      >
+        <span *ngIf="!isRekeyBusy() && !isRekeySuccess()">Update Master Key</span>
+        <span *ngIf="isRekeySuccess()" class="flex items-center gap-2 animate-scale-in">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="3"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          <span>DONE</span>
+        </span>
+        <span *ngIf="isRekeyBusy()" class="flex items-center gap-2">
+          <svg
+            class="animate-spin h-3.5 w-3.5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <span>{{ rekeyStatus() || 'Processing...' }}</span>
+        </span>
+      </button>
+    </div>
+  </div>
+</section>

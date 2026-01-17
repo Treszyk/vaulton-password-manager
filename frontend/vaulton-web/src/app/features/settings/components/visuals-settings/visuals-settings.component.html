@@ -1,0 +1,27 @@
+<section class="space-y-4">
+  <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Visuals</h2>
+  <div
+    class="bg-vault-black border border-zinc-800 rounded-2xl p-6 flex items-center justify-between group hover:border-zinc-800 transition-colors"
+  >
+    <div class="flex flex-col gap-1">
+      <span class="text-sm font-bold text-white tracking-tight">Background Stars</span>
+      <span class="text-xs text-zinc-400">Toggle the animated starfield background.</span>
+    </div>
+
+    <button
+      (click)="settings.toggleStarfield(accountId())"
+      aria-label="Toggle background stars"
+      class="w-12 h-7 rounded-full transition-all duration-300 relative focus:outline-none border"
+      [class.bg-vault-purple]="settings.showStarfield()"
+      [class.border-vault-purple]="settings.showStarfield()"
+      [class.bg-vault-black]="!settings.showStarfield()"
+      [class.border-zinc-800]="!settings.showStarfield()"
+    >
+      <div
+        class="w-5 h-5 bg-white rounded-full absolute top-[3px] transition-transform duration-300 shadow-md"
+        [class.translate-x-6]="settings.showStarfield()"
+        [class.translate-x-1]="!settings.showStarfield()"
+      ></div>
+    </button>
+  </div>
+</section>

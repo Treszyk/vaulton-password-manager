@@ -1,0 +1,227 @@
+<section>
+  <div class="flex items-center justify-between">
+    <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Device Security</h2>
+    <div
+      *ngIf="isPasscodeEnabled()"
+      class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+    >
+      <div class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
+      <span class="text-xs font-bold text-emerald-500 uppercase tracking-tighter">Active</span>
+    </div>
+  </div>
+
+  <div
+    class="bg-vault-black border border-zinc-800 rounded-2xl p-6 flex items-center justify-between group hover:border-zinc-800 transition-colors gap-6 mt-4"
+  >
+    <div class="flex flex-col gap-1 flex-1 min-w-0">
+      <span class="text-sm font-bold text-white tracking-tight">Local PASSCODE Unlock</span>
+      <span class="text-xs text-zinc-400 leading-relaxed"
+        >Quickly unlock with a 6-digit passcode on this device.</span
+      >
+    </div>
+
+    <button
+      (click)="togglePasscode()"
+      aria-label="Toggle local passcode unlock"
+      class="w-12 h-7 rounded-full transition-all duration-300 relative focus:outline-none shrink-0 border"
+      [class.bg-vault-purple]="isPasscodeEnabled()"
+      [class.border-vault-purple]="isPasscodeEnabled()"
+      [class.bg-vault-black]="!isPasscodeEnabled()"
+      [class.border-zinc-800]="!isPasscodeEnabled()"
+    >
+      <div
+        class="w-5 h-5 bg-white rounded-full absolute top-[3px] transition-transform duration-300 shadow-md"
+        [class.translate-x-6]="isPasscodeEnabled()"
+        [class.translate-x-1]="!isPasscodeEnabled()"
+      ></div>
+    </button>
+  </div>
+  <p
+    class="text-[0.75rem] md:text-sm font-medium text-orange-400/80 tracking-wide px-1 mt-1.5 animate-fade-in"
+  >
+    Weakens local security, but increases convenience.
+  </p>
+
+  <div
+    class="grid transition-[grid-template-rows,opacity,margin] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+    [class.grid-rows-[0fr]]="!showPasscodeSetup()"
+    [class.grid-rows-[1fr]]="showPasscodeSetup()"
+    [class.opacity-0]="!showPasscodeSetup()"
+    [class.opacity-100]="showPasscodeSetup()"
+    [class.mt-0]="!showPasscodeSetup()"
+    [class.mt-6]="showPasscodeSetup()"
+  >
+    <div class="overflow-hidden min-h-0">
+      <app-passcode-setup
+        (cancel)="cancelPasscodeSetup()"
+        (setupFinished)="onPasscodeSetupFinished()"
+      ></app-passcode-setup>
+    </div>
+  </div>
+</section>
+
+<section class="space-y-4">
+  <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Auto-Lock Timeout</h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <button
+      (click)="settings.updateTimeout(accountId(), 60)"
+      class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
+      [class.bg-vault-dark]="settings.timeoutSeconds() === 60"
+      [class.border-vault-purple]="settings.timeoutSeconds() === 60"
+      [class.bg-vault-black]="settings.timeoutSeconds() !== 60"
+      [class.border-zinc-800]="settings.timeoutSeconds() !== 60"
+      [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 60"
+    >
+      <div
+        class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+        [class.bg-vault-dark]="settings.timeoutSeconds() !== 60"
+        [class.group-hover:bg-vault-grey]="settings.timeoutSeconds() !== 60"
+        [class.bg-vault-purple/10]="settings.timeoutSeconds() === 60"
+        [class.text-vault-purple]="settings.timeoutSeconds() === 60"
+        [class.text-zinc-400]="settings.timeoutSeconds() !== 60"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <div>
+        <div class="text-sm font-bold text-white">1 Minute</div>
+        <div class="text-xs text-zinc-400 uppercase tracking-wider">Paranoid</div>
+      </div>
+    </button>
+
+    <button
+      (click)="settings.updateTimeout(accountId(), 300)"
+      class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
+      [class.bg-vault-dark]="settings.timeoutSeconds() === 300"
+      [class.border-vault-purple]="settings.timeoutSeconds() === 300"
+      [class.bg-vault-black]="settings.timeoutSeconds() !== 300"
+      [class.border-zinc-800]="settings.timeoutSeconds() !== 300"
+      [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 300"
+    >
+      <div
+        class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+        [class.bg-vault-dark]="settings.timeoutSeconds() !== 300"
+        [class.group-hover:bg-vault-grey]="settings.timeoutSeconds() !== 300"
+        [class.bg-vault-purple/10]="settings.timeoutSeconds() === 300"
+        [class.text-vault-purple]="settings.timeoutSeconds() === 300"
+        [class.text-zinc-400]="settings.timeoutSeconds() !== 300"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <div>
+        <div class="text-sm font-bold text-white">5 Minutes</div>
+        <div class="text-xs text-zinc-400 uppercase tracking-wider">Recommended</div>
+      </div>
+    </button>
+
+    <button
+      (click)="settings.updateTimeout(accountId(), 1800)"
+      class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
+      [class.bg-vault-dark]="settings.timeoutSeconds() === 1800"
+      [class.border-orange-500]="settings.timeoutSeconds() === 1800"
+      [class.bg-vault-black]="settings.timeoutSeconds() !== 1800"
+      [class.border-zinc-800]="settings.timeoutSeconds() !== 1800"
+      [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 1800"
+    >
+      <div
+        class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+        [class.bg-vault-dark]="settings.timeoutSeconds() !== 1800"
+        [class.group-hover:bg-vault-grey]="settings.timeoutSeconds() !== 1800"
+        [class.bg-orange-500/10]="settings.timeoutSeconds() === 1800"
+        [class.text-orange-400]="settings.timeoutSeconds() === 1800"
+        [class.text-zinc-400]="settings.timeoutSeconds() !== 1800"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+          />
+        </svg>
+      </div>
+      <div>
+        <div class="text-sm font-bold text-white group-hover:text-orange-200 transition-colors">
+          30 Minutes
+        </div>
+        <div class="text-xs text-orange-400 uppercase tracking-wider font-bold">
+          Decreased Security
+        </div>
+      </div>
+    </button>
+
+    <button
+      (click)="settings.updateTimeout(accountId(), 3600)"
+      class="flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group"
+      [class.bg-vault-dark]="settings.timeoutSeconds() === 3600"
+      [class.border-red-500]="settings.timeoutSeconds() === 3600"
+      [class.bg-vault-black]="settings.timeoutSeconds() !== 3600"
+      [class.border-zinc-800]="settings.timeoutSeconds() !== 3600"
+      [class.hover:border-zinc-600]="settings.timeoutSeconds() !== 3600"
+    >
+      <div
+        class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+        [class.bg-vault-dark]="settings.timeoutSeconds() !== 3600"
+        [class.group-hover:bg-vault-grey]="settings.timeoutSeconds() !== 3600"
+        [class.bg-red-500/10]="settings.timeoutSeconds() === 3600"
+        [class.text-red-500]="settings.timeoutSeconds() === 3600"
+        [class.text-zinc-400]="settings.timeoutSeconds() !== 3600"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+          />
+        </svg>
+      </div>
+      <div>
+        <div class="text-sm font-bold text-white group-hover:text-red-200 transition-colors">
+          1 Hour
+        </div>
+        <div class="text-xs text-red-500 uppercase tracking-wider font-bold">Danger: High Risk</div>
+      </div>
+    </button>
+  </div>
+</section>
+
+<app-rekey-vault></app-rekey-vault>

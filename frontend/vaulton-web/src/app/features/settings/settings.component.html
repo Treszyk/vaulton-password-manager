@@ -1,0 +1,49 @@
+<div class="w-full h-full flex flex-col items-center justify-start p-6 pb-0">
+  <div class="w-full max-w-2xl h-full flex flex-col gap-8 relative z-10">
+    <div class="flex-none flex flex-col gap-8 animate-slide-in-top">
+      <header class="flex flex-col gap-2">
+        <h1 class="text-3xl font-black text-white tracking-tighter">
+          Settings<span class="text-vault-purple">.</span>
+        </h1>
+        <p class="text-zinc-400 text-sm font-medium">Manage your vault configuration.</p>
+      </header>
+
+      <div
+        class="flex p-1.5 bg-vault-black rounded-2xl relative z-20 border border-zinc-800 backdrop-blur-md"
+      >
+        <button
+          (click)="setTab('GENERAL')"
+          class="flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 z-10 relative"
+          [class.text-white]="activeTab() === 'GENERAL'"
+          [class.text-zinc-400]="activeTab() !== 'GENERAL'"
+        >
+          General
+        </button>
+        <button
+          (click)="setTab('SECURITY')"
+          class="flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 z-10 relative"
+          [class.text-white]="activeTab() === 'SECURITY'"
+          [class.text-zinc-400]="activeTab() !== 'SECURITY'"
+        >
+          Security
+        </button>
+
+        <div class="tab-indicator" [attr.data-active-tab]="activeTab()"></div>
+      </div>
+    </div>
+
+    <div class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth pb-20 -mr-2 pr-2">
+      <div *ngIf="activeTab() === 'GENERAL'" class="flex flex-col gap-8 animate-fade-in pb-4">
+        <app-account-settings [accountId]="accountId()"></app-account-settings>
+        <app-visuals-settings [accountId]="accountId()"></app-visuals-settings>
+      </div>
+
+      <div *ngIf="activeTab() === 'SECURITY'" class="flex flex-col gap-8 animate-fade-in pb-4">
+        <app-security-settings
+          [accountId]="accountId()"
+          [initialShowPasscodeSetup]="initialShowPasscodeSetup()"
+        ></app-security-settings>
+      </div>
+    </div>
+  </div>
+</div>
