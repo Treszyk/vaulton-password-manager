@@ -39,25 +39,25 @@ body {
 
 @media (min-width: 1500px) {
   html {
-    font-size: 18px;
+    font-size: 20.25px;
   }
 }
 
 @media (min-width: 2500px) and (min-height: 1200px) {
   html {
-    font-size: 28px;
+    font-size: 31.5px;
   }
 }
 
 @media (min-width: 3800px) and (min-height: 1800px) {
   html {
-    font-size: 42px;
+    font-size: 47.25px;
   }
 }
 
 @media (min-width: 5000px) and (min-height: 2500px) {
   html {
-    font-size: 64px;
+    font-size: 72px;
   }
 }
 
