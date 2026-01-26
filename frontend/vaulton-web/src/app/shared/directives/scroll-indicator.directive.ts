@@ -80,7 +80,7 @@ export class ScrollIndicatorDirective implements OnInit, OnDestroy, AfterViewIni
     if (!this.indicator) return;
 
     const el = this.el.nativeElement;
-    const overflow = el.scrollWidth > el.clientWidth;
+    const overflow = el.scrollWidth > el.clientWidth + 2;
 
     if (overflow) {
       this.renderer.setStyle(this.indicator, 'opacity', '1');
@@ -102,7 +102,7 @@ export class ScrollIndicatorDirective implements OnInit, OnDestroy, AfterViewIni
 
     const trackWidth = w - pl - pr;
 
-    if (sw <= w) {
+    if (sw <= w + 2) {
       this.renderer.setStyle(this.indicator, 'opacity', '0');
       return;
     }
@@ -111,7 +111,13 @@ export class ScrollIndicatorDirective implements OnInit, OnDestroy, AfterViewIni
     const thumbWidth = trackWidth * ratio;
 
     const maxScroll = sw - w;
-    const progress = maxScroll > 0 ? el.scrollLeft / maxScroll : 0;
+    let progress = maxScroll > 0 ? el.scrollLeft / maxScroll : 0;
+
+    if (Math.abs(maxScroll - el.scrollLeft) < 2) {
+      progress = 1;
+    }
+
+    progress = Math.max(0, Math.min(1, progress));
 
     const maxThumbTravel = trackWidth - thumbWidth;
     const leftPos = pl + progress * maxThumbTravel;

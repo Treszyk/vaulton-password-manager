@@ -11,12 +11,12 @@ import { SessionService } from '../../core/auth/session.service';
   imports: [CommonModule, RouterModule],
   template: `
     <nav
-      class="z-50 w-full px-4 md:px-8 h-20 md:h-24 flex items-center justify-between transition-all duration-700 bg-transparent border-none"
+      class="z-50 w-full px-4 md:px-8 h-20 md:h-24 flex items-center justify-between transition-all duration-700 bg-transparent border-none pointer-events-none"
       [class.absolute]="isAuthPage()"
       [class.sticky]="!isAuthPage()"
       [class.top-0]="true"
     >
-      <div class="flex items-center h-full gap-4 md:gap-10">
+      <div class="flex items-center h-full gap-4 md:gap-10 pointer-events-auto">
         <span
           class="text-xl font-black tracking-tighter cursor-pointer animate-slide-in-left select-none mr-2"
           (click)="router.navigate(['/'])"

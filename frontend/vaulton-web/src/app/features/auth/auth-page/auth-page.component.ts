@@ -23,7 +23,7 @@ import { ScrollIndicatorDirective } from '../../../shared/directives/scroll-indi
     ScrollIndicatorDirective,
   ],
   host: {
-    class: 'w-full',
+    class: 'w-full h-full',
   },
   templateUrl: './auth-page.component.html',
 })

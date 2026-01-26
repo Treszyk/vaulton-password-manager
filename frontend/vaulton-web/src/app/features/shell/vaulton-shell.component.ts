@@ -28,7 +28,7 @@ import { LogoutConfirmationComponent } from './logout-confirmation.component';
     <div class="relative w-full h-full overflow-hidden flex flex-col">
       <app-starfield *ngIf="settings.showStarfield()"></app-starfield>
 
-      <div class="relative z-10 w-full flex-1 min-h-0 flex flex-col">
+      <div class="relative w-full flex-1 min-h-0 flex flex-col">
         <router-outlet></router-outlet>
       </div>
 
@@ -38,27 +38,29 @@ import { LogoutConfirmationComponent } from './logout-confirmation.component';
           session.showWipeConfirm() ||
           session.showLogoutConfirm()
         "
-        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in"
+        class="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-md animate-fade-in"
       >
-        <app-unlock-overlay
-          *ngIf="!session.showWipeConfirm() && !session.showLogoutConfirm()"
-          class="w-full flex justify-center"
-        ></app-unlock-overlay>
+        <div class="min-h-full w-full flex items-center justify-center p-4">
+          <app-unlock-overlay
+            *ngIf="!session.showWipeConfirm() && !session.showLogoutConfirm()"
+            class="w-full flex justify-center"
+          ></app-unlock-overlay>
 
-        <app-wipe-confirmation
-          *ngIf="session.showWipeConfirm()"
-          (confirmWipe)="session.wipeDevice()"
-          (cancel)="session.cancelWipeConfirm()"
-          class="w-full flex justify-center"
-        ></app-wipe-confirmation>
+          <app-wipe-confirmation
+            *ngIf="session.showWipeConfirm()"
+            (confirmWipe)="session.wipeDevice()"
+            (cancel)="session.cancelWipeConfirm()"
+            class="w-full flex justify-center"
+          ></app-wipe-confirmation>
 
-        <app-logout-confirmation
-          *ngIf="session.showLogoutConfirm()"
-          (confirmLogout)="session.logout()"
-          (cancel)="session.cancelLogoutConfirm()"
-          (requestWipe)="triggerWipeFromLogout()"
-          class="w-full flex justify-center"
-        ></app-logout-confirmation>
+          <app-logout-confirmation
+            *ngIf="session.showLogoutConfirm()"
+            (confirmLogout)="session.logout()"
+            (cancel)="session.cancelLogoutConfirm()"
+            (requestWipe)="triggerWipeFromLogout()"
+            class="w-full flex justify-center"
+          ></app-logout-confirmation>
+        </div>
       </div>
     </div>
   `,

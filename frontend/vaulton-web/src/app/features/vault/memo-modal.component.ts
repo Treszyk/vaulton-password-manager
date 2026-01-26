@@ -8,7 +8,7 @@ import { VaultRecord } from './vault-record.model';
   imports: [CommonModule],
   template: `
     <div
-      class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in"
+      class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in"
     >
       <div class="w-full max-w-md p-8 rounded-3xl overlay-card animate-slide-up">
         <div class="flex flex-col items-center text-center mb-8">
