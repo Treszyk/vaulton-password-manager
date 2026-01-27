@@ -11,6 +11,7 @@ import { StarfieldComponent } from '../../../shared/ui/starfield/starfield.compo
 import { ToastService } from '../../../shared/ui/toast/toast.service';
 import { StrengthMeterComponent } from '../../../shared/ui/strength-meter/strength-meter.component';
 import { ScrollIndicatorDirective } from '../../../shared/directives/scroll-indicator.directive';
+import { ImportantInfoModal } from '../../../shared/components/important-info-modal/important-info-modal';
 
 @Component({
   selector: 'app-auth-page',
@@ -21,6 +22,7 @@ import { ScrollIndicatorDirective } from '../../../shared/directives/scroll-indi
     StarfieldComponent,
     StrengthMeterComponent,
     ScrollIndicatorDirective,
+    ImportantInfoModal,
   ],
   host: {
     class: 'w-full h-full',
@@ -50,6 +52,12 @@ export class AuthPageComponent {
 
   standardTime = signal<number | null>(null);
   hardenedTime = signal<number | null>(null);
+
+  recoveryModalData = signal<{
+    accountId: string;
+    recoveryKey: string;
+    loginSuccess: boolean;
+  } | null>(null);
 
   recommendedMode = computed(() => {
     const h = this.hardenedTime();
@@ -212,18 +220,31 @@ export class AuthPageComponent {
       );
       this.toast.trigger('Vault Initialized', true);
 
-      // modal will go here later, remember to remove!!!!!
-      console.log('Recovery Key:', recoveryKey);
-
-      if (loginSuccess) {
-        this.router.navigate(['/vault']);
-      } else {
-        setTimeout(() => this.setMode('LOGIN'), 1000);
+      // Show modal regardless of login success
+      if (recoveryKey) {
+        this.recoveryModalData.set({
+          accountId: this.accountId(),
+          recoveryKey,
+          loginSuccess: !!loginSuccess,
+        });
       }
     } catch (e) {
       this.reportError('Initialization Failed');
     } finally {
       this.isWorking.set(false);
+    }
+  }
+
+  onModalClose() {
+    const data = this.recoveryModalData();
+    if (!data) return;
+
+    this.recoveryModalData.set(null);
+
+    if (data.loginSuccess) {
+      this.router.navigate(['/vault']);
+    } else {
+      this.setMode('LOGIN');
     }
   }
 }

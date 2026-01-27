@@ -368,11 +368,12 @@
                       <button
                         *ngIf="isOptimized() && !isBenchmarking()"
                         (click)="onOptimizeKdf()"
-                        class="group/rerun flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-vault-dark transition-all animate-fade-in"
+                        class="group/rerun flex items-center justify-center p-1.5 rounded-lg hover:bg-vault-dark transition-all animate-fade-in flex-shrink-0 border border-transparent hover:border-vault-purple/20"
+                        title="Rerun Benchmark"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          class="w-2.5 h-2.5 text-vault-purple transition-transform group-hover/rerun:rotate-180 duration-500"
+                          class="w-3.5 h-3.5 text-vault-purple-bright transition-transform group-hover/rerun:rotate-180 duration-500"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -384,10 +385,6 @@
                             d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
                           />
                         </svg>
-                        <span
-                          class="text-xs md:text-xs font-bold uppercase tracking-widest text-vault-purple/70 group-hover/rerun:text-vault-purple transition-colors"
-                          >Rerun</span
-                        >
                       </button>
                     </div>
                   </div>
@@ -631,4 +628,13 @@
 
     <div class="flex-1 w-full"></div>
   </div>
+
+  @if (recoveryModalData(); as data) {
+    <app-important-info-modal
+      [accountId]="data.accountId"
+      [recoveryKey]="data.recoveryKey"
+      [loginSuccess]="data.loginSuccess"
+      (close)="onModalClose()"
+    ></app-important-info-modal>
+  }
 </div>
