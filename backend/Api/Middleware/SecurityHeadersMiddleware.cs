@@ -11,7 +11,7 @@ namespace Api.Middleware
 
         public async Task InvokeAsync(HttpContext context, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment() && context.Request.Path.StartsWithSegments("/swagger"))
+            if (env.IsDevelopment()) // && context.Request.Path.StartsWithSegments("/swagger")
             {
                 await _next(context);
                 return;
