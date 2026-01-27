@@ -104,7 +104,7 @@ export class SessionService {
     password: string,
     kdfMode: number,
     schemaVer: number,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const { registerBody } = await this.crypto.buildRegister(
       accountId,
       password,
@@ -112,7 +112,16 @@ export class SessionService {
       schemaVer,
     );
     await firstValueFrom(this.authApi.register(registerBody));
-    await this.login(accountId, password);
+    await this.persistence.saveAccountId(accountId);
+
+    try {
+      // throw new Error('Simulated Login Failure');
+      await this.login(accountId, password);
+      return true;
+    } catch (e) {
+      console.warn('Auto-login failed', e);
+      return false;
+    }
   }
 
   async unlock(password: string): Promise<void> {

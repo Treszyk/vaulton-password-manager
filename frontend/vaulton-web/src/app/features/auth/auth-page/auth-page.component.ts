@@ -204,9 +204,19 @@ export class AuthPageComponent {
     this.password.set('');
 
     try {
-      await this.session.register(this.accountId(), pwd, this.kdfMode(), this.cryptoSchemaVer());
+      const loginSuccess = await this.session.register(
+        this.accountId(),
+        pwd,
+        this.kdfMode(),
+        this.cryptoSchemaVer(),
+      );
       this.toast.trigger('Vault Initialized', true);
-      setTimeout(() => this.setMode('LOGIN'), 1000);
+
+      if (loginSuccess) {
+        this.router.navigate(['/vault']);
+      } else {
+        setTimeout(() => this.setMode('LOGIN'), 1000);
+      }
     } catch (e) {
       this.reportError('Initialization Failed');
     } finally {
