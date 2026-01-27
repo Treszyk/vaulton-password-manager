@@ -9,6 +9,6 @@ public sealed record RegisterCommand(
 	byte[] S_Pwd,
 	KdfMode KdfMode,
 	EncryptedValue MkWrapPwd,
-	EncryptedValue? MkWrapRk,
+	EncryptedValue MkWrapRk,
 	int CryptoSchemaVer
 );

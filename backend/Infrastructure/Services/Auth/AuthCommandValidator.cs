@@ -18,7 +18,7 @@ namespace Infrastructure.Services.Auth
 			if (!CryptoValidators.IsValidEncryptedValue(cmd.MkWrapPwd, CryptoSizes.MkLen))
 				return RegisterError.InvalidCryptoBlob;
 
-			if (cmd.MkWrapRk is not null && !CryptoValidators.IsValidEncryptedValue(cmd.MkWrapRk, CryptoSizes.MkLen))
+			if (!CryptoValidators.IsValidEncryptedValue(cmd.MkWrapRk, CryptoSizes.MkLen))
 				return RegisterError.InvalidCryptoBlob;
 
 			if (cmd.KdfMode is not KdfMode.Default and not KdfMode.Strong)

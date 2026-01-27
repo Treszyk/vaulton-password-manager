@@ -22,7 +22,7 @@ public class User
 
 	// Master key wraps
 	public required EncryptedValue MkWrapPwd { get; set; }
-	public EncryptedValue? MkWrapRk { get; set; }
+	public required EncryptedValue MkWrapRk { get; set; }
 
 	// Crypto schema version (always 1 in this prototype)
 	public int CryptoSchemaVer { get; set; }

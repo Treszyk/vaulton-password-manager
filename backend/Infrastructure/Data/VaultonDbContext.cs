@@ -83,27 +83,26 @@ public class VaultonDbContext(DbContextOptions<VaultonDbContext> options) : DbCo
 				.IsRequired();
 		});
 
-		// MK wrap with recovery key (optional for now)
 		b.OwnsOne(u => u.MkWrapRk, w =>
 		{
 			w.Property(x => x.Nonce)
 				.HasColumnName("MkWrapRk_Nonce")
 				.HasMaxLength(CryptoSizes.GcmNonceLen)
-				.IsRequired(false);
+				.IsRequired();
 
 			w.Property(x => x.Tag)
 				.HasColumnName("MkWrapRk_Tag")
 				.HasMaxLength(CryptoSizes.GcmTagLen)
-				.IsRequired(false);
+				.IsRequired();
 
 			w.Property(x => x.CipherText)
 				.HasColumnName("MkWrapRk_CipherText")
 				.HasMaxLength(CryptoSizes.MkLen)
-				.IsRequired(false);
+				.IsRequired();
 		});
 
 		b.Navigation(u => u.MkWrapPwd).IsRequired();
-		b.Navigation(u => u.MkWrapRk).IsRequired(false);
+		b.Navigation(u => u.MkWrapRk).IsRequired();
 	}
 
 	private static void ConfigureRefreshTokens(ModelBuilder modelBuilder)
