@@ -2,11 +2,12 @@ using Core.Crypto;
 
 namespace Application.Services.Auth.Commands;
 
-public sealed record ChangePasswordCommand(
+public sealed record RecoverCommand(
 	Guid AccountId,
-	byte[] AdminVerifier,
+	byte[] RkVerifier,
 	byte[] NewVerifier,
 	byte[] NewAdminVerifier,
+	byte[] NewRkVerifier,
 	byte[] NewS_Pwd,
 	KdfMode NewKdfMode,
 	EncryptedValue NewMkWrapPwd,

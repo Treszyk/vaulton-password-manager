@@ -1,15 +1,19 @@
 using Api.DTOs.Crypto;
-using Core.Crypto;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Core.Crypto;
 
 namespace Api.DTOs.Auth;
 
-public sealed record ChangePasswordRequest(
+public sealed record RecoverRequest(
+	[param: Required]
+	[property: JsonPropertyName("AccountId")]
+	Guid AccountId,
+
 	[param: Required]
 	[param: Length(CryptoSizes.VerifierLen, CryptoSizes.VerifierLen)]
-	[property: JsonPropertyName("AdminVerifier")]
-	byte[] AdminVerifier,
+	[property: JsonPropertyName("RkVerifier")]
+	byte[] RkVerifier,
 
 	[param: Required]
 	[param: Length(CryptoSizes.VerifierLen, CryptoSizes.VerifierLen)]
@@ -22,12 +26,16 @@ public sealed record ChangePasswordRequest(
 	byte[] NewAdminVerifier,
 
 	[param: Required]
+	[param: Length(CryptoSizes.VerifierLen, CryptoSizes.VerifierLen)]
+	[property: JsonPropertyName("NewRkVerifier")]
+	byte[] NewRkVerifier,
+
+	[param: Required]
 	[param: Length(CryptoSizes.SaltLen, CryptoSizes.SaltLen)]
 	[property: JsonPropertyName("NewS_Pwd")]
 	byte[] NewS_Pwd,
 
 	[param: Required]
-	[param: Range(1, 2)]
 	[property: JsonPropertyName("NewKdfMode")]
 	int NewKdfMode,
 
@@ -40,7 +48,6 @@ public sealed record ChangePasswordRequest(
 	EncryptedValueDto NewMkWrapRk,
 
 	[param: Required]
-	[param: Range(1, 1)]
 	[property: JsonPropertyName("CryptoSchemaVer")]
 	int CryptoSchemaVer
 );

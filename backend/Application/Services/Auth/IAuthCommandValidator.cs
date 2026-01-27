@@ -9,4 +9,5 @@ public interface IAuthCommandValidator
 	LoginError? ValidateLogin(LoginCommand cmd);
 	WrapsError? ValidateWraps(WrapsCommand cmd);
 	ChangePasswordError? ValidateChangePassword(ChangePasswordCommand cmd);
+	RecoverError? ValidateRecover(RecoverCommand cmd);
 }

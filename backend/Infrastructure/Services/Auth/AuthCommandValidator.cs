@@ -12,24 +12,11 @@ namespace Infrastructure.Services.Auth
 			if (cmd.CryptoSchemaVer != 1)
 				return RegisterError.UnsupportedCryptoSchema;
 
-			if (cmd.Verifier.Length != CryptoSizes.VerifierLen || 
-				cmd.AdminVerifier.Length != CryptoSizes.VerifierLen ||
-				cmd.RkVerifier.Length != CryptoSizes.VerifierLen ||
-				cmd.S_Pwd.Length != CryptoSizes.SaltLen)
-			{
-				return RegisterError.InvalidCryptoBlob;
-			}
+			var ok = IsValidCryptoSet(
+				cmd.Verifier, cmd.AdminVerifier, cmd.RkVerifier,
+				cmd.S_Pwd, cmd.KdfMode, cmd.MkWrapPwd, cmd.MkWrapRk);
 
-			if (!CryptoValidators.IsValidEncryptedValue(cmd.MkWrapPwd, CryptoSizes.MkLen))
-				return RegisterError.InvalidCryptoBlob;
-
-			if (!CryptoValidators.IsValidEncryptedValue(cmd.MkWrapRk, CryptoSizes.MkLen))
-				return RegisterError.InvalidCryptoBlob;
-
-			if (cmd.KdfMode is not KdfMode.Default and not KdfMode.Strong)
-				return RegisterError.InvalidKdfMode;
-
-			return null;
+			return ok ? null : RegisterError.InvalidCryptoBlob;
 		}
 
 		public LoginError? ValidateLogin(LoginCommand cmd)
@@ -53,24 +40,58 @@ namespace Infrastructure.Services.Auth
 			if (cmd.CryptoSchemaVer != 1)
 				return ChangePasswordError.UnsupportedCryptoSchema;
 
-			if (cmd.AdminVerifier.Length != CryptoSizes.VerifierLen ||
-				cmd.NewVerifier.Length != CryptoSizes.VerifierLen ||
-				cmd.NewAdminVerifier.Length != CryptoSizes.VerifierLen ||
-				cmd.NewS_Pwd.Length != CryptoSizes.SaltLen)
-			{
+			if (cmd.AdminVerifier.Length != CryptoSizes.VerifierLen)
 				return ChangePasswordError.InvalidCryptoBlob;
+
+			var ok = IsValidCryptoSet(
+				cmd.NewVerifier, cmd.NewAdminVerifier, null,
+				cmd.NewS_Pwd, cmd.NewKdfMode, cmd.NewMkWrapPwd, cmd.NewMkWrapRk);
+
+			return ok ? null : ChangePasswordError.InvalidCryptoBlob;
+		}
+
+		public RecoverError? ValidateRecover(RecoverCommand cmd)
+		{
+			if (cmd.CryptoSchemaVer != 1)
+				return RecoverError.UnsupportedCryptoSchema;
+
+			if (cmd.RkVerifier.Length != CryptoSizes.VerifierLen)
+				return RecoverError.InvalidCryptoBlob;
+
+			var ok = IsValidCryptoSet(
+				cmd.NewVerifier, cmd.NewAdminVerifier, cmd.NewRkVerifier,
+				cmd.NewS_Pwd, cmd.NewKdfMode, cmd.NewMkWrapPwd, cmd.NewMkWrapRk);
+
+			return ok ? null : RecoverError.InvalidCryptoBlob;
+		}
+
+		private static bool IsValidCryptoSet(
+			byte[] verifier,
+			byte[] adminVerifier,
+			byte[]? rkVerifier,
+			byte[] sPwd,
+			KdfMode kdfMode,
+			EncryptedValue mkWrapPwd,
+			EncryptedValue mkWrapRk)
+		{
+			if (verifier.Length != CryptoSizes.VerifierLen ||
+				adminVerifier.Length != CryptoSizes.VerifierLen ||
+				(rkVerifier != null && rkVerifier.Length != CryptoSizes.VerifierLen) ||
+				sPwd.Length != CryptoSizes.SaltLen)
+			{
+				return false;
 			}
 
-			if (!CryptoValidators.IsValidEncryptedValue(cmd.NewMkWrapPwd, CryptoSizes.MkLen))
-				return ChangePasswordError.InvalidCryptoBlob;
+			if (!CryptoValidators.IsValidEncryptedValue(mkWrapPwd, CryptoSizes.MkLen))
+				return false;
 
-			if (cmd.NewMkWrapRk is not null && !CryptoValidators.IsValidEncryptedValue(cmd.NewMkWrapRk, CryptoSizes.MkLen))
-				return ChangePasswordError.InvalidCryptoBlob;
+			if (!CryptoValidators.IsValidEncryptedValue(mkWrapRk, CryptoSizes.MkLen))
+				return false;
 
-			if (cmd.NewKdfMode is not KdfMode.Default and not KdfMode.Strong)
-				return ChangePasswordError.InvalidKdfMode;
+			if (kdfMode is not KdfMode.Default and not KdfMode.Strong)
+				return false;
 
-			return null;
+			return true;
 		}
 	}
 }

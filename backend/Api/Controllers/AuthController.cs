@@ -110,6 +110,58 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		));
 	}
 
+	[HttpPost("recovery-wraps")]
+	[EnableRateLimiting("AuthPolicy")]
+	public async Task<ActionResult<WrapsResponse>> GetRecoveryWraps([FromBody] RecoveryWrapsRequest request)
+	{
+		var result = await _auth.GetRecoveryWrapsAsync(request.AccountId);
+
+		if (!result.Success)
+		{
+			return Unauthorized();
+		}
+
+		return Ok(new WrapsResponse(
+			new EncryptedValueDto(result.MkWrapPwd!.Nonce, result.MkWrapPwd.CipherText, result.MkWrapPwd.Tag),
+			new EncryptedValueDto(result.MkWrapRk!.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag)
+		));
+	}
+
+	[HttpPost("recover")]
+	[EnableRateLimiting("AuthPolicy")]
+	public async Task<IActionResult> Recover([FromBody] RecoverRequest request)
+	{
+		var cmd = new RecoverCommand(
+			request.AccountId,
+			request.RkVerifier,
+			request.NewVerifier,
+			request.NewAdminVerifier,
+			request.NewRkVerifier,
+			request.NewS_Pwd,
+			(KdfMode)request.NewKdfMode,
+			request.NewMkWrapPwd.ToDomain(),
+			request.NewMkWrapRk.ToDomain(),
+			request.CryptoSchemaVer
+		);
+
+		var result = await _auth.RecoverAsync(cmd);
+
+		if (!result.Success)
+		{
+			return result.Error switch
+			{
+				RecoverError.AccountNotFound => Unauthorized(),
+				RecoverError.InvalidRkVerifier => Unauthorized(),
+				RecoverError.InvalidCryptoBlob => BadRequest(new { message = "Invalid crypto blob sizes." }),
+				RecoverError.InvalidKdfMode => BadRequest(new { message = "Invalid KDF mode." }),
+				RecoverError.UnsupportedCryptoSchema => BadRequest(new { message = "Unsupported crypto schema version." }),
+				_ => Unauthorized()
+			};
+		}
+
+		return NoContent();
+	}
+
 	[Authorize]
 	[HttpPost("wraps")]
 	public async Task<ActionResult<WrapsResponse>> GetWraps([FromBody] WrapsRequest request)
@@ -149,7 +201,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 			request.NewS_Pwd,
 			(KdfMode)request.NewKdfMode,
 			request.NewMkWrapPwd.ToDomain(),
-			request.NewMkWrapRk?.ToDomain(),
+			request.NewMkWrapRk.ToDomain(),
 			request.CryptoSchemaVer
 		);
 

@@ -38,8 +38,6 @@ namespace Infrastructure.Services.Auth
 				return RegisterResult.Fail(validationError.Value);
 
 			var exists = await db.Users.AnyAsync(u => u.Id == cmd.AccountId);
-			if (exists)
-				return RegisterResult.Fail(RegisterError.AccountExists);
 
 			var sVerifier = new byte[CryptoSizes.SaltLen];
 			var sAdminVerifier = new byte[CryptoSizes.SaltLen];
@@ -55,6 +53,9 @@ namespace Infrastructure.Services.Auth
 
 			try
 			{
+				if (exists)
+					return RegisterResult.Fail(RegisterError.AccountExists);
+
 				var user = CreateUserFromRegisterCommand(
 					cmd, 
 					sVerifier, storedVerifier, 
@@ -328,6 +329,95 @@ namespace Infrastructure.Services.Auth
 				CryptographicOperations.ZeroMemory(cmd.AdminVerifier);
 				CryptographicOperations.ZeroMemory(cmd.NewVerifier);
 				CryptographicOperations.ZeroMemory(cmd.NewAdminVerifier);
+			}
+		}
+
+		public async Task<WrapsResult> GetRecoveryWrapsAsync(Guid accountId)
+		{
+			var user = await db.Users.SingleOrDefaultAsync(u => u.Id == accountId);
+			if (user is null)
+			{
+				return WrapsResult.Fail(WrapsError.AccountNotFound);
+			}
+
+			return WrapsResult.Ok(user.MkWrapPwd, user.MkWrapRk);
+		}
+
+		public async Task<RecoverResult> RecoverAsync(RecoverCommand cmd)
+		{
+			var validationError = validator.ValidateRecover(cmd);
+			if (validationError is not null)
+				return RecoverResult.Fail(validationError.Value);
+
+			try
+			{
+				var now = DateTime.UtcNow;
+				var user = await db.Users.SingleOrDefaultAsync(u => u.Id == cmd.AccountId);
+
+				var verificationSalt = user?.S_Rk ?? new byte[CryptoSizes.SaltLen];
+				var expectedVerifier = user?.RkVerifier ?? new byte[CryptoSizes.VerifierLen];
+
+				var computed = cryptoHelpers.ComputeStoredVerifier(cmd.RkVerifier, verificationSalt);
+				var proofValid = user != null && CryptographicOperations.FixedTimeEquals(expectedVerifier, computed);
+				
+				CryptographicOperations.ZeroMemory(computed);
+
+				if (user != null && lockoutPolicy.IsLockedOut(user, now))
+				{			
+					proofValid = false;
+				}
+
+				// always rotate credentials to equalize timing
+				var sVerifier = new byte[CryptoSizes.SaltLen];
+				var sAdminVerifier = new byte[CryptoSizes.SaltLen];
+				var sRk = new byte[CryptoSizes.SaltLen];
+
+				RandomNumberGenerator.Fill(sVerifier);
+				RandomNumberGenerator.Fill(sAdminVerifier);
+				RandomNumberGenerator.Fill(sRk);
+
+				var storedVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.NewVerifier, sVerifier);
+				var storedAdminVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.NewAdminVerifier, sAdminVerifier);
+				var storedRkVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.NewRkVerifier, sRk);
+
+				if (!proofValid)
+				{
+					if (user != null)
+					{
+						lockoutPolicy.RegisterFailedLogin(user, now);
+						await db.SaveChangesAsync();
+						return RecoverResult.Fail(RecoverError.InvalidRkVerifier);
+					}
+
+					return RecoverResult.Fail(RecoverError.AccountNotFound);
+				}
+
+				lockoutPolicy.RegisterSuccessfulLogin(user!, now);
+
+				user!.Verifier = storedVerifier;
+				user.S_Verifier = sVerifier;
+				user.AdminVerifier = storedAdminVerifier;
+				user.S_AdminVerifier = sAdminVerifier;
+				user.RkVerifier = storedRkVerifier;
+				user.S_Rk = sRk;
+
+				user.S_Pwd = cmd.NewS_Pwd;
+				user.KdfMode = cmd.NewKdfMode;
+				user.MkWrapPwd = cmd.NewMkWrapPwd;
+				user.MkWrapRk = cmd.NewMkWrapRk;
+				user.CryptoSchemaVer = cmd.CryptoSchemaVer;
+				user.UpdatedAt = DateTime.UtcNow;
+
+				await db.SaveChangesAsync();
+
+				return RecoverResult.Ok();
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(cmd.RkVerifier);
+				CryptographicOperations.ZeroMemory(cmd.NewVerifier);
+				CryptographicOperations.ZeroMemory(cmd.NewAdminVerifier);
+				CryptographicOperations.ZeroMemory(cmd.NewRkVerifier);
 			}
 		}
 
