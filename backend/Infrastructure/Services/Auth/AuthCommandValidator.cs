@@ -12,8 +12,13 @@ namespace Infrastructure.Services.Auth
 			if (cmd.CryptoSchemaVer != 1)
 				return RegisterError.UnsupportedCryptoSchema;
 
-			if (cmd.Verifier.Length != CryptoSizes.VerifierLen || cmd.S_Pwd.Length != CryptoSizes.SaltLen)
+			if (cmd.Verifier.Length != CryptoSizes.VerifierLen || 
+				cmd.AdminVerifier.Length != CryptoSizes.VerifierLen ||
+				cmd.RkVerifier.Length != CryptoSizes.VerifierLen ||
+				cmd.S_Pwd.Length != CryptoSizes.SaltLen)
+			{
 				return RegisterError.InvalidCryptoBlob;
+			}
 
 			if (!CryptoValidators.IsValidEncryptedValue(cmd.MkWrapPwd, CryptoSizes.MkLen))
 				return RegisterError.InvalidCryptoBlob;

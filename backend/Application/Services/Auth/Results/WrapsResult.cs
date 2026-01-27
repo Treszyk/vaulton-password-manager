@@ -18,6 +18,6 @@ public sealed class WrapsResult
 		MkWrapRk = mkWrapRk;
 	}
 
-	public static WrapsResult Ok(EncryptedValue mkWrapPwd, EncryptedValue? mkWrapRk) => new(true, null, mkWrapPwd, mkWrapRk);
+	public static WrapsResult Ok(EncryptedValue mkWrapPwd, EncryptedValue mkWrapRk) => new(true, null, mkWrapPwd, mkWrapRk);
 	public static WrapsResult Fail(WrapsError error) => new(false, error, null, null);
 }

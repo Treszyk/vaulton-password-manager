@@ -24,6 +24,10 @@ public class User
 	public required EncryptedValue MkWrapPwd { get; set; }
 	public required EncryptedValue MkWrapRk { get; set; }
 
+	// Recovery
+	public required byte[] RkVerifier { get; set; }
+	public required byte[] S_Rk { get; set; }
+
 	// Crypto schema version (always 1 in this prototype)
 	public int CryptoSchemaVer { get; set; }
 

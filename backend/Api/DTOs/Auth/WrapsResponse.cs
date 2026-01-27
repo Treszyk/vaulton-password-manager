@@ -5,5 +5,8 @@ namespace Api.DTOs.Auth;
 
 public record WrapsResponse(
 	[property: JsonPropertyName("MkWrapPwd")]
-	EncryptedValueDto MkWrapPwd
+	EncryptedValueDto MkWrapPwd,
+
+	[property: JsonPropertyName("MkWrapRk")]
+	EncryptedValueDto MkWrapRk
 );

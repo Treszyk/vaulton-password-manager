@@ -23,6 +23,11 @@ public sealed record RegisterRequest(
 	byte[] AdminVerifier,
 
 	[param: Required]
+	[param: Length(CryptoSizes.VerifierLen, CryptoSizes.VerifierLen)]
+	[property: JsonPropertyName("RkVerifier")]
+	byte[] RkVerifier,
+
+	[param: Required]
 	[param: Length(CryptoSizes.SaltLen, CryptoSizes.SaltLen)]
 	[property: JsonPropertyName("S_Pwd")]
 	byte[] S_Pwd,
@@ -36,8 +41,9 @@ public sealed record RegisterRequest(
 	[property: JsonPropertyName("MKWrapPwd")]
 	EncryptedValueDto MkWrapPwd,
 
+	[param: Required]
 	[property: JsonPropertyName("MKWrapRk")]
-	EncryptedValueDto? MkWrapRk,
+	EncryptedValueDto MkWrapRk,
 
 	[param: Required]
 	[param: Range(1, 1)]

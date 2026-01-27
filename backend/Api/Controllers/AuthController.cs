@@ -40,13 +40,13 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request)
 	{
 		var mkWrapPwd = request.MkWrapPwd.ToDomain();
-
-		EncryptedValue? mkWrapRk = request.MkWrapRk?.ToDomain();
+		var mkWrapRk = request.MkWrapRk.ToDomain();
 
 		var cmd = new RegisterCommand(
 			request.AccountId,
 			request.Verifier,
 			request.AdminVerifier,
+			request.RkVerifier,
 			request.S_Pwd,
 			(KdfMode)request.KdfMode,
 			mkWrapPwd,
@@ -105,10 +105,8 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 
 		return Ok(new LoginResponse(
 			result.Token!,
-			new EncryptedValueDto(result.MkWrapPwd!.Nonce, result.MkWrapPwd.CipherText, result.MkWrapPwd.Tag),
-			result.MkWrapRk is not null 
-				? new EncryptedValueDto(result.MkWrapRk.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag) 
-				: null
+			result.MkWrapPwd is not null ? new EncryptedValueDto(result.MkWrapPwd.Nonce, result.MkWrapPwd.CipherText, result.MkWrapPwd.Tag) : null,
+			result.MkWrapRk is not null ? new EncryptedValueDto(result.MkWrapRk.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag) : null
 		));
 	}
 
@@ -130,7 +128,10 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 			return Unauthorized();
 		}
 
-		return Ok(new WrapsResponse(new EncryptedValueDto(result.MkWrapPwd!.Nonce, result.MkWrapPwd.CipherText, result.MkWrapPwd.Tag)));
+		return Ok(new WrapsResponse(
+			new EncryptedValueDto(result.MkWrapPwd!.Nonce, result.MkWrapPwd.CipherText, result.MkWrapPwd.Tag),
+			new EncryptedValueDto(result.MkWrapRk!.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag)
+		));
 	}
 
 	[Authorize]

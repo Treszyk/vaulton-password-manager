@@ -43,15 +43,23 @@ namespace Infrastructure.Services.Auth
 
 			var sVerifier = new byte[CryptoSizes.SaltLen];
 			var sAdminVerifier = new byte[CryptoSizes.SaltLen];
+			var sRk = new byte[CryptoSizes.SaltLen];
+
 			RandomNumberGenerator.Fill(sVerifier);
 			RandomNumberGenerator.Fill(sAdminVerifier);
+			RandomNumberGenerator.Fill(sRk);
 
 			var storedVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.Verifier, sVerifier);
 			var storedAdminVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.AdminVerifier, sAdminVerifier);
+			var storedRkVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.RkVerifier, sRk);
 
 			try
 			{
-				var user = CreateUserFromRegisterCommand(cmd, sVerifier, storedVerifier, sAdminVerifier, storedAdminVerifier);
+				var user = CreateUserFromRegisterCommand(
+					cmd, 
+					sVerifier, storedVerifier, 
+					sAdminVerifier, storedAdminVerifier,
+					sRk, storedRkVerifier);
 
 				db.Users.Add(user);
 				await db.SaveChangesAsync();
@@ -62,6 +70,7 @@ namespace Infrastructure.Services.Auth
 			{
 				CryptographicOperations.ZeroMemory(cmd.Verifier);
 				CryptographicOperations.ZeroMemory(cmd.AdminVerifier);
+				CryptographicOperations.ZeroMemory(cmd.RkVerifier);
 			}
 		}
 		public async Task<LoginResult> LoginAsync(LoginCommand cmd)
@@ -328,7 +337,9 @@ namespace Infrastructure.Services.Auth
 			byte[] sVerifier, 
 			byte[] verifier,
 			byte[] sAdminVerifier,
-			byte[] adminVerifier)
+			byte[] adminVerifier,
+			byte[] sRk,
+			byte[] rkVerifier)
 		{
 			var now = DateTime.UtcNow;
 
@@ -339,6 +350,8 @@ namespace Infrastructure.Services.Auth
 				S_Verifier = sVerifier,
 				AdminVerifier = adminVerifier,
 				S_AdminVerifier = sAdminVerifier,
+				RkVerifier = rkVerifier,
+				S_Rk = sRk,
 				S_Pwd = cmd.S_Pwd,
 				KdfMode = cmd.KdfMode,
 
