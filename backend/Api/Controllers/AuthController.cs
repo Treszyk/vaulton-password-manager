@@ -111,6 +111,26 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		));
 	}
 
+	[HttpPost("ext/login")]
+	[EnableRateLimiting("AuthPolicy")]
+	public async Task<ActionResult<ExtLoginResponse>> LoginExt([FromBody] LoginRequest request)
+	{
+		var cmd = new LoginCommand(request.AccountId, request.Verifier);
+		var result = await _auth.LoginAsync(cmd);
+
+		if (!result.Success)
+		{
+			return Unauthorized(new { message = "Invalid credentials." });
+		}
+
+		return Ok(new ExtLoginResponse(
+			result.Token!,
+			result.RefreshToken!,
+			result.MkWrapPwd is not null ? new EncryptedValueDto(result.MkWrapPwd.Nonce, result.MkWrapPwd.CipherText, result.MkWrapPwd.Tag) : null,
+			result.MkWrapRk is not null ? new EncryptedValueDto(result.MkWrapRk.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag) : null
+		));
+	}
+
 	[HttpPost("recovery-wraps")]
 	[EnableRateLimiting("AuthPolicy")]
 	public async Task<ActionResult<WrapsResponse>> GetRecoveryWraps([FromBody] RecoveryWrapsRequest request)
@@ -248,6 +268,18 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		return Ok(new LoginResponse(result.AccessToken!, null, null));
 	}
 
+	[HttpPost("ext/refresh")]
+	[EnableRateLimiting("AuthPolicy")]
+	public async Task<ActionResult<ExtRefreshResponse>> RefreshExt([FromBody] ExtRefreshRequest request)
+	{
+		var result = await _auth.RefreshAsync(new RefreshCommand(request.RefreshToken));
+
+		if (!result.Success)
+			return Unauthorized(new { message = "Invalid refresh token." });
+
+		return Ok(new ExtRefreshResponse(result.AccessToken!, result.RefreshToken!));
+	}
+
 	[HttpPost("logout")]
 	public async Task<IActionResult> Logout()
 	{
@@ -257,6 +289,13 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		}
 
 		Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/" });
+		return NoContent();
+	}
+
+	[HttpPost("ext/logout")]
+	public async Task<IActionResult> LogoutExt([FromBody] ExtRefreshRequest request)
+	{
+		await _auth.LogoutAsync(request.RefreshToken);
 		return NoContent();
 	}
 
@@ -270,6 +309,17 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		await _auth.LogoutAllAsync(accountId);
 
 		Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/" });
+		return NoContent();
+	}
+
+	[Authorize]
+	[HttpPost("ext/logout-all")]
+	public async Task<IActionResult> LogoutAllExt()
+	{
+		if (!User.TryGetAccountId(out var accountId))
+			return Unauthorized();
+
+		await _auth.LogoutAllAsync(accountId);
 		return NoContent();
 	}
 
