@@ -31,13 +31,14 @@ public sealed record ChangePasswordRequest(
 	[property: JsonPropertyName("NewKdfMode")]
 	int NewKdfMode,
 
-	[param: Required]
 	[property: JsonPropertyName("NewMkWrapPwd")]
 	EncryptedValueDto NewMkWrapPwd,
 
-	[param: Required]
 	[property: JsonPropertyName("NewMkWrapRk")]
-	EncryptedValueDto NewMkWrapRk,
+	EncryptedValueDto? NewMkWrapRk,
+
+	[property: JsonPropertyName("NewRkVerifier")]
+	byte[]? NewRkVerifier,
 
 	[param: Required]
 	[param: Range(1, 1)]

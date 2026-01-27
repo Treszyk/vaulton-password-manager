@@ -218,4 +218,35 @@ export class SessionService {
       zeroize(salt);
     }
   }
+
+  async recover(accountId: string, recoveryKey: string, newPassword: string): Promise<string> {
+    const wraps = await firstValueFrom(this.authApi.getRecoveryWraps(accountId));
+    const recoveryRes = await this.crypto.recover(
+      recoveryKey,
+      newPassword,
+      accountId,
+      wraps.MkWrapRk,
+      wraps.CryptoSchemaVer,
+      wraps.KdfMode,
+    );
+
+    await firstValueFrom(
+      this.authApi.recover({
+        AccountId: accountId,
+        RkVerifier: recoveryRes.rkVerifier,
+        NewVerifier: recoveryRes.newVerifier,
+        NewAdminVerifier: recoveryRes.newAdminVerifier,
+        NewRkVerifier: recoveryRes.newRkVerifier,
+        NewS_Pwd: recoveryRes.newS_Pwd,
+        NewKdfMode: recoveryRes.newKdfMode,
+        NewMkWrapPwd: recoveryRes.newMkWrapPwd,
+        NewMkWrapRk: recoveryRes.newMkWrapRk,
+        CryptoSchemaVer: recoveryRes.cryptoSchemaVer,
+      }),
+    );
+
+    await this.persistence.saveAccountId(accountId);
+    this.toast.queue('Account recovered successfully. Please log in with your new password.');
+    return recoveryRes.newRecoveryKey;
+  }
 }

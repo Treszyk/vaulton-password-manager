@@ -10,6 +10,7 @@ public sealed record ChangePasswordCommand(
 	byte[] NewS_Pwd,
 	KdfMode NewKdfMode,
 	EncryptedValue NewMkWrapPwd,
-	EncryptedValue NewMkWrapRk,
+	EncryptedValue? NewMkWrapRk,
+	byte[]? NewRkVerifier,
 	int CryptoSchemaVer
 );

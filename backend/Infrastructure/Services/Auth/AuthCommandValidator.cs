@@ -14,7 +14,8 @@ namespace Infrastructure.Services.Auth
 
 			var ok = IsValidCryptoSet(
 				cmd.Verifier, cmd.AdminVerifier, cmd.RkVerifier,
-				cmd.S_Pwd, cmd.KdfMode, cmd.MkWrapPwd, cmd.MkWrapRk);
+				cmd.S_Pwd, cmd.KdfMode, cmd.MkWrapPwd, cmd.MkWrapRk,
+				rkRequired: true);
 
 			return ok ? null : RegisterError.InvalidCryptoBlob;
 		}
@@ -44,8 +45,9 @@ namespace Infrastructure.Services.Auth
 				return ChangePasswordError.InvalidCryptoBlob;
 
 			var ok = IsValidCryptoSet(
-				cmd.NewVerifier, cmd.NewAdminVerifier, null,
-				cmd.NewS_Pwd, cmd.NewKdfMode, cmd.NewMkWrapPwd, cmd.NewMkWrapRk);
+				cmd.NewVerifier, cmd.NewAdminVerifier, cmd.NewRkVerifier,
+				cmd.NewS_Pwd, cmd.NewKdfMode, cmd.NewMkWrapPwd, cmd.NewMkWrapRk,
+				rkRequired: false);
 
 			return ok ? null : ChangePasswordError.InvalidCryptoBlob;
 		}
@@ -60,7 +62,8 @@ namespace Infrastructure.Services.Auth
 
 			var ok = IsValidCryptoSet(
 				cmd.NewVerifier, cmd.NewAdminVerifier, cmd.NewRkVerifier,
-				cmd.NewS_Pwd, cmd.NewKdfMode, cmd.NewMkWrapPwd, cmd.NewMkWrapRk);
+				cmd.NewS_Pwd, cmd.NewKdfMode, cmd.NewMkWrapPwd, cmd.NewMkWrapRk,
+				rkRequired: true);
 
 			return ok ? null : RecoverError.InvalidCryptoBlob;
 		}
@@ -72,20 +75,34 @@ namespace Infrastructure.Services.Auth
 			byte[] sPwd,
 			KdfMode kdfMode,
 			EncryptedValue mkWrapPwd,
-			EncryptedValue mkWrapRk)
+			EncryptedValue? mkWrapRk,
+			bool rkRequired)
 		{
 			if (verifier.Length != CryptoSizes.VerifierLen ||
 				adminVerifier.Length != CryptoSizes.VerifierLen ||
-				(rkVerifier != null && rkVerifier.Length != CryptoSizes.VerifierLen) ||
 				sPwd.Length != CryptoSizes.SaltLen)
 			{
 				return false;
 			}
 
-			if (!CryptoValidators.IsValidEncryptedValue(mkWrapPwd, CryptoSizes.MkLen))
-				return false;
+			if (rkRequired)
+			{
+				if (rkVerifier == null || rkVerifier.Length != CryptoSizes.VerifierLen)
+					return false;
+				
+				if (mkWrapRk == null || !CryptoValidators.IsValidEncryptedValue(mkWrapRk, CryptoSizes.MkLen))
+					return false;
+			}
+			else
+			{
+				if (rkVerifier != null && rkVerifier.Length != CryptoSizes.VerifierLen)
+					return false;
 
-			if (!CryptoValidators.IsValidEncryptedValue(mkWrapRk, CryptoSizes.MkLen))
+				if (mkWrapRk != null && !CryptoValidators.IsValidEncryptedValue(mkWrapRk, CryptoSizes.MkLen))
+					return false;
+			}
+
+			if (!CryptoValidators.IsValidEncryptedValue(mkWrapPwd, CryptoSizes.MkLen))
 				return false;
 
 			if (kdfMode is not KdfMode.Default and not KdfMode.Strong)

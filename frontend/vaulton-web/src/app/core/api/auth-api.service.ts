@@ -21,6 +21,26 @@ export interface WrapsRequest {
 
 export interface WrapsResponse {
   MkWrapPwd: EncryptedValueDto;
+  MkWrapRk: EncryptedValueDto;
+  KdfMode: number;
+  CryptoSchemaVer: number;
+}
+
+export interface RecoveryWrapsRequest {
+  AccountId: string;
+}
+
+export interface RecoverRequest {
+  AccountId: string;
+  RkVerifier: string;
+  NewVerifier: string;
+  NewAdminVerifier: string;
+  NewRkVerifier: string;
+  NewS_Pwd: string;
+  NewKdfMode: number;
+  NewMkWrapPwd: EncryptedValueDto;
+  NewMkWrapRk: EncryptedValueDto;
+  CryptoSchemaVer: number;
 }
 
 export interface ChangePasswordRequest {
@@ -31,6 +51,7 @@ export interface ChangePasswordRequest {
   NewKdfMode: number;
   NewMkWrapPwd: EncryptedValueDto;
   NewMkWrapRk: EncryptedValueDto | null;
+  NewRkVerifier: string | null;
   CryptoSchemaVer: number;
 }
 
@@ -54,7 +75,7 @@ export class AuthApiService {
           KdfMode: res.KdfMode ?? res.kdfMode,
           CryptoSchemaVer: res.CryptoSchemaVer ?? res.cryptoSchemaVer,
         };
-      })
+      }),
     );
   }
 
@@ -84,5 +105,15 @@ export class AuthApiService {
 
   changePassword(req: ChangePasswordRequest): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/auth/change-password`, req);
+  }
+
+  getRecoveryWraps(accountId: string): Observable<WrapsResponse> {
+    return this.http.post<WrapsResponse>(`${this.baseUrl}/auth/recovery-wraps`, {
+      AccountId: accountId,
+    });
+  }
+
+  recover(req: RecoverRequest): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/auth/recover`, req);
   }
 }

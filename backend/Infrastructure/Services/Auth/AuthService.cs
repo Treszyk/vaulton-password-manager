@@ -249,7 +249,7 @@ namespace Infrastructure.Services.Auth
 				lockoutPolicy.RegisterSuccessfulLogin(user, now);
 				await db.SaveChangesAsync();
 
-				return WrapsResult.Ok(user.MkWrapPwd, user.MkWrapRk);
+				return WrapsResult.Ok(user.MkWrapPwd, user.MkWrapRk, (int)user.KdfMode, user.CryptoSchemaVer);
 			}
 			finally
 			{
@@ -316,7 +316,17 @@ namespace Infrastructure.Services.Auth
 				user.S_Pwd = cmd.NewS_Pwd;
 				user.KdfMode = cmd.NewKdfMode;
 				user.MkWrapPwd = cmd.NewMkWrapPwd;
-				user.MkWrapRk = cmd.NewMkWrapRk;
+				if (cmd.NewMkWrapRk != null && cmd.NewRkVerifier != null)
+				{
+					user.MkWrapRk = cmd.NewMkWrapRk;
+					
+					var sRk = new byte[CryptoSizes.SaltLen];
+					RandomNumberGenerator.Fill(sRk);
+					var storedRkVerifier = cryptoHelpers.ComputeStoredVerifier(cmd.NewRkVerifier, sRk);
+					
+					user.RkVerifier = storedRkVerifier;
+					user.S_Rk = sRk;
+				}
 				user.CryptoSchemaVer = cmd.CryptoSchemaVer;
 				user.UpdatedAt = DateTime.UtcNow;
 
@@ -329,6 +339,10 @@ namespace Infrastructure.Services.Auth
 				CryptographicOperations.ZeroMemory(cmd.AdminVerifier);
 				CryptographicOperations.ZeroMemory(cmd.NewVerifier);
 				CryptographicOperations.ZeroMemory(cmd.NewAdminVerifier);
+				if (cmd.NewRkVerifier != null)
+				{
+					CryptographicOperations.ZeroMemory(cmd.NewRkVerifier);
+				}
 			}
 		}
 
@@ -340,7 +354,7 @@ namespace Infrastructure.Services.Auth
 				return WrapsResult.Fail(WrapsError.AccountNotFound);
 			}
 
-			return WrapsResult.Ok(user.MkWrapPwd, user.MkWrapRk);
+			return WrapsResult.Ok(user.MkWrapPwd, user.MkWrapRk, (int)user.KdfMode, user.CryptoSchemaVer);
 		}
 
 		public async Task<RecoverResult> RecoverAsync(RecoverCommand cmd)

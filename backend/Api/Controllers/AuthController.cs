@@ -24,7 +24,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		Secure = !_env.IsDevelopment(),
 		SameSite = SameSiteMode.Strict,
 		Expires = new DateTimeOffset(expiresUtc),
-		Path = "/" // Works for Swagger (/auth/...) and frontend (/api/auth/...) via proxy/Caddy
+		Path = "/"
 	};
 
 	[HttpPost("pre-register")]
@@ -32,7 +32,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	public async Task<ActionResult<PreRegisterResponse>> PreRegister()
 	{
 		var accountId = await _auth.PreRegisterAsync();
-		return Ok(new PreRegisterResponse(accountId, 1)); // hardcoded V1 CryptoSchemaVer
+		return Ok(new PreRegisterResponse(accountId, 1));
 	}
 
 	[HttpPost("register")]
@@ -78,13 +78,13 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		var cmd = new PreLoginCommand(request.AccountId);
 		var result = await _auth.PreLoginAsync(cmd);
 
-		// we always return Ok to prevent accountId enumeration
 		return Ok(new PreLoginResponse(
 			result.S_Pwd!,
 			(int)result.KdfMode!,
 			result.CryptoSchemaVer!.Value
 		));
 	}
+
 	[HttpPost("login")]
 	[EnableRateLimiting("AuthPolicy")]
 	public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
@@ -123,7 +123,9 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 
 		return Ok(new WrapsResponse(
 			new EncryptedValueDto(result.MkWrapPwd!.Nonce, result.MkWrapPwd.CipherText, result.MkWrapPwd.Tag),
-			new EncryptedValueDto(result.MkWrapRk!.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag)
+			new EncryptedValueDto(result.MkWrapRk!.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag),
+			result.KdfMode,
+			result.CryptoSchemaVer
 		));
 	}
 
@@ -182,7 +184,9 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 
 		return Ok(new WrapsResponse(
 			new EncryptedValueDto(result.MkWrapPwd!.Nonce, result.MkWrapPwd.CipherText, result.MkWrapPwd.Tag),
-			new EncryptedValueDto(result.MkWrapRk!.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag)
+			new EncryptedValueDto(result.MkWrapRk!.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag),
+			result.KdfMode,
+			result.CryptoSchemaVer
 		));
 	}
 
@@ -201,7 +205,8 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 			request.NewS_Pwd,
 			(KdfMode)request.NewKdfMode,
 			request.NewMkWrapPwd.ToDomain(),
-			request.NewMkWrapRk.ToDomain(),
+			request.NewMkWrapRk?.ToDomain(),
+			request.NewRkVerifier,
 			request.CryptoSchemaVer
 		);
 

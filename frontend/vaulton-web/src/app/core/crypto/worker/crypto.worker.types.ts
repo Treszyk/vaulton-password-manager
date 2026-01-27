@@ -10,6 +10,7 @@ export interface RegisterRequest {
   AccountId: string;
   Verifier: string;
   AdminVerifier: string;
+  RkVerifier: string;
   S_Pwd: string;
   KdfMode: number;
   MKWrapPwd: EncryptedValueDto;
@@ -88,6 +89,17 @@ export type WorkerRequest =
         newPasswordBuffer: ArrayBuffer;
         accountId: string;
         currentMkWrapPwd: EncryptedValueDto;
+        schemaVer: number;
+        newKdfMode: number;
+      };
+    }
+  | {
+      type: 'RECOVER';
+      payload: {
+        recoveryKeyB64: string;
+        newPasswordBuffer: ArrayBuffer;
+        accountId: string;
+        mkWrapRk: EncryptedValueDto;
         schemaVer: number;
         newKdfMode: number;
       };

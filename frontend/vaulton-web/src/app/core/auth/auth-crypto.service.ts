@@ -416,6 +416,49 @@ export class AuthCryptoService {
     }
   }
 
+  async recover(
+    recoveryKey: string,
+    newPassword: string,
+    accountId: string,
+    mkWrapRk: EncryptedValueDto,
+    schemaVer: number,
+    newKdfMode: number,
+  ): Promise<{
+    rkVerifier: string;
+    newVerifier: string;
+    newAdminVerifier: string;
+    newRkVerifier: string;
+    newS_Pwd: string;
+    newKdfMode: number;
+    newMkWrapPwd: EncryptedValueDto;
+    newMkWrapRk: EncryptedValueDto;
+    cryptoSchemaVer: number;
+    newRecoveryKey: string;
+  }> {
+    let pwdBytes: Uint8Array | null = new TextEncoder().encode(newPassword);
+    const newPasswordBuffer = pwdBytes.buffer;
+    try {
+      return await this.postToWorker<any>(
+        'RECOVER',
+        {
+          recoveryKeyB64: recoveryKey,
+          newPasswordBuffer,
+          accountId,
+          mkWrapRk,
+          schemaVer,
+          newKdfMode,
+        },
+        [newPasswordBuffer],
+      );
+    } finally {
+      if (pwdBytes) {
+        try {
+          pwdBytes.fill(0);
+        } catch {}
+      }
+    }
+  }
+
   private postToWorker<T>(type: string, payload: any, transfer?: Transferable[]): Promise<T> {
     if (!this.worker) {
       this.initWorker();

@@ -164,6 +164,20 @@ addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRe
         }
         break;
       }
+      case 'RECOVER': {
+        const { newPasswordBuffer } = request.payload;
+        const newPwdBytes = new Uint8Array(newPasswordBuffer);
+        try {
+          const res = await handleRecover({
+            ...request.payload,
+            newPassword: newPwdBytes,
+          });
+          postSuccess(id, res);
+        } finally {
+          zeroize(newPwdBytes);
+        }
+        break;
+      }
       default:
         throw new Error(`Unknown message type: ${(request as any).type}`);
     }
@@ -194,8 +208,8 @@ async function handleRegister({
   schemaVer: number;
 }) {
   const sPwd = crypto.getRandomValues(new Uint8Array(16));
-  let aad = new TextEncoder().encode(`vaulton:mk-wrap-pwd:schema${schemaVer}:${accountId}`);
-  let aadRk = new TextEncoder().encode(`vaulton:mk-wrap-rk:schema${schemaVer}:${accountId}`);
+  const aad = new TextEncoder().encode(`vaulton:mk-wrap-pwd:schema${schemaVer}:${accountId}`);
+  const aadRk = new TextEncoder().encode(`vaulton:mk-wrap-rk:schema${schemaVer}:${accountId}`);
 
   let mkBytes: Uint8Array | null = null;
   let rkBytes: Uint8Array | null = null;
@@ -210,10 +224,12 @@ async function handleRegister({
     const wrapMk = await encryptSplit(kekKey, mkBytes, aad);
 
     rkBytes = crypto.getRandomValues(new Uint8Array(32));
-    const rkKey = await crypto.subtle.importKey('raw', rkBytes as BufferSource, 'HKDF', false, [
+    const rkKey = await crypto.subtle.importKey('raw', rkBytes as any, 'HKDF', false, [
       'deriveKey',
+      'deriveBits',
     ]);
-    const kekRk = await hkdfAesGcm256Key(rkKey, 'vaulton/kek-recovery', ['encrypt']);
+    const vrfRk = await hkdfVerifierB64(rkKey, 'vaulton/rk-vrf');
+    const kekRk = await hkdfAesGcm256Key(rkKey, 'vaulton/rk-kek', ['encrypt']);
     const wrapRk = await encryptSplit(kekRk, mkBytes, aadRk);
 
     const recoveryKeyB64 = bytesToB64(rkBytes);
@@ -248,6 +264,7 @@ async function handleRegister({
       AccountId: accountId,
       Verifier: verifierB64,
       AdminVerifier: adminVerifierB64,
+      RkVerifier: vrfRk,
       S_Pwd: sPwdB64,
       KdfMode: kdfMode,
       MKWrapPwd: mkWrapPwd,
@@ -646,5 +663,98 @@ async function decryptMk(
     zeroize(ct);
     zeroize(tag);
     zeroize(ctTag);
+  }
+}
+
+async function handleRecover({
+  recoveryKeyB64,
+  newPassword,
+  accountId,
+  mkWrapRk,
+  schemaVer,
+  newKdfMode,
+}: {
+  recoveryKeyB64: string;
+  newPassword: Uint8Array;
+  accountId: string;
+  mkWrapRk: EncryptedValueDto;
+  schemaVer: number;
+  newKdfMode: number;
+}) {
+  const rkBytes = b64ToBytes(recoveryKeyB64);
+  const rkBaseKey = await crypto.subtle.importKey('raw', rkBytes as any, 'HKDF', false, [
+    'deriveKey',
+    'deriveBits',
+  ]);
+
+  try {
+    const rkProofB64 = await hkdfVerifierB64(rkBaseKey, 'vaulton/rk-vrf');
+    const rkKek = await hkdfAesGcm256Key(rkBaseKey, 'vaulton/rk-kek');
+
+    const aadRk = new TextEncoder().encode(`vaulton:mk-wrap-rk:schema${schemaVer}:${accountId}`);
+    const mkRaw = await decryptMk(rkKek, mkWrapRk, aadRk);
+
+    try {
+      const sPwd = crypto.getRandomValues(new Uint8Array(16));
+      const aadPwd = new TextEncoder().encode(
+        `vaulton:mk-wrap-pwd:schema${schemaVer}:${accountId}`,
+      );
+      const hkdfBaseKey = await kdfProvider.deriveHkdfBaseKey(newPassword, sPwd, newKdfMode);
+
+      const verifierB64 = await hkdfVerifierB64(hkdfBaseKey, 'vaulton/verifier');
+      const adminVerifierB64 = await hkdfVerifierB64(hkdfBaseKey, 'vaulton/admin');
+      const kekKey = await hkdfAesGcm256Key(hkdfBaseKey, 'vaulton/kek', ['encrypt']);
+      const wrapMkPwd = await encryptSplit(kekKey, mkRaw, aadPwd);
+
+      const newRkBytes = crypto.getRandomValues(new Uint8Array(32));
+      const newRkKey = await crypto.subtle.importKey('raw', newRkBytes as any, 'HKDF', false, [
+        'deriveKey',
+        'deriveBits',
+      ]);
+      const vrfRk = await hkdfVerifierB64(newRkKey, 'vaulton/rk-vrf');
+      const kekRk = await hkdfAesGcm256Key(newRkKey, 'vaulton/rk-kek', ['encrypt']);
+      const wrapMkRk = await encryptSplit(kekRk, mkRaw, aadRk);
+
+      const newRecoveryKeyB64 = bytesToB64(newRkBytes);
+
+      zeroize(newRkBytes);
+
+      try {
+        return {
+          rkVerifier: rkProofB64,
+          newVerifier: verifierB64,
+          newAdminVerifier: adminVerifierB64,
+          newRkVerifier: vrfRk,
+          newS_Pwd: bytesToB64(sPwd),
+          newKdfMode: newKdfMode,
+          newMkWrapPwd: {
+            Nonce: bytesToB64(wrapMkPwd.Nonce),
+            CipherText: bytesToB64(wrapMkPwd.CipherText),
+            Tag: bytesToB64(wrapMkPwd.Tag),
+          },
+          newMkWrapRk: {
+            Nonce: bytesToB64(wrapMkRk.Nonce),
+            CipherText: bytesToB64(wrapMkRk.CipherText),
+            Tag: bytesToB64(wrapMkRk.Tag),
+          },
+          cryptoSchemaVer: schemaVer,
+          newRecoveryKey: newRecoveryKeyB64,
+        };
+      } finally {
+        zeroize(wrapMkPwd.Nonce);
+        zeroize(wrapMkPwd.CipherText);
+        zeroize(wrapMkPwd.Tag);
+        zeroize(wrapMkRk.Nonce);
+        zeroize(wrapMkRk.CipherText);
+        zeroize(wrapMkRk.Tag);
+        zeroize(sPwd);
+        zeroize(aadPwd);
+      }
+    } finally {
+      zeroize(mkRaw);
+      zeroize(aadRk);
+    }
+  } finally {
+    zeroize(rkBytes);
   }
 }

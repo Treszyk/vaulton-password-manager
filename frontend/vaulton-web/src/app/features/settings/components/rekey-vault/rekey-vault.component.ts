@@ -174,6 +174,7 @@ export class RekeyVaultComponent {
           NewKdfMode: this.kdfMode(),
           NewMkWrapPwd: res.newMkWrapPwd,
           NewMkWrapRk: null,
+          NewRkVerifier: null,
           CryptoSchemaVer: bundle.CryptoSchemaVer,
         })
         .toPromise();

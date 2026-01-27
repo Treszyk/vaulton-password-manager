@@ -8,5 +8,11 @@ public record WrapsResponse(
 	EncryptedValueDto MkWrapPwd,
 
 	[property: JsonPropertyName("MkWrapRk")]
-	EncryptedValueDto MkWrapRk
+	EncryptedValueDto MkWrapRk,
+
+	[property: JsonPropertyName("KdfMode")]
+	int KdfMode,
+
+	[property: JsonPropertyName("CryptoSchemaVer")]
+	int CryptoSchemaVer
 );
