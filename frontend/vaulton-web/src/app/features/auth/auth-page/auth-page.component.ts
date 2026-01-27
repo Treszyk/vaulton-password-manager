@@ -12,6 +12,7 @@ import { ToastService } from '../../../shared/ui/toast/toast.service';
 import { StrengthMeterComponent } from '../../../shared/ui/strength-meter/strength-meter.component';
 import { ScrollIndicatorDirective } from '../../../shared/directives/scroll-indicator.directive';
 import { ImportantInfoModal } from '../../../shared/components/important-info-modal/important-info-modal';
+import { RecoverAccountModal } from '../../../shared/components/recover-account-modal/recover-account-modal';
 
 @Component({
   selector: 'app-auth-page',
@@ -23,6 +24,7 @@ import { ImportantInfoModal } from '../../../shared/components/important-info-mo
     StrengthMeterComponent,
     ScrollIndicatorDirective,
     ImportantInfoModal,
+    RecoverAccountModal,
   ],
   host: {
     class: 'w-full h-full',
@@ -58,6 +60,8 @@ export class AuthPageComponent {
     recoveryKey: string;
     loginSuccess: boolean;
   } | null>(null);
+
+  showRecoverModal = signal(false);
 
   recommendedMode = computed(() => {
     const h = this.hardenedTime();
@@ -177,7 +181,7 @@ export class AuthPageComponent {
   }
 
   onForgotPassword() {
-    this.toast.trigger('Recovery not implemented', false);
+    this.showRecoverModal.set(true);
   }
 
   onSubmit() {

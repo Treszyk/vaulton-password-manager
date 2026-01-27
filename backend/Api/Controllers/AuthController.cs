@@ -24,7 +24,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		Secure = !_env.IsDevelopment(),
 		SameSite = SameSiteMode.Strict,
 		Expires = new DateTimeOffset(expiresUtc),
-		Path = "/"
+		Path = "/" // Works for Swagger (/auth/...) and frontend (/api/auth/...) via proxy/Caddy
 	};
 
 	[HttpPost("pre-register")]
@@ -32,7 +32,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	public async Task<ActionResult<PreRegisterResponse>> PreRegister()
 	{
 		var accountId = await _auth.PreRegisterAsync();
-		return Ok(new PreRegisterResponse(accountId, 1));
+		return Ok(new PreRegisterResponse(accountId, 1)); // hardcoded V1 CryptoSchemaVer
 	}
 
 	[HttpPost("register")]
@@ -78,6 +78,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		var cmd = new PreLoginCommand(request.AccountId);
 		var result = await _auth.PreLoginAsync(cmd);
 
+		// we always return Ok to prevent accountId enumeration
 		return Ok(new PreLoginResponse(
 			result.S_Pwd!,
 			(int)result.KdfMode!,

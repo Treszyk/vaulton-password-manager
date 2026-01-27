@@ -351,7 +351,30 @@ namespace Infrastructure.Services.Auth
 			var user = await db.Users.SingleOrDefaultAsync(u => u.Id == accountId);
 			if (user is null)
 			{
-				return WrapsResult.Fail(WrapsError.AccountNotFound);
+				// return random fake data to prevent account enumeration.
+				
+				var fakeMkWrapPwd = new EncryptedValue 
+				{
+					Nonce = new byte[CryptoSizes.GcmNonceLen],
+					CipherText = new byte[CryptoSizes.MkLen],
+					Tag = new byte[CryptoSizes.GcmTagLen]
+				};
+				var fakeMkWrapRk = new EncryptedValue 
+				{
+					Nonce = new byte[CryptoSizes.GcmNonceLen],
+					CipherText = new byte[CryptoSizes.MkLen],
+					Tag = new byte[CryptoSizes.GcmTagLen]
+				};
+				
+				RandomNumberGenerator.Fill(fakeMkWrapPwd.Nonce);
+				RandomNumberGenerator.Fill(fakeMkWrapPwd.CipherText);
+				RandomNumberGenerator.Fill(fakeMkWrapPwd.Tag);
+				
+				RandomNumberGenerator.Fill(fakeMkWrapRk.Nonce);
+				RandomNumberGenerator.Fill(fakeMkWrapRk.CipherText);
+				RandomNumberGenerator.Fill(fakeMkWrapRk.Tag);
+
+				return WrapsResult.Ok(fakeMkWrapPwd, fakeMkWrapRk, (int)KdfMode.Default, 1);
 			}
 
 			return WrapsResult.Ok(user.MkWrapPwd, user.MkWrapRk, (int)user.KdfMode, user.CryptoSchemaVer);

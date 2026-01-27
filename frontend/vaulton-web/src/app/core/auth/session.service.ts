@@ -219,7 +219,12 @@ export class SessionService {
     }
   }
 
-  async recover(accountId: string, recoveryKey: string, newPassword: string): Promise<string> {
+  async recover(
+    accountId: string,
+    recoveryKey: string,
+    newPassword: string,
+    newKdfMode: number,
+  ): Promise<{ newRecoveryKey: string }> {
     const wraps = await firstValueFrom(this.authApi.getRecoveryWraps(accountId));
     const recoveryRes = await this.crypto.recover(
       recoveryKey,
@@ -227,7 +232,7 @@ export class SessionService {
       accountId,
       wraps.MkWrapRk,
       wraps.CryptoSchemaVer,
-      wraps.KdfMode,
+      newKdfMode,
     );
 
     await firstValueFrom(
@@ -247,6 +252,6 @@ export class SessionService {
 
     await this.persistence.saveAccountId(accountId);
     this.toast.queue('Account recovered successfully. Please log in with your new password.');
-    return recoveryRes.newRecoveryKey;
+    return { newRecoveryKey: recoveryRes.newRecoveryKey };
   }
 }

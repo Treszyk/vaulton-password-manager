@@ -611,3 +611,7 @@ button.btn-secondary {
   z-index: 20;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
+
+.animate-spin-reverse {
+  animation: spin 1s linear infinite reverse;
+}

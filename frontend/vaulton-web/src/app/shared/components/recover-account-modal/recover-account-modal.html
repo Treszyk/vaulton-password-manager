@@ -1,0 +1,505 @@
+<div class="fixed inset-0 z-[100] overflow-y-auto bg-black/70 backdrop-blur-xl animate-fade-in">
+  <div class="min-h-[100svh] w-full flex items-center justify-center p-4">
+    <div
+      class="w-full max-w-lg p-8 rounded-[2.5rem] overlay-card animate-slide-up bg-black border border-zinc-900 shadow-2xl relative overflow-hidden"
+    >
+      <ng-container *ngIf="stage() === 'INPUT'">
+        <div class="flex flex-col items-center text-center mb-10">
+          <div
+            class="w-20 h-20 rounded-full bg-vault-purple/10 flex items-center justify-center mb-6"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-10 h-10 text-vault-purple"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+              />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-black uppercase tracking-[0.2em] text-zinc-100">
+            Account Recovery
+          </h2>
+          <p class="text-zinc-400 text-sm mt-2 font-medium">
+            Enter your credentials to regain access.
+          </p>
+        </div>
+
+        <div class="space-y-6 mb-10">
+          <div class="space-y-2">
+            <label class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-zinc-300 ml-1"
+              >Account ID</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="accountId"
+              class="w-full pl-5 pr-12 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl transition-all focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 outline-none text-zinc-200 font-mono text-sm"
+              placeholder="vault-xxxx-xxxx"
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-zinc-300 ml-1"
+              >Recovery Key</label
+            >
+            <textarea
+              [(ngModel)]="recoveryKey"
+              rows="3"
+              class="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl transition-all focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 outline-none text-zinc-200 font-mono text-xs resize-none leading-relaxed"
+              placeholder="Enter your 32-character recovery key..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <button
+            (click)="onNextToKeySetup()"
+            [disabled]="!accountId() || !recoveryKey()"
+            class="w-full btn-primary !rounded-2xl !py-4 font-bold uppercase tracking-[0.2em] shadow-lg shadow-vault-purple/20"
+          >
+            Verify Key
+          </button>
+          <button
+            (click)="onBack()"
+            class="w-full py-4 text-xs font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="stage() === 'KEY_SETUP'">
+        <div class="flex flex-col items-center text-center mb-8">
+          <div
+            class="w-16 h-16 rounded-full bg-vault-purple/10 flex items-center justify-center mb-4"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-8 h-8 text-vault-purple"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+          </div>
+          <h2 class="text-xl font-black uppercase tracking-[0.2em] text-zinc-100">
+            New Security Set
+          </h2>
+          <p class="text-zinc-400 text-xs mt-1 font-medium">Define your new master password.</p>
+        </div>
+
+        <div class="space-y-5 mb-8">
+          <div class="space-y-2">
+            <label class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-zinc-300 ml-1"
+              >New Password</label
+            >
+            <input
+              type="password"
+              [(ngModel)]="newPassword"
+              (ngModelChange)="onPasswordInput()"
+              [disabled]="isBenchmarking()"
+              class="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl transition-all focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 outline-none text-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              placeholder="••••••••••••"
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-zinc-300 ml-1"
+              >Confirm Password</label
+            >
+            <input
+              type="password"
+              [(ngModel)]="confirmPassword"
+              (ngModelChange)="onPasswordInput()"
+              [disabled]="isBenchmarking()"
+              class="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl transition-all focus:border-vault-purple/50 focus:ring-2 focus:ring-vault-purple/20 outline-none text-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              placeholder="••••••••••••"
+            />
+          </div>
+
+          <app-strength-meter
+            [password]="newPassword()"
+            [visible]="true"
+            class="block"
+          ></app-strength-meter>
+
+          <div class="kdf-container expanded">
+            <div class="min-h-0 space-y-3">
+              <div class="flex items-center justify-between ml-1 mb-1 relative">
+                <label class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-zinc-400"
+                  >Vault Hardening Grade</label
+                >
+                <div class="flex items-center gap-2 h-5">
+                  <span
+                    *ngIf="isBenchmarking()"
+                    class="text-[0.5625rem] font-black uppercase tracking-wider text-vault-purple-bright animate-pulse"
+                  >
+                    Benchmarking {{ benchmarkStatus() }}...
+                  </span>
+
+                  <button
+                    *ngIf="isOptimized() && !isBenchmarking()"
+                    (click)="onOptimizeKdf()"
+                    class="group/rerun flex items-center justify-center p-1.5 rounded-lg hover:bg-vault-dark transition-all animate-fade-in flex-shrink-0 border border-transparent hover:border-vault-purple/20"
+                    title="Rerun Benchmark"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-3.5 h-3.5 text-vault-purple-bright transition-transform group-hover/rerun:rotate-180 duration-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="relative py-1 overflow-visible">
+                <div
+                  class="flex gap-2 transition-all duration-700 ease-in-out"
+                  [class.opacity-0]="!isOptimized() && !isBenchmarking()"
+                  [class.scale-[0.98]]="!isOptimized() && !isBenchmarking()"
+                  [class.pointer-events-none]="!isOptimized() && !isBenchmarking()"
+                >
+                  <div
+                    class="kdf-option group/kdf tooltip-trigger tooltip-full relative flex-1"
+                    [class.active]="kdfMode() === 1"
+                    (click)="kdfMode.set(1)"
+                    data-tooltip="Standard protection. Recommended for most devices."
+                  >
+                    <div class="flex items-center gap-1.5">
+                      <span class="grade-title">Standard</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-3 h-3 text-zinc-500 group-hover/kdf:text-zinc-500 transition-colors"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <span class="grade-desc" *ngIf="!standardTime() && !isBenchmarking()"
+                      >Fast & Secure</span
+                    >
+                    <span class="grade-desc" *ngIf="!standardTime() && isBenchmarking()"
+                      >Estimated time...</span
+                    >
+                    <span class="grade-desc" *ngIf="standardTime()"
+                      >Estimated time: {{ standardTime()?.toFixed(1) }}s</span
+                    >
+                    <div
+                      *ngIf="standardTime() && !isBenchmarking()"
+                      class="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[0.5rem] font-black uppercase tracking-tighter"
+                      [class.text-green-400]="recommendedMode() === 1"
+                      [class.text-orange-400]="recommendedMode() !== 1 && standardTime()! <= 4.0"
+                      [class.text-red-400]="recommendedMode() !== 1 && standardTime()! > 4.0"
+                    >
+                      {{
+                        recommendedMode() === 1
+                          ? 'RECOMMENDED'
+                          : standardTime()! > 4.0
+                            ? 'VERY SLOW'
+                            : 'GOOD'
+                      }}
+                    </div>
+                  </div>
+
+                  <div
+                    class="kdf-option group/kdf tooltip-trigger tooltip-full relative flex-1"
+                    [class.active]="kdfMode() === 2"
+                    (click)="kdfMode.set(2)"
+                    data-tooltip="Strong protection. Best for modern desktops."
+                  >
+                    <div class="flex items-center gap-1.5">
+                      <span class="grade-title">Hardened</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-3 h-3 text-zinc-500 group-hover/kdf:text-zinc-500 transition-colors"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <span class="grade-desc" *ngIf="!hardenedTime() && !isBenchmarking()"
+                      >Extreme Security</span
+                    >
+                    <span class="grade-desc" *ngIf="!hardenedTime() && isBenchmarking()"
+                      >Estimated time...</span
+                    >
+                    <span class="grade-desc" *ngIf="hardenedTime()"
+                      >Estimated time: {{ hardenedTime()?.toFixed(1) }}s</span
+                    >
+                    <div
+                      *ngIf="hardenedTime() && !isBenchmarking()"
+                      class="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[0.5rem] font-black uppercase tracking-tighter"
+                      [class.text-green-400]="recommendedMode() === 2"
+                      [class.text-orange-400]="recommendedMode() !== 2 && hardenedTime()! <= 3.25"
+                      [class.text-red-400]="recommendedMode() !== 2 && hardenedTime()! > 3.25"
+                    >
+                      {{
+                        recommendedMode() === 2
+                          ? 'RECOMMENDED'
+                          : hardenedTime()! > 3.25
+                            ? 'VERY SLOW'
+                            : 'GOOD'
+                      }}
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  *ngIf="!isOptimized() && !isBenchmarking()"
+                  class="absolute inset-x-0 inset-y-0 z-20 flex flex-col items-center justify-center animate-fade-in pointer-events-none"
+                >
+                  <div
+                    class="flex flex-col items-center justify-center p-4 pointer-events-auto w-full relative"
+                  >
+                    <p
+                      class="text-xs font-bold uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
+                      [class.text-zinc-200]="isPasswordStrong()"
+                      [class.text-red-400]="!isPasswordStrong()"
+                    >
+                      {{
+                        isPasswordStrong()
+                          ? 'Benchmark required to select'
+                          : 'Minimum "Fair" strength required'
+                      }}
+                    </p>
+                    <button
+                      (click)="onOptimizeKdf()"
+                      [class.bg-vault-purple]="isPasswordStrong()"
+                      [class.bg-red-600]="!isPasswordStrong()"
+                      [class.border-red-400/50]="!isPasswordStrong()"
+                      [class.animate-pulse]="!isPasswordStrong()"
+                      [class.pointer-events-none]="!isPasswordStrong()"
+                      class="flex items-center gap-2.5 px-6 py-3 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-zinc-600 hover:brightness-110"
+                      [class.shadow-vault-purple/40]="isPasswordStrong()"
+                      [class.shadow-red-600/50]="!isPasswordStrong()"
+                    >
+                      <span
+                        class="text-[0.65rem] font-black uppercase tracking-widest leading-none"
+                      >
+                        {{ isPasswordStrong() ? 'Benchmark & Select' : 'Password Too Weak' }}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <button
+            (click)="onRecover()"
+            [disabled]="!isOptimized() || newPassword() !== confirmPassword()"
+            class="w-full btn-primary !rounded-2xl !py-4 font-bold uppercase tracking-[0.2em] shadow-lg shadow-vault-purple/20"
+          >
+            Recover Vault
+          </button>
+          <button
+            (click)="onBack()"
+            class="w-full py-4 text-xs font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors"
+          >
+            Back
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="stage() === 'RECOVERING'">
+        <div class="min-h-[400px] flex flex-col items-center justify-center text-center">
+          <div class="relative w-24 h-24 mb-8">
+            <div class="absolute inset-0 border-4 border-vault-purple/20 rounded-full"></div>
+            <div
+              class="absolute inset-0 border-4 border-t-vault-purple rounded-full animate-spin"
+            ></div>
+            <div class="absolute inset-4 border-4 border-vault-purple/10 rounded-full"></div>
+            <div
+              class="absolute inset-4 border-4 border-b-vault-purple/60 rounded-full animate-spin-reverse"
+            ></div>
+          </div>
+          <h2
+            class="text-xl font-black uppercase tracking-[0.3em] text-zinc-100 animate-pulse italic"
+          >
+            Regenerating...
+          </h2>
+          <p class="text-zinc-400 text-xs mt-4 font-medium max-w-[240px]">
+            Decrypting Master Key and re-wrapping vault security layers.
+          </p>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="stage() === 'SUCCESS'">
+        <div class="flex flex-col items-center text-center mb-6">
+          <div
+            class="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center mb-4"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-8 h-8 text-orange-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <h2 class="text-xl font-black uppercase tracking-[0.2em] text-zinc-100">
+            Vault Recovered
+          </h2>
+        </div>
+
+        <div class="p-4 rounded-xl bg-orange-500/5 border border-orange-500/20 mb-6">
+          <p class="text-[0.65rem] text-orange-200/80 font-medium leading-relaxed">
+            <span class="text-orange-400 font-bold block mb-0.5 uppercase tracking-wider"
+              >NEW RECOVERY KEY</span
+            >
+            Your old key is now <span class="text-orange-400">invalid</span>. Save this new one
+            immediately.
+          </p>
+        </div>
+
+        <div class="space-y-1.5 mb-8">
+          <label class="text-[0.65rem] font-bold uppercase tracking-[0.1em] text-zinc-400 ml-1"
+            >New Recovery Key</label
+          >
+          <div class="relative group">
+            <div
+              class="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl text-zinc-300 font-mono text-xs break-all leading-relaxed"
+            >
+              {{ newRecoveryKey() }}
+            </div>
+            <button
+              (click)="copyToClipboard(newRecoveryKey())"
+              class="absolute top-1/2 -translate-y-1/2 right-3 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-all"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <label
+            class="flex items-center gap-3 p-4 rounded-2xl border border-zinc-800/50 bg-zinc-900/40 cursor-pointer hover:bg-zinc-900/60 transition-colors group"
+          >
+            <div class="relative flex items-center justify-center flex-shrink-0">
+              <input
+                type="checkbox"
+                [(ngModel)]="acknowledged"
+                class="peer size-5 appearance-none rounded-md border-2 border-zinc-700 bg-zinc-950 checked:border-orange-500 checked:bg-orange-500 transition-all cursor-pointer"
+              />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="absolute pointer-events-none opacity-0 peer-checked:opacity-100 text-white size-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="4"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span
+              class="text-[0.7rem] font-bold text-zinc-400 group-hover:text-zinc-200 transition-colors uppercase tracking-wider"
+              >I have saved my NEW Recovery Key.</span
+            >
+          </label>
+
+          <div
+            class="relative h-14 w-full rounded-2xl overflow-hidden group cursor-pointer select-none border transition-all duration-200"
+            [class.opacity-50]="!acknowledged()"
+            [class.border-zinc-800]="!isHolding()"
+            [class.bg-zinc-950]="!isHolding()"
+            [class.border-orange-500]="isHolding()"
+            [class.unstable-shake]="isHolding()"
+            [style.--shake-intensity]="shakeIntensity()"
+            (mousedown)="startHold()"
+            (mouseup)="cancelHold()"
+            (mouseleave)="cancelHold()"
+            (touchstart)="$event.preventDefault(); startHold()"
+            (touchend)="cancelHold()"
+          >
+            <div
+              class="absolute inset-y-0 left-0 bg-orange-600 transition-all duration-75 ease-linear"
+              [style.width.%]="progress()"
+            ></div>
+            <div
+              class="absolute inset-0 flex items-center justify-center gap-2 pointer-events-none text-white font-black uppercase tracking-widest z-10"
+            >
+              <span [class.animate-pulse]="isHolding()">
+                {{ buttonLabel() }}
+              </span>
+              @if (!isHolding() && progress() < 100) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="w-4 h-4 transition-transform group-hover:translate-x-1"
+                >
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              }
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

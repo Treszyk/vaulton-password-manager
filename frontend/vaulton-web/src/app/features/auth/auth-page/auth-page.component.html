@@ -137,10 +137,6 @@
                     class="text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-vault-purple transition-all flex items-center gap-1.5 group/forgot"
                   >
                     <span>Forgot?</span>
-                    <span
-                      class="px-1 py-0.5 rounded-md bg-vault-dark border border-zinc-800 text-[0.625rem] text-zinc-400 group-hover/forgot:border-vault-purple/30 group-hover/forgot:text-vault-purple transition-all"
-                      >SOON</span
-                    >
                   </button>
                 </div>
                 <div class="relative group">
@@ -636,5 +632,12 @@
       [loginSuccess]="data.loginSuccess"
       (close)="onModalClose()"
     ></app-important-info-modal>
+  }
+
+  @if (showRecoverModal()) {
+    <app-recover-account-modal
+      [initialAccountId]="accountId()"
+      (close)="showRecoverModal.set(false)"
+    ></app-recover-account-modal>
   }
 </div>
