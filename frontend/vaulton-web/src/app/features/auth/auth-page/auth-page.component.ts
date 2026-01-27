@@ -204,13 +204,16 @@ export class AuthPageComponent {
     this.password.set('');
 
     try {
-      const loginSuccess = await this.session.register(
+      const { recoveryKey, loginSuccess } = await this.session.register(
         this.accountId(),
         pwd,
         this.kdfMode(),
         this.cryptoSchemaVer(),
       );
       this.toast.trigger('Vault Initialized', true);
+
+      // modal will go here later, remember to remove!!!!!
+      console.log('Recovery Key:', recoveryKey);
 
       if (loginSuccess) {
         this.router.navigate(['/vault']);

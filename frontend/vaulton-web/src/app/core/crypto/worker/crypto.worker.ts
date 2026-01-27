@@ -195,7 +195,10 @@ async function handleRegister({
 }) {
   const sPwd = crypto.getRandomValues(new Uint8Array(16));
   let aad = new TextEncoder().encode(`vaulton:mk-wrap-pwd:schema${schemaVer}:${accountId}`);
+  let aadRk = new TextEncoder().encode(`vaulton:mk-wrap-rk:schema${schemaVer}:${accountId}`);
+
   let mkBytes: Uint8Array | null = null;
+  let rkBytes: Uint8Array | null = null;
 
   try {
     const hkdfBaseKey = await kdfProvider.deriveHkdfBaseKey(password, sPwd, kdfMode);
@@ -204,19 +207,41 @@ async function handleRegister({
     const kekKey = await hkdfAesGcm256Key(hkdfBaseKey, 'vaulton/kek', ['encrypt']);
 
     mkBytes = crypto.getRandomValues(new Uint8Array(32));
-    const wrap = await encryptSplit(kekKey, mkBytes, aad);
+    const wrapMk = await encryptSplit(kekKey, mkBytes, aad);
+
+    rkBytes = crypto.getRandomValues(new Uint8Array(32));
+    const rkKey = await crypto.subtle.importKey('raw', rkBytes as BufferSource, 'HKDF', false, [
+      'deriveKey',
+    ]);
+    const kekRk = await hkdfAesGcm256Key(rkKey, 'vaulton/kek-recovery', ['encrypt']);
+    const wrapRk = await encryptSplit(kekRk, mkBytes, aadRk);
+
+    const recoveryKeyB64 = bytesToB64(rkBytes);
+
+    zeroize(rkBytes);
+    rkBytes = null;
+
     zeroize(mkBytes);
     mkBytes = null;
 
     const mkWrapPwd: EncryptedValueDto = {
-      Nonce: bytesToB64(wrap.Nonce),
-      CipherText: bytesToB64(wrap.CipherText),
-      Tag: bytesToB64(wrap.Tag),
+      Nonce: bytesToB64(wrapMk.Nonce),
+      CipherText: bytesToB64(wrapMk.CipherText),
+      Tag: bytesToB64(wrapMk.Tag),
     };
 
-    zeroize(wrap.Nonce);
-    zeroize(wrap.CipherText);
-    zeroize(wrap.Tag);
+    const mkWrapRk: EncryptedValueDto = {
+      Nonce: bytesToB64(wrapRk.Nonce),
+      CipherText: bytesToB64(wrapRk.CipherText),
+      Tag: bytesToB64(wrapRk.Tag),
+    };
+
+    zeroize(wrapMk.Nonce);
+    zeroize(wrapMk.CipherText);
+    zeroize(wrapMk.Tag);
+    zeroize(wrapRk.Nonce);
+    zeroize(wrapRk.CipherText);
+    zeroize(wrapRk.Tag);
 
     const sPwdB64 = bytesToB64(sPwd);
     const registerBody: RegisterRequest = {
@@ -226,15 +251,17 @@ async function handleRegister({
       S_Pwd: sPwdB64,
       KdfMode: kdfMode,
       MKWrapPwd: mkWrapPwd,
-      MKWrapRk: null,
+      MKWrapRk: mkWrapRk,
       CryptoSchemaVer: schemaVer,
     };
 
-    return { registerBody };
+    return { registerBody, recoveryKey: recoveryKeyB64 };
   } finally {
     zeroize(aad);
+    if (aadRk) zeroize(aadRk);
     zeroize(sPwd);
     if (mkBytes) zeroize(mkBytes);
+    if (rkBytes) zeroize(rkBytes);
   }
 }
 
@@ -406,7 +433,7 @@ async function handleDecryptEntry({ dto, aadB64 }: { dto: EncryptedValueDto; aad
     const ptBuf = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv: nonce as BufferSource, additionalData: aad as BufferSource },
       vaultKey,
-      ctTag as BufferSource
+      ctTag as BufferSource,
     );
 
     return { result: { ptBuffer: ptBuf }, transfer: [ptBuf] };
@@ -528,7 +555,7 @@ async function handleExecuteRekey({
     const hkdfCurrent = await kdfProvider.deriveHkdfBaseKey(
       currentPassword,
       curSalt,
-      currentKdfMode
+      currentKdfMode,
     );
     const kekCurrent = await hkdfAesGcm256Key(hkdfCurrent, 'vaulton/kek', ['decrypt']);
 
@@ -561,7 +588,7 @@ async function handleExecuteRekey({
 async function unwrapMk(
   kek: CryptoKey,
   dto: EncryptedValueDto,
-  aad: Uint8Array
+  aad: Uint8Array,
 ): Promise<CryptoKey> {
   const nonce = b64ToBytes(dto.Nonce);
   const ct = b64ToBytes(dto.CipherText);
@@ -579,7 +606,7 @@ async function unwrapMk(
       { name: 'AES-GCM', iv: nonce as BufferSource, additionalData: aad as BufferSource },
       { name: 'HKDF' },
       false,
-      ['deriveKey']
+      ['deriveKey'],
     );
   } finally {
     zeroize(nonce);
@@ -592,7 +619,7 @@ async function unwrapMk(
 async function decryptMk(
   kek: CryptoKey,
   dto: EncryptedValueDto,
-  aad: Uint8Array
+  aad: Uint8Array,
 ): Promise<Uint8Array> {
   const nonce = b64ToBytes(dto.Nonce);
   const ct = b64ToBytes(dto.CipherText);
@@ -610,7 +637,7 @@ async function decryptMk(
         additionalData: aad as BufferSource,
       },
       kek,
-      ctTag as BufferSource
+      ctTag as BufferSource,
     );
 
     return new Uint8Array(ptBuf);

@@ -13,7 +13,7 @@ export interface RegisterRequest {
   S_Pwd: string;
   KdfMode: number;
   MKWrapPwd: EncryptedValueDto;
-  MKWrapRk: EncryptedValueDto | null;
+  MKWrapRk: EncryptedValueDto;
   CryptoSchemaVer: number;
 }
 

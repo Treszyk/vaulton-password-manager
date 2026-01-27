@@ -65,6 +65,12 @@ namespace Api
 						Array.Empty<string>()
 					}
 				});
+
+				if (builder.Environment.IsDevelopment())
+				{
+					c.AddServer(new OpenApiServer { Url = "/api", Description = "Frontend Proxy (localhost:4200)" });
+					c.AddServer(new OpenApiServer { Url = "/", Description = "Direct Backend" });
+				}
 			});
 
 			builder.Services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();

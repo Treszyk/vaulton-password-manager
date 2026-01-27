@@ -104,8 +104,8 @@ export class SessionService {
     password: string,
     kdfMode: number,
     schemaVer: number,
-  ): Promise<boolean> {
-    const { registerBody } = await this.crypto.buildRegister(
+  ): Promise<{ recoveryKey: string; loginSuccess: boolean }> {
+    const { registerBody, recoveryKey } = await this.crypto.buildRegister(
       accountId,
       password,
       kdfMode,
@@ -117,10 +117,10 @@ export class SessionService {
     try {
       // throw new Error('Simulated Login Failure');
       await this.login(accountId, password);
-      return true;
+      return { recoveryKey, loginSuccess: true };
     } catch (e) {
       console.warn('Auto-login failed', e);
-      return false;
+      return { recoveryKey, loginSuccess: false };
     }
   }
 

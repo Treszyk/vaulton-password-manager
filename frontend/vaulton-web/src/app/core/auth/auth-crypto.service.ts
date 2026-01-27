@@ -70,9 +70,10 @@ export class AuthCryptoService {
     accountId: string,
     password: string,
     kdfMode: number,
-    schemaVer: number
+    schemaVer: number,
   ): Promise<{
     registerBody: RegisterRequest;
+    recoveryKey: string;
   }> {
     if (this.isWorking) {
       throw new Error('Crypto worker is busy. Please wait.');
@@ -85,6 +86,7 @@ export class AuthCryptoService {
     try {
       const res = await this.postToWorker<{
         registerBody: RegisterRequest;
+        recoveryKey: string;
       }>('REGISTER', { accountId, passwordBuffer, kdfMode, schemaVer }, [passwordBuffer]);
       return res;
     } finally {
@@ -114,7 +116,7 @@ export class AuthCryptoService {
           saltB64: preLogin.S_Pwd,
           kdfMode: preLogin.KdfMode,
         },
-        [passwordBuffer]
+        [passwordBuffer],
       );
       return res;
     } finally {
@@ -131,7 +133,7 @@ export class AuthCryptoService {
   async encryptEntry(
     plaintextOrBuffer: string | ArrayBuffer,
     aadB64: string,
-    domain?: string
+    domain?: string,
   ): Promise<{ DomainTag: string; Payload: { Nonce: string; CipherText: string; Tag: string } }> {
     let ptBytes: Uint8Array | null;
     let plaintextBuffer: ArrayBuffer;
@@ -148,7 +150,7 @@ export class AuthCryptoService {
       return await this.postToWorker<EncryptedEntryResult>(
         'ENCRYPT_ENTRY',
         { plaintextBuffer, aadB64, domain },
-        [plaintextBuffer]
+        [plaintextBuffer],
       );
     } finally {
       if (ptBytes) {
@@ -178,7 +180,7 @@ export class AuthCryptoService {
   async finalizeLogin(
     mkWrapPwd: EncryptedValueDto,
     schemaVer: number,
-    accountId: string
+    accountId: string,
   ): Promise<void> {
     await this.postToWorker('FINALIZE_LOGIN', {
       MkWrapPwd: mkWrapPwd,
@@ -200,7 +202,7 @@ export class AuthCryptoService {
           saltBuffer,
           kdfMode,
         },
-        [passwordBuffer, saltBuffer]
+        [passwordBuffer, saltBuffer],
       );
       return res.duration;
     } catch (err: any) {
@@ -243,7 +245,7 @@ export class AuthCryptoService {
       MkWrapPwd: EncryptedValueDto;
       CryptoSchemaVer: number;
       AccountId: string;
-    }
+    },
   ): Promise<void> {
     if (this.isWorking) {
       throw new Error('Crypto worker is busy.');
@@ -263,7 +265,7 @@ export class AuthCryptoService {
           CryptoSchemaVer: bundle.CryptoSchemaVer,
           AccountId: bundle.AccountId,
         },
-        [passwordBuffer]
+        [passwordBuffer],
       );
     } finally {
       if (pwdBytes) {
@@ -283,7 +285,7 @@ export class AuthCryptoService {
       const res = await this.postToWorker<{ adminVerifier: string }>(
         'DERIVE_ADMIN_VERIFIER',
         { passwordBuffer, saltB64: salt, kdfMode },
-        [passwordBuffer]
+        [passwordBuffer],
       );
       return res.adminVerifier;
     } finally {
@@ -302,7 +304,7 @@ export class AuthCryptoService {
     passcode: string,
     accountId: string,
     mkWrapPwd: EncryptedValueDto,
-    schemaVer: number
+    schemaVer: number,
   ): Promise<{ mkWrapLocal: EncryptedValueDto; sLocalB64: string }> {
     let pwdBytes: Uint8Array | null = new TextEncoder().encode(password);
     let pinBytes: Uint8Array | null = new TextEncoder().encode(passcode);
@@ -321,7 +323,7 @@ export class AuthCryptoService {
           mkWrapPwd,
           schemaVer,
         },
-        [passwordBuffer, passcodeBuffer]
+        [passwordBuffer, passcodeBuffer],
       );
     } finally {
       if (pwdBytes) {
@@ -341,7 +343,7 @@ export class AuthCryptoService {
     passcode: string,
     saltB64: string,
     mkWrapLocal: EncryptedValueDto,
-    accountId: string
+    accountId: string,
   ): Promise<void> {
     let pinBytes: Uint8Array | null = new TextEncoder().encode(passcode);
     const passcodeBuffer = pinBytes.buffer;
@@ -349,7 +351,7 @@ export class AuthCryptoService {
       await this.postToWorker(
         'UNLOCK_VIA_PASSCODE',
         { passcodeBuffer, saltB64, mkWrapLocal, accountId },
-        [passcodeBuffer]
+        [passcodeBuffer],
       );
     } finally {
       if (pinBytes) {
@@ -368,7 +370,7 @@ export class AuthCryptoService {
     accountId: string,
     currentMkWrapPwd: EncryptedValueDto,
     schemaVer: number,
-    newKdfMode: number
+    newKdfMode: number,
   ): Promise<{
     newVerifier: string;
     newAdminVerifier: string;
@@ -398,7 +400,7 @@ export class AuthCryptoService {
           schemaVer,
           newKdfMode,
         },
-        [currentPasswordBuffer, newPasswordBuffer]
+        [currentPasswordBuffer, newPasswordBuffer],
       );
     } finally {
       if (curPwdBytes) {
