@@ -126,6 +126,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		return Ok(new ExtLoginResponse(
 			result.Token!,
 			result.RefreshToken!,
+			result.RefreshExpiresAt!.Value,
 			result.MkWrapPwd is not null ? new EncryptedValueDto(result.MkWrapPwd.Nonce, result.MkWrapPwd.CipherText, result.MkWrapPwd.Tag) : null,
 			result.MkWrapRk is not null ? new EncryptedValueDto(result.MkWrapRk.Nonce, result.MkWrapRk.CipherText, result.MkWrapRk.Tag) : null
 		));
@@ -277,7 +278,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		if (!result.Success)
 			return Unauthorized(new { message = "Invalid refresh token." });
 
-		return Ok(new ExtRefreshResponse(result.AccessToken!, result.RefreshToken!));
+		return Ok(new ExtRefreshResponse(result.AccessToken!, result.RefreshToken!, result.RefreshExpiresAt!.Value));
 	}
 
 	[HttpPost("logout")]

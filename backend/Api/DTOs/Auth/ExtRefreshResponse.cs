@@ -4,5 +4,6 @@ namespace Api.DTOs.Auth;
 
 public sealed record ExtRefreshResponse(
 	[property: JsonPropertyName("AccessToken")] string AccessToken,
-	[property: JsonPropertyName("RefreshToken")] string RefreshToken
+	[property: JsonPropertyName("RefreshToken")] string RefreshToken,
+	[property: JsonPropertyName("RefreshExpiresAt")] DateTime RefreshExpiresAt
 );
