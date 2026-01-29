@@ -615,3 +615,34 @@ button.btn-secondary {
 .animate-spin-reverse {
   animation: spin 1s linear infinite reverse;
 }
+
+.demo-countdown {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: transparent;
+  color: #dc2626;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  z-index: 999999;
+}
+
+.demo-text {
+  display: block;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .demo-countdown {
+    top: 8px;
+    bottom: auto;
+    left: 8px;
+    transform: none;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}

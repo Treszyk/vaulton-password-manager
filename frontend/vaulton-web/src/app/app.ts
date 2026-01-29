@@ -3,11 +3,12 @@ import { RouterOutlet, Router } from '@angular/router';
 import { SessionService } from './core/auth/session.service';
 import { VaultonNavComponent } from './features/shell/vaulton-nav.component';
 import { ToastComponent } from './shared/ui/toast/toast.component';
+import { DemoCountdownComponent } from './shared/ui/demo-countdown/demo-countdown.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, VaultonNavComponent, ToastComponent],
+  imports: [RouterOutlet, VaultonNavComponent, ToastComponent, DemoCountdownComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
