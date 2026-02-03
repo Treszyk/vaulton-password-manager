@@ -331,6 +331,8 @@ namespace Infrastructure.Services.Auth
 				user.UpdatedAt = DateTime.UtcNow;
 
 				await db.SaveChangesAsync();
+				
+				await refreshTokenStore.RevokeAllAsync(user.Id, now);
 
 				return ChangePasswordResult.Ok();
 			}
@@ -446,6 +448,8 @@ namespace Infrastructure.Services.Auth
 				user.UpdatedAt = DateTime.UtcNow;
 
 				await db.SaveChangesAsync();
+
+				await refreshTokenStore.RevokeAllAsync(user.Id, now);
 
 				return RecoverResult.Ok();
 			}

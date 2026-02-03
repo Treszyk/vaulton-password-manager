@@ -12,7 +12,7 @@ public sealed class VaultCommandValidator : IVaultCommandValidator
 		if (cmd.AccountId == Guid.Empty || cmd.EntryId == Guid.Empty)
 			return VaultError.InvalidCryptoBlob;
 
-		if (!IsValidDomainTag(cmd.DomainTag) || !IsValidPayload(cmd.Payload))
+		if (!IsValidPayload(cmd.Payload))
 			return VaultError.InvalidCryptoBlob;
 
 		return null;
@@ -50,14 +50,12 @@ public sealed class VaultCommandValidator : IVaultCommandValidator
 		if (cmd.AccountId == Guid.Empty || cmd.EntryId == Guid.Empty)
 			return VaultError.NotFound;
 
-		if (!IsValidDomainTag(cmd.DomainTag) || !IsValidPayload(cmd.Payload))
+		if (!IsValidPayload(cmd.Payload))
 			return VaultError.InvalidCryptoBlob;
 
 		return null;
 	}
 
-	private static bool IsValidDomainTag(byte[] tag)
-		=> tag is { Length: CryptoSizes.DomainTagLen };
 
 	private static bool IsValidPayload(EncryptedValue p)
 		=> CryptoValidators.IsValidEncryptedValue(p, 1, CryptoSizes.MaxEntryCiphertextBytes);

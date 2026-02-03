@@ -31,7 +31,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 
 		var payload = request.Payload.ToDomain();
 
-		var cmd = new CreateEntryCommand(accountId, request.EntryId, request.DomainTag, payload);
+		var cmd = new CreateEntryCommand(accountId, request.EntryId, payload);
 		var result = await _vault.CreateEntryAsync(cmd);
 
 		if (!result.Success)
@@ -82,7 +82,6 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 
 		var dtos = result.Entries!.Select(e => new EntryDto(
 			e.Id,
-			e.DomainTag,
 			e.Payload.ToDto()
 		)).ToList();
 
@@ -109,7 +108,6 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 
 		var dto = new EntryDto(
 			result.EntryId!.Value,
-			result.DomainTag!,
 			new EncryptedValueDto(
 				result.Payload!.Nonce,
 				result.Payload!.CipherText,
@@ -153,7 +151,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 			Tag = request.Payload.Tag
 		};
 
-		var cmd = new UpdateEntryCommand(accountId, id, request.DomainTag, payload);
+		var cmd = new UpdateEntryCommand(accountId, id, payload);
 		var result = await _vault.UpdateEntryAsync(cmd);
 
 		if (!result.Success)

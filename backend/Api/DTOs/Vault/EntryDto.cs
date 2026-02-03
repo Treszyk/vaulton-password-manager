@@ -5,6 +5,5 @@ namespace Api.DTOs.Vault;
 
 public sealed record EntryDto(
 	[property: JsonPropertyName("Id")] Guid Id,
-	[property: JsonPropertyName("DomainTag")] byte[] DomainTag,
 	[property: JsonPropertyName("Payload")] EncryptedValueDto Payload
 );

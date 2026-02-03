@@ -39,7 +39,6 @@ public sealed class VaultService(VaultonDbContext db, IVaultCommandValidator val
 		{
 			Id = cmd.EntryId,
 			UserId = cmd.AccountId,
-			DomainTag = cmd.DomainTag,
 			Payload = cmd.Payload,
 			CreatedAt = now,
 			UpdatedAt = now
@@ -63,7 +62,7 @@ public sealed class VaultService(VaultonDbContext db, IVaultCommandValidator val
 			.OrderByDescending(e => e.UpdatedAt)
 			.Skip(cmd.Skip)
 			.Take(cmd.Take)
-			.Select(e => new EntryListItem(e.Id, e.DomainTag, e.Payload))
+			.Select(e => new EntryListItem(e.Id, e.Payload))
 			.ToListAsync();
 
 
@@ -83,7 +82,7 @@ public sealed class VaultService(VaultonDbContext db, IVaultCommandValidator val
 		if (e is null)
 			return GetEntryResult.Fail(VaultError.NotFound);
 
-		return GetEntryResult.Ok(e.Id, e.DomainTag, e.Payload);
+		return GetEntryResult.Ok(e.Id, e.Payload);
 	}
 
 	public async Task<DeleteEntryResult> DeleteEntryAsync(DeleteEntryCommand cmd)
@@ -113,7 +112,6 @@ public sealed class VaultService(VaultonDbContext db, IVaultCommandValidator val
 		if (e is null)
 			return UpdateEntryResult.Fail(VaultError.NotFound);
 
-		e.DomainTag = cmd.DomainTag;
 		e.Payload = cmd.Payload;
 		e.UpdatedAt = DateTime.UtcNow;
 

@@ -11,11 +11,6 @@ public sealed record CreateEntryRequest(
 	Guid EntryId,
 
 	[param: Required]
-	[param: Length(CryptoSizes.DomainTagLen, CryptoSizes.DomainTagLen)]
-	[property: JsonPropertyName("DomainTag")]
-	byte[] DomainTag,
-
-	[param: Required]
 	[property: JsonPropertyName("Payload")]
 	EncryptedValueDto Payload
 );

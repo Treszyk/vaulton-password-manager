@@ -30,9 +30,6 @@ public class VaultonDbContext(DbContextOptions<VaultonDbContext> options) : DbCo
 			.OnDelete(DeleteBehavior.Cascade);
 
 		b.HasIndex(e => e.UserId);
-		b.HasIndex(e => e.DomainTag);
-		b.Property(e => e.DomainTag)
-			.HasMaxLength(CryptoSizes.DomainTagLen);
 
 		b.OwnsOne(e => e.Payload, p =>
 		{

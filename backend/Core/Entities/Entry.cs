@@ -10,9 +10,6 @@ public class Entry
 	// Encrypted payload AES-GCM
 	public EncryptedValue Payload { get; set; } = default!;
 
-	// Domain tag for extension-friendly lookup (HMAC(K_tag, normalizedDomain))
-	public byte[] DomainTag { get; set; } = default!;
-
 	// metadata
 	public DateTime CreatedAt { get; set; }
 	public DateTime UpdatedAt { get; set; }
