@@ -16,7 +16,6 @@ import type { KdfProvider } from '../kdf/kdf';
 
 const kdfProvider: KdfProvider = new Argon2KdfProvider();
 let vaultKey: CryptoKey | null = null;
-let domainTagKey: CryptoKey | null = null;
 let pendingLoginBaseKey: CryptoKey | null = null;
 
 addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRequest>>) => {
@@ -326,7 +325,6 @@ async function handleFinalizeLogin({
   }
 
   vaultKey = null;
-  domainTagKey = null;
 
   const aadString = `vaulton:mk-wrap-pwd:schema${CryptoSchemaVer}:${AccountId}`;
   const aad = new TextEncoder().encode(aadString);
@@ -337,10 +335,8 @@ async function handleFinalizeLogin({
     const mk = await unwrapMk(kekKey, MkWrapPwd, aad);
 
     vaultKey = await hkdfAesGcm256Key(mk, 'vaulton/vault-enc', ['encrypt', 'decrypt']);
-    domainTagKey = await hkdfHmacSha256Key(mk, 'vaulton/vault-tag');
   } catch (e) {
     vaultKey = null;
-    domainTagKey = null;
     throw e;
   } finally {
     pendingLoginBaseKey = null;
@@ -350,7 +346,6 @@ async function handleFinalizeLogin({
 
 async function handleClearKeys() {
   vaultKey = null;
-  domainTagKey = null;
   pendingLoginBaseKey = null;
 }
 
@@ -376,13 +371,11 @@ async function handleDeriveAdminVerifier({
 async function handleEncryptEntry({
   plaintextBuffer,
   aadB64,
-  domain,
 }: {
   plaintextBuffer: ArrayBuffer;
   aadB64: string;
-  domain?: string;
 }) {
-  if (!vaultKey || !domainTagKey) throw new Error('Vault key not initialized');
+  if (!vaultKey) throw new Error('Vault key not initialized');
 
   const ptBytes = new Uint8Array(plaintextBuffer);
   const aad = b64ToBytes(aadB64);
@@ -390,26 +383,9 @@ async function handleEncryptEntry({
   try {
     const split = await encryptSplit(vaultKey, ptBytes, aad);
 
-    const domainInput = domain ?? '';
-    const domainBytes = new TextEncoder().encode(domainInput);
-    let domainTag = '';
-
-    try {
-      const hmacBuf = await crypto.subtle.sign({ name: 'HMAC' }, domainTagKey, domainBytes);
-      const hmacBytes = new Uint8Array(hmacBuf);
-      try {
-        domainTag = bytesToB64(hmacBytes);
-      } finally {
-        zeroize(hmacBytes);
-      }
-    } finally {
-      zeroize(domainBytes);
-    }
-
     try {
       return {
         result: {
-          DomainTag: domainTag,
           Payload: {
             Nonce: bytesToB64(split.Nonce),
             CipherText: bytesToB64(split.CipherText),
@@ -526,7 +502,6 @@ async function handleUnlockViaPasscode({
   const sLocal = b64ToBytes(saltB64);
   const aadLocal = new TextEncoder().encode(`vaulton:local-passcode-wrap:${accountId}`);
   vaultKey = null;
-  domainTagKey = null;
 
   try {
     const hkdfBaseKey = await kdfProvider.deriveHkdfBaseKey(passcode, sLocal, 3);
@@ -535,10 +510,8 @@ async function handleUnlockViaPasscode({
     const mk = await unwrapMk(kekKey, mkWrapLocal, aadLocal);
 
     vaultKey = await hkdfAesGcm256Key(mk, 'vaulton/vault-enc', ['encrypt', 'decrypt']);
-    domainTagKey = await hkdfHmacSha256Key(mk, 'vaulton/vault-tag');
   } catch (e) {
     vaultKey = null;
-    domainTagKey = null;
     throw e;
   } finally {
     zeroize(sLocal);

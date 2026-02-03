@@ -52,7 +52,7 @@ export type WorkerRequest =
     }
   | {
       type: 'ENCRYPT_ENTRY';
-      payload: { plaintextBuffer: ArrayBuffer; aadB64: string; domain?: string };
+      payload: { plaintextBuffer: ArrayBuffer; aadB64: string };
     }
   | { type: 'DECRYPT_ENTRY'; payload: { dto: EncryptedValueDto; aadB64: string } }
   | {
@@ -118,7 +118,6 @@ export interface WorkerMessage<T> {
 }
 
 export interface EncryptedEntryResult {
-  DomainTag: string;
   Payload: EncryptedValueDto;
 }
 
@@ -128,13 +127,11 @@ export interface DecryptEntryResult {
 
 export interface CreateVaultEntryRequest {
   EntryId: string;
-  DomainTag: string;
   Payload: EncryptedValueDto;
 }
 
 export interface EntryDto {
   Id: string;
-  DomainTag: string;
   Payload: EncryptedValueDto;
 }
 
@@ -143,7 +140,6 @@ export interface PreCreateEntryResponse {
 }
 
 export interface UpdateVaultEntryRequest {
-  DomainTag: string;
   Payload: EncryptedValueDto;
 }
 

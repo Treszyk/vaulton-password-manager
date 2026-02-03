@@ -16,17 +16,13 @@ export type PlainEntry = {
 export class VaultCryptoService {
   constructor(private readonly authCrypto: AuthCryptoService) {}
 
-  async encryptEntry(
-    entry: PlainEntry,
-    domain: string,
-    aadStr: string
-  ): Promise<EncryptedEntryResult> {
+  async encryptEntry(entry: PlainEntry, aadStr: string): Promise<EncryptedEntryResult> {
     const json = JSON.stringify(entry);
     const aadB64 = bytesToB64(new TextEncoder().encode(aadStr));
 
     const ptBytes = new TextEncoder().encode(json);
     try {
-      return await this.authCrypto.encryptEntry(ptBytes.buffer, aadB64, domain);
+      return await this.authCrypto.encryptEntry(ptBytes.buffer, aadB64);
     } finally {
       try {
         ptBytes.fill(0);

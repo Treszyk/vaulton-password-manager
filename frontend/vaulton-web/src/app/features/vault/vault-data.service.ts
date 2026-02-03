@@ -52,14 +52,13 @@ export class VaultDataService {
 
   async addRecord(input: VaultRecordInput) {
     const { EntryId } = await firstValueFrom(this.api.preCreate());
-    const encrypted = await this.vaultCrypto.encryptEntry(input, input.website, EntryId);
+    const encrypted = await this.vaultCrypto.encryptEntry(input, EntryId);
 
     await firstValueFrom(
       this.api.create({
         EntryId,
-        DomainTag: encrypted.DomainTag,
         Payload: encrypted.Payload,
-      })
+      }),
     );
 
     const newRecord: VaultRecord = {
@@ -70,13 +69,12 @@ export class VaultDataService {
   }
 
   async updateRecord(id: string, input: VaultRecordInput) {
-    const encrypted = await this.vaultCrypto.encryptEntry(input, input.website, id);
+    const encrypted = await this.vaultCrypto.encryptEntry(input, id);
 
     await firstValueFrom(
       this.api.update(id, {
-        DomainTag: encrypted.DomainTag,
         Payload: encrypted.Payload,
-      })
+      }),
     );
 
     this.records.update((prev) => prev.map((r) => (r.id === id ? { ...r, ...input } : r)));

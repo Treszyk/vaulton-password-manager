@@ -133,8 +133,7 @@ export class AuthCryptoService {
   async encryptEntry(
     plaintextOrBuffer: string | ArrayBuffer,
     aadB64: string,
-    domain?: string,
-  ): Promise<{ DomainTag: string; Payload: { Nonce: string; CipherText: string; Tag: string } }> {
+  ): Promise<{ Payload: { Nonce: string; CipherText: string; Tag: string } }> {
     let ptBytes: Uint8Array | null;
     let plaintextBuffer: ArrayBuffer;
 
@@ -149,7 +148,7 @@ export class AuthCryptoService {
     try {
       return await this.postToWorker<EncryptedEntryResult>(
         'ENCRYPT_ENTRY',
-        { plaintextBuffer, aadB64, domain },
+        { plaintextBuffer, aadB64 },
         [plaintextBuffer],
       );
     } finally {
