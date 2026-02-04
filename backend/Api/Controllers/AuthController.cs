@@ -136,7 +136,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	[EnableRateLimiting("AuthPolicy")]
 	public async Task<ActionResult<WrapsResponse>> GetRecoveryWraps([FromBody] RecoveryWrapsRequest request)
 	{
-		var result = await _auth.GetRecoveryWrapsAsync(request.AccountId);
+		var result = await _auth.GetRecoveryWrapsAsync(request.AccountId, request.RkVerifier);
 
 		if (!result.Success)
 		{

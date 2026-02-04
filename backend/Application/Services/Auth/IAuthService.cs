@@ -13,7 +13,7 @@ public interface IAuthService
 	Task LogoutAllAsync(Guid accountId);
 	Task<PreLoginResult> PreLoginAsync(PreLoginCommand cmd);
 	Task<WrapsResult> GetWrapsAsync(WrapsCommand cmd);
-	Task<WrapsResult> GetRecoveryWrapsAsync(Guid accountId);
+	Task<WrapsResult> GetRecoveryWrapsAsync(Guid accountId, byte[] rkVerifier);
 	Task<ChangePasswordResult> ChangePasswordAsync(ChangePasswordCommand cmd);
 	Task<RecoverResult> RecoverAsync(RecoverCommand cmd);
 }

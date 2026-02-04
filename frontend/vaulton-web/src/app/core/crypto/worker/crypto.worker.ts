@@ -177,6 +177,16 @@ addEventListener('message', async ({ data }: MessageEvent<WorkerMessage<WorkerRe
         }
         break;
       }
+      case 'DERIVE_RK_VERIFIER': {
+        const { recoveryKeyB64 } = request.payload;
+        try {
+          const rkVerifier = await handleDeriveRkVerifier(recoveryKeyB64);
+          postSuccess(id, { rkVerifier });
+        } catch (err: any) {
+          postError(id, err.message || String(err));
+        }
+        break;
+      }
       default:
         throw new Error(`Unknown message type: ${(request as any).type}`);
     }
@@ -463,7 +473,7 @@ async function handleActivatePasscode({
 
   try {
     const hkdfLocal = await kdfProvider.deriveHkdfBaseKey(passcode, localSalt, 3);
-    const kekLocal = await hkdfAesGcm256Key(hkdfLocal, 'vaulton/kek', ['encrypt']);
+    const kekLocal = await hkdfAesGcm256Key(hkdfLocal, 'vaulton/passcode-kek', ['encrypt']);
 
     const hkdfMaster = await kdfProvider.deriveHkdfBaseKey(password, mSalt, masterKdfMode);
     const kekMaster = await hkdfAesGcm256Key(hkdfMaster, 'vaulton/kek', ['decrypt']);
@@ -506,7 +516,7 @@ async function handleUnlockViaPasscode({
   try {
     const hkdfBaseKey = await kdfProvider.deriveHkdfBaseKey(passcode, sLocal, 3);
 
-    const kekKey = await hkdfAesGcm256Key(hkdfBaseKey, 'vaulton/kek', ['unwrapKey']);
+    const kekKey = await hkdfAesGcm256Key(hkdfBaseKey, 'vaulton/passcode-kek', ['unwrapKey']);
     const mk = await unwrapMk(kekKey, mkWrapLocal, aadLocal);
 
     vaultKey = await hkdfAesGcm256Key(mk, 'vaulton/vault-enc', ['encrypt', 'decrypt']);
@@ -727,6 +737,18 @@ async function handleRecover({
       zeroize(mkRaw);
       zeroize(aadRk);
     }
+  } finally {
+    zeroize(rkBytes);
+  }
+}
+
+async function handleDeriveRkVerifier(recoveryKeyB64: string): Promise<string> {
+  const rkBytes = b64ToBytes(recoveryKeyB64);
+  try {
+    const rkBaseKey = await crypto.subtle.importKey('raw', rkBytes as any, 'HKDF', false, [
+      'deriveBits',
+    ]);
+    return await hkdfVerifierB64(rkBaseKey, 'vaulton/rk-vrf');
   } finally {
     zeroize(rkBytes);
   }

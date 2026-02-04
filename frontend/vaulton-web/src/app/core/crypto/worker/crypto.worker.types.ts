@@ -103,6 +103,10 @@ export type WorkerRequest =
         schemaVer: number;
         newKdfMode: number;
       };
+    }
+  | {
+      type: 'DERIVE_RK_VERIFIER';
+      payload: { recoveryKeyB64: string };
     };
 
 export interface WorkerResponseEnvelope<T> {

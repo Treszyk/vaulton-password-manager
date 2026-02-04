@@ -348,38 +348,47 @@ namespace Infrastructure.Services.Auth
 			}
 		}
 
-		public async Task<WrapsResult> GetRecoveryWrapsAsync(Guid accountId)
+		public async Task<WrapsResult> GetRecoveryWrapsAsync(Guid accountId, byte[] rkVerifier)
 		{
+			var now = DateTime.UtcNow;
 			var user = await db.Users.SingleOrDefaultAsync(u => u.Id == accountId);
-			if (user is null)
-			{
-				// return random fake data to prevent account enumeration.
-				
-				var fakeMkWrapPwd = new EncryptedValue 
-				{
-					Nonce = new byte[CryptoSizes.GcmNonceLen],
-					CipherText = new byte[CryptoSizes.MkLen],
-					Tag = new byte[CryptoSizes.GcmTagLen]
-				};
-				var fakeMkWrapRk = new EncryptedValue 
-				{
-					Nonce = new byte[CryptoSizes.GcmNonceLen],
-					CipherText = new byte[CryptoSizes.MkLen],
-					Tag = new byte[CryptoSizes.GcmTagLen]
-				};
-				
-				RandomNumberGenerator.Fill(fakeMkWrapPwd.Nonce);
-				RandomNumberGenerator.Fill(fakeMkWrapPwd.CipherText);
-				RandomNumberGenerator.Fill(fakeMkWrapPwd.Tag);
-				
-				RandomNumberGenerator.Fill(fakeMkWrapRk.Nonce);
-				RandomNumberGenerator.Fill(fakeMkWrapRk.CipherText);
-				RandomNumberGenerator.Fill(fakeMkWrapRk.Tag);
 
-				return WrapsResult.Ok(fakeMkWrapPwd, fakeMkWrapRk, (int)KdfMode.Default, 1);
+			var verificationSalt = user?.S_Rk ?? cryptoHelpers.ComputeFakeSalt(accountId);
+			var expectedVerifier = user?.RkVerifier ?? new byte[CryptoSizes.VerifierLen];
+
+			var computed = cryptoHelpers.ComputeStoredVerifier(rkVerifier, verificationSalt);
+			
+			var proofValid = user != null && CryptographicOperations.FixedTimeEquals(expectedVerifier, computed);
+
+			CryptographicOperations.ZeroMemory(computed);
+
+			if (user != null && lockoutPolicy.IsLockedOut(user, now))
+			{
+				proofValid = false;
 			}
 
-			return WrapsResult.Ok(user.MkWrapPwd, user.MkWrapRk, (int)user.KdfMode, user.CryptoSchemaVer);
+			if (!proofValid)
+			{
+				if (user != null)
+				{
+					lockoutPolicy.RegisterFailedLogin(user, now);
+					await db.SaveChangesAsync();
+				}
+
+				var (pwdNonce, pwdCt, pwdTag) = cryptoHelpers.ComputeFakeWraps(accountId, "mk-wrap-pwd");
+				var (rkNonce, rkCt, rkTag) = cryptoHelpers.ComputeFakeWraps(accountId, "mk-wrap-rk");
+
+				return WrapsResult.Ok(
+					new EncryptedValue { Nonce = pwdNonce, CipherText = pwdCt, Tag = pwdTag },
+					new EncryptedValue { Nonce = rkNonce, CipherText = rkCt, Tag = rkTag },
+					(int)KdfMode.Default, 
+					1);
+			}
+
+			lockoutPolicy.RegisterSuccessfulLogin(user!, now);
+			await db.SaveChangesAsync();
+
+			return WrapsResult.Ok(user!.MkWrapPwd, user.MkWrapRk, (int)user.KdfMode, user.CryptoSchemaVer);
 		}
 
 		public async Task<RecoverResult> RecoverAsync(RecoverCommand cmd)
@@ -393,7 +402,7 @@ namespace Infrastructure.Services.Auth
 				var now = DateTime.UtcNow;
 				var user = await db.Users.SingleOrDefaultAsync(u => u.Id == cmd.AccountId);
 
-				var verificationSalt = user?.S_Rk ?? new byte[CryptoSizes.SaltLen];
+				var verificationSalt = user?.S_Rk ?? cryptoHelpers.ComputeFakeSalt(cmd.AccountId);
 				var expectedVerifier = user?.RkVerifier ?? new byte[CryptoSizes.VerifierLen];
 
 				var computed = cryptoHelpers.ComputeStoredVerifier(cmd.RkVerifier, verificationSalt);

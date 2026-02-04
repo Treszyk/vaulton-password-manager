@@ -458,6 +458,13 @@ export class AuthCryptoService {
     }
   }
 
+  async deriveRkVerifier(recoveryKey: string): Promise<string> {
+    const res = await this.postToWorker<{ rkVerifier: string }>('DERIVE_RK_VERIFIER', {
+      recoveryKeyB64: recoveryKey,
+    });
+    return res.rkVerifier;
+  }
+
   private postToWorker<T>(type: string, payload: any, transfer?: Transferable[]): Promise<T> {
     if (!this.worker) {
       this.initWorker();

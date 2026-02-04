@@ -25,7 +25,21 @@ namespace Infrastructure.Services.Auth
 
 		public byte[] ComputeFakeSalt(Guid accountId)
 		{
-			ReadOnlySpan<byte> context = "Vaulton.FakeSalt.v1"u8;
+			return ComputeFakeBlob(accountId, "Vaulton.FakeSalt.v1", CryptoSizes.SaltLen);
+		}
+
+		public (byte[] Nonce, byte[] CipherText, byte[] Tag) ComputeFakeWraps(Guid accountId, string label)
+		{
+			var nonce = ComputeFakeBlob(accountId, $"Vaulton.FakeNonce.v1.{label}", CryptoSizes.GcmNonceLen);
+			var ct = ComputeFakeBlob(accountId, $"Vaulton.FakeCT.v1.{label}", CryptoSizes.MkLen);
+			var tag = ComputeFakeBlob(accountId, $"Vaulton.FakeTag.v1.{label}", CryptoSizes.GcmTagLen);
+
+			return (nonce, ct, tag);
+		}
+
+		private byte[] ComputeFakeBlob(Guid accountId, string contextLabel, int length)
+		{
+			byte[] context = System.Text.Encoding.UTF8.GetBytes(contextLabel);
 			
 			Span<byte> idBytes = stackalloc byte[16];
 			if (!accountId.TryWriteBytes(idBytes))
@@ -36,7 +50,7 @@ namespace Infrastructure.Services.Auth
 			var inputLen = context.Length + idBytes.Length;
 			byte[] input = new byte[inputLen];
 			
-			context.CopyTo(input);
+			Buffer.BlockCopy(context, 0, input, 0, context.Length);
 			idBytes.CopyTo(input.AsSpan(context.Length));
 
 			try
@@ -44,8 +58,9 @@ namespace Infrastructure.Services.Auth
 				using var hmac = new HMACSHA256(options.FakeSaltSecretBytes);
 				var hash = hmac.ComputeHash(input);
 
-				var result = new byte[CryptoSizes.SaltLen];
-				Buffer.BlockCopy(hash, 0, result, 0, CryptoSizes.SaltLen);
+				var result = new byte[length];
+				var take = Math.Min(hash.Length, length);
+				Buffer.BlockCopy(hash, 0, result, 0, take);
 
 				return result;
 			}

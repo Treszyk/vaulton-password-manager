@@ -6,14 +6,14 @@ This doc describes how Vaulton derives keys, encrypts data and maps cryptographi
 
 **Goals:**
 
-- The server should and **will** never see the master password or master key in plaintext form.
-- Only opaque ciphertexts, salts, key-wrapping blobs and a user-selected KDF mode are persisted in the database
-- A database-only compromise **should not** allow the attacker to decrypt the vault data
+- The server will **never** see the master password or master key in plaintext form.
+- Only opaque ciphertexts, salts, key-wrapping blobs and verifier hashes are persisted in the database.
+- A database-only compromise **cannot** allow the attacker to easily decrypt the vault data.
 
 **Trade-offs**
 
 - Vaulton is not trying to protect against a fully compromised client due to its zero-knowledge nature (malware, keyloggers, direct access to the client machine)
-- Planned local "PIN unlock" is a UX feature that simplifies day-to-day use of the app. While enhancing UX it weakens local security due to PIN being easier to brute-force
+- **Passcode Unlock** is a UX feature that allows local sessions to be protected by a simple numeric or alphanumeric PIN. On activation, the user's `MK` is re-wrapped under a passcode-derived key and stored in the browser's persistent storage. This allows "unlocking" without the full master password as long as the local `MK` wrap persists.
 
 ## 2. Identity model (high level)
 
@@ -27,76 +27,92 @@ This doc describes how Vaulton derives keys, encrypts data and maps cryptographi
 
 #### **Password KDF mode (Argon2id-backed on the client)**
 
-Vaulton stores a coarse-grained `KdfMode` selector instead of per-user Argon2 parameters. The client still runs Argon2id and maps the mode to a concrete Argon2id profile (currently aligned with libsodium defaults):
+Vaulton stores a coarse-grained `KdfMode` selector instead of per-user Argon2 parameters. The client runs Argon2id (v1.3) and maps the mode to a concrete Argon2id profile:
 
-- `KdfMode = 1` → Default profile
-- `KdfMode = 2` → Strong profile
+- **`KdfMode = 1` (Default)**:
+  - Memory: 128 MB
+  - Iterations (opsLimit): 3
+- **`KdfMode = 2` (Strong)**:
+  - Memory: 256 MB
+  - Iterations (opsLimit): 4
+- **`KdfMode = 3` (Passcode/Local)**:
+  - Memory: 192 MB
+  - Iterations (opsLimit): 3
 
 The per-user salt `S_Pwd` (16 bytes) is stored in the database.
 
 #### **HKDF (HMAC-SHA-256)**
 
-Used to split the password-derived root key into multiple independent keys:
+Used to split high-entropy base keys into context-specific child keys. Labels use fixed, public `info` strings:
 
-- `K_vrf` (verifier key for auth)
-- `K_kek` (key-encryption key for wrapping the Master Key)
+**1. From the Password-Derived `hkdfBaseKey`**
 
-HKDF uses fixed, public `info` strings (e.g. `"vaulton/verifier"`, `"vaulton/mk-wrap"`); these do **not** need to be stored per-user.
+- `vaulton/verifier`: Derives the login `verifier`.
+- `vaulton/admin`: Derives the administrative `adminVerifier`.
+- `vaulton/kek`: Derives the Key Encryption Key (`kekKey`) for wrapping the Master Key.
 
-#### **Master Key (MK) and tag key**
+**2. From the Recovery Key (`RK`)**
 
-- The Master Key (`MK`) is a randomly generated high-entropy symmetric key (e.g. 256 bits), created on the client during registration.
+- `vaulton/rk-vrf`: Derives the `rkVerifier`.
+- `vaulton/rk-kek`: Derives the Key Encryption Key (`rkKek`) for wrapping the Master Key.
+
+**3. From the Master Key (`MK`)**
+
+- `vaulton/vault-enc`: Derives the **`vaultKey`** used for entry encryption.
+
+**4. From a Passcode/Local Key**
+
+- `vaulton/passcode-kek`: Derives the local wrap key.
+
+#### **Master Key (MK)**
+
+- The Master Key (`MK`) is a randomly generated high-entropy symmetric key (256 bits), created on the client during registration.
 - `MK` is never sent to the server in plaintext and is **not** used directly for encryption.
-- From `MK`, Vaulton derives:
-  - `K_enc` for encrypting vault entries with AES-GCM, and
-  - `K_tag` for deterministic domain tags.
 
-  `K_enc = HKDF(MK, info = "vaulton/entry-enc")`
-  `K_tag = HKDF(MK, info = "vaulton/domain-tag")`
+- **`vaultKey`** for encrypting vault entries with AES-GCM:
 
-Deriving `K_tag` from `MK` (instead of from the password-derived root key) keeps domain tags independent of password changes: as long as `MK` stays the same, `K_tag` and all existing tags remain valid. A password change only re-wraps `MK` with a new `K_kek` and updates the verifier; it does not require re-tagging all entries.
+  `vaultKey = HKDF(MK, info = "vaulton/vault-enc")`
+
+Deriving `vaultKey` from `MK` (instead of from the password-derived `hkdfBaseKey`) keeps the vault data independent of password changes. A password change only re-wraps `MK` with a new `kekKey` and updates the verifiers; it does not require re-encrypting all entries.
 
 #### **AES-GCM (AEAD)**
 
-Used on the client to encrypt:
+Used on the client to encrypt sensitive material. Every AES-GCM operation in Vaulton uses a domain-separated **AAD (Additional Authenticated Data)** to prevent ciphertext substitution:
 
-- The randomly generated Master Key (`MK`) under `K_kek` -> `MKWrapPwd`
-- (Planned) MK under randomly generated user-held Recovery Key `K_rk` -> `MKWrapRk`
-- Each vault entry JSON under `K_enc` -> per-entry { `Nonce`, `CipherText`, `Tag` }
+- **Master Key Wrap (Password)**: `vaulton:mk-wrap-pwd:schema<N>:<AccountId>`
+- **Master Key Wrap (Recovery)**: `vaulton:mk-wrap-rk:schema<N>:<AccountId>`
+- **Master Key Wrap (Passcode/Local)**: `vaulton:local-passcode-wrap:<AccountId>`
+- **Vault Entries**: `vaulton:v-entry:<EntryId>`
 
-`MKWrapPwd`/`MKWrapRk` are structured values:
+Each operation uses a **random 12-byte nonce** and produces a **16-byte authentication tag**.
 
-- `Nonce` (12 bytes)
-- `CipherText` (32 bytes, the wrapped `MK`)
-- `Tag` (16 bytes)
+Vaulton uses three independent proofs to protect different actions:
 
-Provides confidentiality + integrity,
-
-#### **HMAC-SHA-256 (Domain tags)**
-
-Used with `K_tag` to compute deterministic tags for normalized domains:
-
-`DomainTag = HMAC(K_tag, normalizedDomain)`
-
-Stored server-side to let a planned extension easily fetch entries by domain without decrypting the whole vault.
-
-This intentionally leaks a small amount of information: an attacker (or hosting provider) who can see the database can tell that a given user has, for example, 3 entries with the same `DomainTag`. They still do not learn the actual domain name or any plaintext credentials without the master password (and thus `MK` and `K_tag`), but they can see that those 3 entries belong to the same unknown site.
+1.  **Login Proof (`verifier`)**:
+    - Derived from password via `HKDF(hkdfBaseKey, info="vaulton/verifier")`.
+    - Used for standard authentication and session issuance.
+2.  **Admin Proof (`adminVerifier`)**:
+    - Derived from password via `HKDF(hkdfBaseKey, info="vaulton/admin")`.
+    - Required for sensitive actions (e.g., password change, fetching raw wraps).
+3.  **Recovery Proof (`rkVerifier`)**:
+    - Derived from the high-entropy random **Recovery Key (`RK`)** via `HKDF(rkBaseKey, info="vaulton/rk-vrf")`.
+    - Proves possession of the Recovery Key during account recovery.
 
 ### 3.2 Server-side primitives
 
 #### **PBKDF2 (HMAC-SHA-256) with pepper**
 
-Used to harden the client-side verifier against database leaks.
+Used to harden the client-side verifiers against database leaks.
 
 Input:
 
-- Raw verifier `Verifier_raw = K_vrf` from the client
-- Per-user salt `S_Verifier` (generated by the server during registration and never sent to the client)
-- Global secret `Pepper` (kept in configuration, **not** DB)
+- Raw verifier `verifier` from the client
+- Per-user salt `sVerifier` (generated by the server during registration)
+- Global secret `Pepper` (kept in configuration)
 
 Output:
 
-- `StoredVerifier = PBKDF2(Verifier_raw || Pepper, S_Verifier, iterations, outputLength)`
+- `storedVerifier = PBKDF2(verifier || Pepper, sVerifier, iterations, 32)`
 
 Only `StoredVerifier` and `S_Verifier` are stored in the database.
 

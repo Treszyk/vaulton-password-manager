@@ -5,16 +5,18 @@ Vaulton is a zero-knowledge password manager built around an **AccountId-only** 
 ## Why Vaulton
 
 - **Privacy-first identity**: no email address, no username, just an opaque AccountId.
+- **Triple Verifier System**: independent proofs for Login, Admin actions, and Account Recovery.
 - **Zero-knowledge encryption**: all vault encryption happens on the client; the server stores only opaque blobs and salts.
-- **Modern session model**: short-lived JWT access tokens + long-lived refresh tokens in HttpOnly cookies.
-- **Future-ready crypto**: KDF mode selectors are built in, and a crypto schema field exists for planned migrations.
+- **Account Recovery**: fully implemented zero-knowledge recovery via a user-held Recovery Key.
+- **Local Security**: Passcode-based local session encryption for easy yet secure access.
+- **Modern session model**: short-lived JWTs + long-lived refresh tokens (HttpOnly or JSON for extensions).
 
 ## How it works (high level)
 
 1. The client requests a fresh AccountId (`/auth/pre-register`).
 2. The client derives a verifier and key-wrapping materials locally, then registers (`/auth/register`).
 3. Login proves knowledge of the password-derived verifier (`/auth/login`).
-4. The vault is decrypted only on the client using the master key in memory.
+4. The vault is decrypted only on the client using the master key (`MK`) in memory.
 
 ## What’s in this repo
 
@@ -22,7 +24,7 @@ Vaulton is a zero-knowledge password manager built around an **AccountId-only** 
 - **backend/Application/** – service interfaces, commands, and results.
 - **backend/Infrastructure/** – EF Core persistence and auth/crypto helpers.
 - **backend/Core/** – shared crypto primitives and entities.
-- **Docs/** – deep dives on authentication and cryptography.
+- **docs/** – deep dives on authentication and cryptography.
 - **frontend/vaulton-web/** – Angular frontend application.
 
 ## Development Setup
@@ -59,11 +61,12 @@ docker compose -f docker-compose.dev.yml up --build
 
 The `-v` flag removes the persistent volume (`vaulton-db-dev-data`), giving you an empty database on the next startup.
 
-### Features
-
-- **Health-Aware Startup**: The API waits for the PostgreSQL database to be healthy before starting.
-- **Swagger UI**: Accessible at `http://localhost:8080/swagger` during development.
-- **Frontend App**: Accessible at `http://localhost:4200`.
+- **Triple Verifier**: separation of concerns between standard login, admin actions, and recovery.
+- **Passcode Unlock**: optional local PIN lock.
+- **Timing Attack Protection**: deterministic fake salts and dummy work for non-existent users.
+- **Health-Aware Startup**: the API waits for the PostgreSQL database to be healthy before starting.
+- **Swagger UI**: accessible at `http://localhost:8080/swagger` during development.
+- **Frontend App**: accessible at `http://localhost:4200` (Angular 21.0 + Tailwind CSS).
 
 ## Production Deployment
 
@@ -71,5 +74,5 @@ Production deployment is managed via the `deploy/` directory. For detailed techn
 
 ## Documentation
 
-- `Docs/auth.md` for the authentication/session model.
-- `Docs/crypto.md` for the key ladder and encryption design.
+- `docs/auth.md` for the authentication/session model.
+- `docs/crypto.md` for the key ladder and encryption design.

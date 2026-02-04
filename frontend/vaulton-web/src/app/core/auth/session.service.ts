@@ -225,7 +225,8 @@ export class SessionService {
     newPassword: string,
     newKdfMode: number,
   ): Promise<{ newRecoveryKey: string }> {
-    const wraps = await firstValueFrom(this.authApi.getRecoveryWraps(accountId));
+    const rkVerifierToken = await this.crypto.deriveRkVerifier(recoveryKey);
+    const wraps = await firstValueFrom(this.authApi.getRecoveryWraps(accountId, rkVerifierToken));
     const recoveryRes = await this.crypto.recover(
       recoveryKey,
       newPassword,

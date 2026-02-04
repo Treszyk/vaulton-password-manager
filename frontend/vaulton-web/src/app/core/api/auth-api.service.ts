@@ -28,6 +28,7 @@ export interface WrapsResponse {
 
 export interface RecoveryWrapsRequest {
   AccountId: string;
+  RkVerifier: string;
 }
 
 export interface RecoverRequest {
@@ -107,9 +108,10 @@ export class AuthApiService {
     return this.http.post<void>(`${this.baseUrl}/auth/change-password`, req);
   }
 
-  getRecoveryWraps(accountId: string): Observable<WrapsResponse> {
+  getRecoveryWraps(accountId: string, rkVerifier: string): Observable<WrapsResponse> {
     return this.http.post<WrapsResponse>(`${this.baseUrl}/auth/recovery-wraps`, {
       AccountId: accountId,
+      RkVerifier: rkVerifier,
     });
   }
 
