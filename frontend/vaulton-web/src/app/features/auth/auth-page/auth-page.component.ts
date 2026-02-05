@@ -13,6 +13,7 @@ import { StrengthMeterComponent } from '../../../shared/ui/strength-meter/streng
 import { ScrollIndicatorDirective } from '../../../shared/directives/scroll-indicator.directive';
 import { ImportantInfoModal } from '../../../shared/components/important-info-modal/important-info-modal';
 import { RecoverAccountModal } from '../../../shared/components/recover-account-modal/recover-account-modal';
+import { validateNewPassword } from '../../../core/auth/auth-utils';
 
 @Component({
   selector: 'app-auth-page',
@@ -124,8 +125,9 @@ export class AuthPageComponent {
   async onOptimizeKdf(): Promise<void> {
     if (this.isBenchmarking()) return;
 
-    if (!this.password() || !this.isPasswordStrong()) {
-      this.toast.trigger('Password too weak for benchmark.', false);
+    const validationError = validateNewPassword(this.password(), this.accountId());
+    if (validationError) {
+      this.toast.trigger(validationError, false);
       return;
     }
 
@@ -207,6 +209,13 @@ export class AuthPageComponent {
 
   async register() {
     if (this.isWorking()) return;
+
+    const validationError = validateNewPassword(this.password(), this.accountId());
+    if (validationError) {
+      this.reportError(validationError);
+      return;
+    }
+
     if (!this.isOptimized()) {
       this.toast.trigger('Please run the benchmark first.', false);
       return;

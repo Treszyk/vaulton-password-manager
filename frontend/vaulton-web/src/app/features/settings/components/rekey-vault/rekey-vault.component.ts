@@ -9,6 +9,7 @@ import { SessionService } from '../../../../core/auth/session.service';
 import { zeroize } from '../../../../core/crypto/zeroize';
 import { StrengthMeterComponent } from '../../../../shared/ui/strength-meter/strength-meter.component';
 import { ScrollIndicatorDirective } from '../../../../shared/directives/scroll-indicator.directive';
+import { validateNewPassword } from '../../../../core/auth/auth-utils';
 
 @Component({
   selector: 'app-rekey-vault',
@@ -108,26 +109,6 @@ export class RekeyVaultComponent {
   }
 
   async updateMasterKey() {
-    if (!this.rekeyOldPassword || !this.rekeyNewPassword || !this.rekeyConfirmPassword) {
-      this.toast.trigger('Fill all password fields');
-      return;
-    }
-
-    if (this.rekeyNewPassword !== this.rekeyConfirmPassword) {
-      this.toast.trigger('Passwords do not match');
-      return;
-    }
-
-    if (this.rekeyOldPassword === this.rekeyNewPassword) {
-      this.toast.trigger('New password must be different');
-      return;
-    }
-
-    if (!this.isPasswordStrong()) {
-      this.toast.trigger('Password too weak');
-      return;
-    }
-
     if (!this.isOptimized()) {
       this.toast.trigger('Please run the benchmark first');
       return;
@@ -138,6 +119,17 @@ export class RekeyVaultComponent {
       this.rekeyStatus.set('Verifying current password...');
       const bundle = await this.persistence.getBundle();
       if (!bundle) throw new Error('No vault session found');
+
+      const validationError = validateNewPassword(
+        this.rekeyNewPassword,
+        bundle.AccountId,
+        this.rekeyConfirmPassword,
+        this.rekeyOldPassword,
+      );
+
+      if (validationError) {
+        throw new Error(validationError);
+      }
 
       const oldAdminVerifier = await this.crypto.deriveAdminVerifier(
         this.rekeyOldPassword,
@@ -190,7 +182,7 @@ export class RekeyVaultComponent {
       if (err.status == 401 || err.message?.includes('401')) {
         this.toast.trigger('INVALID CREDENTIALS', false);
       } else {
-        this.toast.trigger(err.message || 'Password change failed');
+        this.toast.trigger(err.message || 'Password change failed', false);
       }
     } finally {
       if (!this.isRekeySuccess()) {

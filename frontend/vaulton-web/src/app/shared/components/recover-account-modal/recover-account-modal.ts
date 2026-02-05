@@ -15,6 +15,7 @@ import { SessionService } from '../../../core/auth/session.service';
 import { ToastService } from '../../ui/toast/toast.service';
 import { StrengthMeterComponent } from '../../ui/strength-meter/strength-meter.component';
 import { ScrollIndicatorDirective } from '../../directives/scroll-indicator.directive';
+import { validateNewPassword } from '../../../core/auth/auth-utils';
 
 type RecoveryStage = 'INPUT' | 'KEY_SETUP' | 'RECOVERING' | 'SUCCESS';
 
@@ -86,12 +87,12 @@ export class RecoverAccountModal implements OnInit, OnDestroy {
 
   async onNextToKeySetup() {
     if (!this.accountId() || !this.recoveryKey()) {
-      this.toast.trigger('Please fill all fields');
+      this.toast.trigger('Please fill all fields', false);
       return;
     }
 
     if (this.recoveryKey().trim().length < 32) {
-      this.toast.trigger('Invalid recovery key length');
+      this.toast.trigger('Invalid recovery key length', false);
       return;
     }
 
@@ -101,8 +102,14 @@ export class RecoverAccountModal implements OnInit, OnDestroy {
   async onOptimizeKdf() {
     if (this.isBenchmarking()) return;
 
-    if (!this.newPassword() || !this.isPasswordStrong()) {
-      this.toast.trigger('Password too weak for benchmark.', false);
+    const validationError = validateNewPassword(
+      this.newPassword(),
+      this.accountId(),
+      this.confirmPassword(),
+    );
+
+    if (validationError) {
+      this.toast.trigger(validationError, false);
       return;
     }
 
@@ -139,8 +146,14 @@ export class RecoverAccountModal implements OnInit, OnDestroy {
   }
 
   async onRecover() {
-    if (this.newPassword() !== this.confirmPassword()) {
-      this.toast.trigger('Passwords do not match');
+    const validationError = validateNewPassword(
+      this.newPassword(),
+      this.accountId(),
+      this.confirmPassword(),
+    );
+
+    if (validationError) {
+      this.toast.trigger(validationError, false);
       return;
     }
 
