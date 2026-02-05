@@ -80,14 +80,16 @@ import { ScrollIndicatorDirective } from '../../shared/directives/scroll-indicat
                       class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                       >Title</label
                     >
-                    <input
-                      type="text"
-                      name="title"
-                      [(ngModel)]="form.title"
-                      required
-                      placeholder="e.g. My Google Account"
-                      class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
-                    />
+                    <div class="relative">
+                      <input
+                        type="text"
+                        name="title"
+                        [(ngModel)]="form.title"
+                        required
+                        placeholder="e.g. My Google Account"
+                        class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
+                      />
+                    </div>
                   </div>
 
                   <div class="space-y-1.5">
@@ -95,13 +97,15 @@ import { ScrollIndicatorDirective } from '../../shared/directives/scroll-indicat
                       class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                       >Website</label
                     >
-                    <input
-                      type="text"
-                      name="website"
-                      [(ngModel)]="form.website"
-                      placeholder="e.g. google.com"
-                      class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
-                    />
+                    <div class="relative">
+                      <input
+                        type="text"
+                        name="website"
+                        [(ngModel)]="form.website"
+                        placeholder="e.g. google.com"
+                        class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
+                      />
+                    </div>
                   </div>
 
                   <div class="space-y-1.5">
@@ -109,14 +113,16 @@ import { ScrollIndicatorDirective } from '../../shared/directives/scroll-indicat
                       class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                       >Username / Email</label
                     >
-                    <input
-                      type="text"
-                      name="username"
-                      [(ngModel)]="form.username"
-                      required
-                      placeholder="email@example.com"
-                      class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
-                    />
+                    <div class="relative">
+                      <input
+                        type="text"
+                        name="username"
+                        [(ngModel)]="form.username"
+                        required
+                        placeholder="email@example.com"
+                        class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 !text-xs md:!text-sm/relaxed transition-all"
+                      />
+                    </div>
                   </div>
 
                   <div class="space-y-1.5">

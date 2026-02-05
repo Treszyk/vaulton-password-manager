@@ -29,7 +29,6 @@ In the current prototype all accounts use **`CryptoSchemaVer = 1`**. No branchin
 - Vaulton uses an AccountId-only identity model (as described above).
 - The server allocates new opaque GUIDs called **AccountId** and guarantees they are unique.
 - On the web client, the frontend stores the AccountId locally (for example in IndexedDB) so the user does not have to type or paste it on every visit.
-- Advanced users can export or back up their AccountId as part of an “account bundle” if they wish (future work).
 
 ### 2.2 Account creation (high level)
 

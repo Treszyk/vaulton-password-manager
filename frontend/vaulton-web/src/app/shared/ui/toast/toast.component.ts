@@ -21,8 +21,8 @@ import { ToastService } from './toast.service';
         <p
           class="text-xs font-black uppercase tracking-[0.2em] drop-shadow-lg"
           [ngClass]="{
-            'text-vault-purple': toast.isSuccess(),
-            'text-red-500': !toast.isSuccess()
+            'text-emerald-400': toast.isSuccess(),
+            'text-red-500': !toast.isSuccess(),
           }"
         >
           {{ toast.message() }}

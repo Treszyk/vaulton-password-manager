@@ -404,8 +404,7 @@ button.btn-secondary {
 }
 
 .revealed-text {
-  display: inline-block !important;
-  width: fit-content !important;
+  display: block !important;
   background: linear-gradient(to right, #a855f7 50%, #a1a1aa 50%);
   background-size: 200% 100%;
   background-position: 0% 0%;
@@ -597,19 +596,51 @@ button.btn-secondary {
 
 .input-scroll-thumb {
   position: absolute;
-  bottom: 10px;
-  left: 0;
-  height: 3px;
+  height: 6px;
   background-color: var(--v-purple);
   border-radius: 99px;
   opacity: 0;
-  pointer-events: none;
+  cursor: pointer;
+  pointer-events: auto;
   transition:
     opacity 0.2s,
     transform 0.1s linear,
     width 0.1s linear;
-  z-index: 20;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.input-scroll-thumb.is-visible {
+  opacity: 0.9;
+}
+
+.input-scroll-thumb.is-visible:hover,
+.input-scroll-thumb.is-visible:active,
+.input-scroll-thumb.is-dragging {
+  opacity: 1 !important;
+}
+
+.input-scroll-thumb.is-dragging {
+  cursor: grabbing;
+  transition: none !important;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
 .animate-spin-reverse {

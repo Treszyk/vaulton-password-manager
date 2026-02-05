@@ -9,11 +9,12 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VaultRecord } from './vault-record.model';
+import { ScrollIndicatorDirective } from '../../shared/directives/scroll-indicator.directive';
 
 @Component({
   selector: 'app-record-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ScrollIndicatorDirective],
   host: {
     class: 'h-full',
   },
@@ -109,12 +110,18 @@ import { VaultRecord } from './vault-record.model';
         </div>
       </div>
 
-      <div class="space-y-2 flex-1 flex flex-col justify-end">
-        <div class="relative">
+      <div class="space-y-2 flex-1 flex flex-col justify-end min-h-0">
+        <div class="relative flex flex-col">
           <p class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-1">Login</p>
-          <div class="flex items-center justify-between">
-            <p class="text-sm text-zinc-200 truncate font-medium">{{ record.username }}</p>
-            <div class="flex items-center justify-end h-8 md:h-10">
+          <div class="flex items-center justify-between relative gap-2 min-w-0">
+            <div class="relative flex-1 min-w-0 h-10 overflow-hidden">
+              <div scroll-indicator class="flex items-center h-full overflow-x-auto scrollbar-none">
+                <p class="text-sm text-zinc-200 whitespace-nowrap font-medium pr-2 w-max">
+                  {{ record.username }}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center justify-end h-8 md:h-10 flex-shrink-0">
               <button
                 (click)="copyUsername(record.username)"
                 class="flex items-center justify-center transition-[background-color,color,border-color,box-shadow,fill,stroke] duration-500 rounded-xl overflow-hidden px-2.5 h-full w-fit max-w-[200px]"
@@ -161,23 +168,25 @@ import { VaultRecord } from './vault-record.model';
           </div>
         </div>
 
-        <div class="relative">
+        <div class="relative flex flex-col">
           <p class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-1">Secret</p>
-          <div class="flex items-center justify-between gap-4">
-            <div class="relative flex-1 overflow-hidden flex items-center h-5">
-              <p
-                class="text-sm font-mono tracking-widest transition-all duration-300 w-fit leading-none"
-                [class.revealed-text]="reveal()"
-                [class.text-zinc-400]="!reveal()"
-              >
-                {{ reveal() ? record.password : '••••••••' }}
-              </p>
+          <div class="flex items-center justify-between gap-4 min-w-0">
+            <div class="relative flex-1 h-10 min-w-0 overflow-hidden">
+              <div scroll-indicator class="h-full overflow-x-auto scrollbar-none flex items-center">
+                <p
+                  class="text-sm font-mono tracking-widest transition-all duration-300 leading-none w-max whitespace-nowrap"
+                  [class.revealed-text]="reveal()"
+                  [class.text-zinc-400]="!reveal()"
+                >
+                  {{ reveal() ? record.password : '••••••••' }}
+                </p>
+              </div>
             </div>
 
-            <div class="flex items-center justify-end h-8 md:h-10">
+            <div class="flex items-center justify-end h-8 md:h-10 flex-shrink-0">
               <button
                 (click)="toggleReveal()"
-                class="w-8 h-8 md:w-10 md:w-10 flex items-center justify-center text-zinc-500 hover:text-white transition-all rounded-xl hover:bg-vault-dark mr-1"
+                class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-zinc-500 hover:text-white transition-all rounded-xl hover:bg-vault-dark mr-1"
                 [attr.aria-label]="reveal() ? 'Hide Password' : 'Show Password'"
               >
                 <svg
