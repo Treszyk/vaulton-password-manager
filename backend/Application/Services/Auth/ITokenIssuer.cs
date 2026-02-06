@@ -1,6 +1,8 @@
-﻿namespace Application.Services.Auth;
+﻿using Application.Services.Auth.Results;
+
+namespace Application.Services.Auth;
 
 public interface ITokenIssuer
 {
-	string IssueToken(Guid accountId);
+	IssuedTokenResult IssueToken(Guid accountId);
 }

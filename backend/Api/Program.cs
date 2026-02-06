@@ -15,6 +15,8 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.RateLimiting;
@@ -112,6 +114,38 @@ namespace Api
 					};
 					options.MapInboundClaims = false;
 					options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Sub;
+
+					options.Events = new JwtBearerEvents
+					{
+						OnTokenValidated = async context =>
+						{
+							var jti = context.Principal?.FindFirstValue(JwtRegisteredClaimNames.Jti);
+							var sub = context.Principal?.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+							if (string.IsNullOrEmpty(jti) || string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var accountId))
+							{
+								context.Fail("Unauthorized");
+								return;
+							}
+
+							using var scope = context.HttpContext.RequestServices.CreateScope();
+							var db = scope.ServiceProvider.GetRequiredService<VaultonDbContext>();
+							
+							var jtiHash = SHA256.HashData(Encoding.UTF8.GetBytes(jti));
+
+							var now = DateTime.UtcNow;
+							var isValid = await db.RefreshTokens
+								.AnyAsync(rt => rt.UserId == accountId &&
+												rt.RevokedAt == null &&
+												rt.ExpiresAt > now &&
+												rt.AccessTokenJtiHash == jtiHash);
+
+							if (!isValid)
+							{
+								context.Fail("Unauthorized");
+							}
+						}
+					};
 				});
 
 			builder.Services.AddAuthorization();

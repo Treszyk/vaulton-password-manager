@@ -120,9 +120,11 @@ namespace Infrastructure.Services.Auth
 				lockoutPolicy.RegisterSuccessfulLogin(user, now);
 				user.LastLoginAt = now;
 
-				var refreshIssue = await refreshTokenStore.MintAsync(user.Id, now);
-				var accessToken = tokenIssuer.IssueToken(user.Id);
-				return LoginResult.Ok(accessToken, refreshIssue.Token, refreshIssue.ExpiresAt, user.MkWrapPwd, user.MkWrapRk);
+				var issued = tokenIssuer.IssueToken(user.Id);
+				var jtiHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(issued.Jti));
+				
+				var refreshIssue = await refreshTokenStore.MintAsync(user.Id, jtiHash, now);
+				return LoginResult.Ok(issued.Token, refreshIssue.Token, refreshIssue.ExpiresAt, user.MkWrapPwd, user.MkWrapRk);
 			}
 			finally
 			{
@@ -135,7 +137,15 @@ namespace Infrastructure.Services.Auth
 				return RefreshResult.Fail(RefreshError.MissingRefreshToken);
 
 			var now = DateTime.UtcNow;
-			var rotation = await refreshTokenStore.RotateAsync(cmd.RefreshToken, now);
+			
+			var userId = await refreshTokenStore.GetUserIdByTokenAsync(cmd.RefreshToken);
+			if (userId == null)
+				return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+
+			var issued = tokenIssuer.IssueToken(userId.Value);
+			var jtiHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(issued.Jti));
+
+			var rotation = await refreshTokenStore.RotateAsync(cmd.RefreshToken, jtiHash, now);
 
 			switch (rotation.Status)
 			{
@@ -151,8 +161,7 @@ namespace Infrastructure.Services.Auth
 					if (rotation.UserId is null || rotation.Token is null || rotation.ExpiresAt is null)
 						return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
 
-					var access = tokenIssuer.IssueToken(rotation.UserId.Value);
-					return RefreshResult.Ok(access, rotation.Token, rotation.ExpiresAt.Value);
+					return RefreshResult.Ok(issued.Token, rotation.Token, rotation.ExpiresAt.Value);
 				default:
 					return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
 			}

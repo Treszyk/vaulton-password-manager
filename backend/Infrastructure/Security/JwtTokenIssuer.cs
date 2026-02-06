@@ -1,4 +1,5 @@
 ﻿using Application.Services.Auth;
+using Application.Services.Auth.Results;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +12,7 @@ public sealed class JwtTokenIssuer(IConfiguration config) : ITokenIssuer
 {
 	private readonly IConfiguration _config = config;
 
-	public string IssueToken(Guid accountId)
+	public IssuedTokenResult IssueToken(Guid accountId)
 	{
 		var secret = _config["Jwt:Secret"]
 			?? throw new InvalidOperationException("Missing Jwt:Secret");
@@ -27,11 +28,12 @@ public sealed class JwtTokenIssuer(IConfiguration config) : ITokenIssuer
 
 		var now = DateTime.UtcNow;
 		var expires = now.AddMinutes(20);
+		var jti = Guid.NewGuid().ToString();
 
 		var claims = new Dictionary<string, object>
 		{
 			{ JwtRegisteredClaimNames.Sub, accountId.ToString() },
-			{ JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString() },
+			{ JwtRegisteredClaimNames.Jti, jti },
 			{ JwtRegisteredClaimNames.Iat, new DateTimeOffset(now).ToUnixTimeSeconds() }
 		};
 
@@ -46,6 +48,8 @@ public sealed class JwtTokenIssuer(IConfiguration config) : ITokenIssuer
 		};
 
 		var handler = new JsonWebTokenHandler();
-		return handler.CreateToken(descriptor);
+		var token = handler.CreateToken(descriptor);
+
+		return new IssuedTokenResult(token, jti);
 	}
 }

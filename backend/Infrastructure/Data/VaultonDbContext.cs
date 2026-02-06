@@ -119,6 +119,7 @@ public class VaultonDbContext(DbContextOptions<VaultonDbContext> options) : DbCo
 
 		b.HasIndex(rt => rt.TokenHash).IsUnique();
 		b.HasIndex(rt => rt.UserId);
+		b.HasIndex(rt => rt.AccessTokenJtiHash);
 
 		b.Property(rt => rt.CreatedAt).IsRequired();
 		b.Property(rt => rt.ExpiresAt).IsRequired();

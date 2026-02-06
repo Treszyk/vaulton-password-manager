@@ -12,7 +12,7 @@ namespace Infrastructure.Services.Auth
 	{
 		private static readonly TimeSpan RefreshTtl = TimeSpan.FromDays(7);
 
-		public async Task<RefreshTokenIssueResult> MintAsync(Guid userId, DateTime now)
+		public async Task<RefreshTokenIssueResult> MintAsync(Guid userId, byte[] jtiHash, DateTime now)
 		{
 			var (refreshToken, refreshHash) = AuthCryptoHelpers.MintRefreshToken();
 			var refreshExpires = now.Add(RefreshTtl);
@@ -22,6 +22,7 @@ namespace Infrastructure.Services.Auth
 				Id = Guid.NewGuid(),
 				UserId = userId,
 				TokenHash = refreshHash,
+				AccessTokenJtiHash = jtiHash, // Link JTI hash
 				CreatedAt = now,
 				ExpiresAt = refreshExpires,
 				RevokedAt = null
@@ -32,7 +33,7 @@ namespace Infrastructure.Services.Auth
 			return new RefreshTokenIssueResult(refreshToken, refreshExpires);
 		}
 
-		public async Task<RefreshTokenRotationResult> RotateAsync(string refreshToken, DateTime now)
+		public async Task<RefreshTokenRotationResult> RotateAsync(string refreshToken, byte[] jtiHash, DateTime now)
 		{
 			if (string.IsNullOrWhiteSpace(refreshToken))
 				return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Invalid, null, null, null);
@@ -64,6 +65,7 @@ namespace Infrastructure.Services.Auth
 					Id = Guid.NewGuid(),
 					UserId = tokenRow.UserId,
 					TokenHash = newHash,
+					AccessTokenJtiHash = jtiHash,
 					CreatedAt = now,
 					ExpiresAt = newExpires,
 					RevokedAt = null
@@ -109,6 +111,24 @@ namespace Infrastructure.Services.Auth
 			await db.RefreshTokens
 				.Where(rt => rt.UserId == accountId && rt.RevokedAt == null)
 				.ExecuteUpdateAsync(s => s.SetProperty(rt => rt.RevokedAt, now));
+		}
+
+		public async Task<Guid?> GetUserIdByTokenAsync(string refreshToken)
+		{
+			if (string.IsNullOrWhiteSpace(refreshToken)) return null;
+			if (!AuthCryptoHelpers.TryHashRefreshToken(refreshToken, out var hash)) return null;
+
+			try
+			{
+				var tokenRow = await db.RefreshTokens
+					.SingleOrDefaultAsync(x => x.TokenHash.SequenceEqual(hash));
+
+				return tokenRow?.UserId;
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(hash);
+			}
 		}
 	}
 }

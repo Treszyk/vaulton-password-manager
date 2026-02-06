@@ -12,5 +12,8 @@ public class RefreshToken
 	public DateTime ExpiresAt { get; set; }
 	public DateTime? RevokedAt { get; set; }
 
+	// Hash of the active access token's Jti
+	public byte[]? AccessTokenJtiHash { get; set; }
+
 	public User? User { get; set; }
 }
