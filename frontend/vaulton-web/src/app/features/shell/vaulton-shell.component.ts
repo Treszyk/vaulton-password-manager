@@ -1,4 +1,4 @@
-import { Component, inject, ViewEncapsulation, effect } from '@angular/core';
+import { Component, inject, ViewEncapsulation, effect, HostListener } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StarfieldComponent } from '../../shared/ui/starfield/starfield.component';
@@ -78,6 +78,13 @@ export class VaultonShellComponent {
         this.settings.loadSettings(accountId);
       }
     });
+  }
+
+  @HostListener('window:visibilitychange')
+  onVisibilityChange(): void {
+    if (document.visibilityState === 'visible') {
+      this.session.verifySession();
+    }
   }
 
   triggerWipeFromLogout(): void {

@@ -1,5 +1,15 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { catchError, map, of, Observable, switchMap, firstValueFrom } from 'rxjs';
+import {
+  catchError,
+  map,
+  of,
+  Observable,
+  switchMap,
+  firstValueFrom,
+  interval,
+  Subscription,
+  tap,
+} from 'rxjs';
 import { AuthApiService } from '../api/auth-api.service';
 import { AuthStateService } from './auth-state.service';
 import { AuthCryptoService } from './auth-crypto.service';
@@ -10,6 +20,11 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 import { VaultDataService } from '../../features/vault/vault-data.service';
 import { SettingsService } from '../../core/settings/settings.service';
 import { zeroize } from '../../core/crypto/zeroize';
+
+export const SESSION_HEARTBEAT_MS = 300000; // 5 minutes
+export const SESSION_CHECK_THROTTLE_MS = 10000; // 10 seconds
+export const SESSION_INTERACTION_THROTTLE_MS = 120000; // 2 minutes
+export const SESSION_AGGRESSIVE_THROTTLE_MS = 30000; // 30 seconds
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -23,6 +38,10 @@ export class SessionService {
     private readonly toast: ToastService,
     private readonly settings: SettingsService,
   ) {}
+
+  private heartbeatSub: Subscription | null = null;
+  private lastVerificationTime = 0;
+  private verificationInFlight = false;
 
   readonly showWipeConfirm = signal(false);
   readonly showLogoutConfirm = signal(false);
@@ -51,11 +70,13 @@ export class SessionService {
           map((me) => {
             this.authState.setAccountId(me.accountId);
             this.authState.setInitialized(true);
+            this.startHeartbeat();
             return true;
           }),
           catchError(() => {
             this.authState.clear();
             this.authState.setInitialized(true);
+            this.stopHeartbeat();
             return of(false);
           }),
         );
@@ -63,6 +84,7 @@ export class SessionService {
       catchError(() => {
         this.authState.clear();
         this.authState.setInitialized(true);
+        this.stopHeartbeat();
         return of(false);
       }),
     );
@@ -92,6 +114,7 @@ export class SessionService {
       this.authState.setAccessToken(res.Token);
       this.authState.setAccountId(accountId);
       this.authState.isUnlocked.set(true);
+      this.startHeartbeat();
     } catch (e) {
       this.authState.clear();
       this.authApi.logout().subscribe();
@@ -162,13 +185,14 @@ export class SessionService {
     this.router.navigate(['/vault']);
   }
 
-  async logout(): Promise<void> {
+  async logout(message?: string): Promise<void> {
+    this.stopHeartbeat();
     await this.crypto.clearKeys(true);
 
     this.authState.clear();
     this.vault.clearData();
 
-    this.toast.queue('Logged out successfully');
+    this.toast.queue(message || 'Logged out successfully', false);
 
     this.authApi.logout().subscribe({
       complete: () => {
@@ -254,5 +278,38 @@ export class SessionService {
     await this.persistence.saveAccountId(accountId);
     this.toast.queue('Account recovered successfully. Please log in with your new password.');
     return { newRecoveryKey: recoveryRes.newRecoveryKey };
+  }
+
+  async verifySession(throttleMs = SESSION_CHECK_THROTTLE_MS): Promise<void> {
+    const now = Date.now();
+    if (this.verificationInFlight || now - this.lastVerificationTime < throttleMs) {
+      return;
+    }
+
+    this.verificationInFlight = true;
+    try {
+      const me = await firstValueFrom(this.authApi.me().pipe(catchError(() => of(null))));
+      this.lastVerificationTime = Date.now();
+
+      if (!me) {
+        await this.logout('Your session was terminated or has expired.');
+      }
+    } finally {
+      this.verificationInFlight = false;
+    }
+  }
+
+  private startHeartbeat(): void {
+    this.stopHeartbeat();
+    this.heartbeatSub = interval(SESSION_HEARTBEAT_MS).subscribe(() => {
+      this.verifySession(SESSION_HEARTBEAT_MS);
+    });
+  }
+
+  private stopHeartbeat(): void {
+    if (this.heartbeatSub) {
+      this.heartbeatSub.unsubscribe();
+      this.heartbeatSub = null;
+    }
   }
 }

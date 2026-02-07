@@ -6,10 +6,17 @@ import {
   signal,
   ViewEncapsulation,
   OnDestroy,
+  HostListener,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VaultRecord } from './vault-record.model';
 import { ScrollIndicatorDirective } from '../../shared/directives/scroll-indicator.directive';
+import {
+  SessionService,
+  SESSION_AGGRESSIVE_THROTTLE_MS,
+  SESSION_INTERACTION_THROTTLE_MS,
+} from '../../core/auth/session.service';
 
 @Component({
   selector: 'app-record-card',
@@ -48,7 +55,7 @@ import { ScrollIndicatorDirective } from '../../shared/directives/scroll-indicat
         <div class="flex items-center justify-end gap-1.5 flex-shrink-0 min-w-[4.5rem]">
           <button
             type="button"
-            (click)="onEdit.emit(record)"
+            (click)="onEditClick()"
             class="edit-btn h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white transition-all hover:bg-vault-900"
             title="Edit Entry"
             aria-label="Edit Entry"
@@ -326,7 +333,18 @@ export class RecordCardComponent implements OnDestroy {
   private copyTimeout?: any;
   private statusTimeout?: any;
 
-  toggleReveal() {
+  private readonly session = inject(SessionService);
+
+  @HostListener('click')
+  onCardInteraction() {
+    this.session.verifySession(SESSION_INTERACTION_THROTTLE_MS);
+  }
+
+  async toggleReveal() {
+    if (!this.reveal()) {
+      await this.session.verifySession(SESSION_AGGRESSIVE_THROTTLE_MS);
+    }
+
     if (this.reveal()) {
       this.reveal.set(false);
       if (this.revealTimeout) clearTimeout(this.revealTimeout);
@@ -340,7 +358,7 @@ export class RecordCardComponent implements OnDestroy {
     }, 8000);
   }
 
-  onDeleteClick(id: string) {
+  async onDeleteClick(id: string) {
     if (!this.deleteConfirmActive()) {
       this.deleteConfirmActive.set(true);
       if (this.deleteTimeout) clearTimeout(this.deleteTimeout);
@@ -348,6 +366,7 @@ export class RecordCardComponent implements OnDestroy {
       return;
     }
 
+    await this.session.verifySession(SESSION_AGGRESSIVE_THROTTLE_MS);
     this.onDelete.emit(id);
     this.deleteConfirmActive.set(false);
     if (this.deleteTimeout) clearTimeout(this.deleteTimeout);
@@ -357,13 +376,18 @@ export class RecordCardComponent implements OnDestroy {
     navigator.clipboard.writeText(value);
   }
 
-  copyUsername(value: string) {
+  async onEditClick() {
+    await this.session.verifySession(SESSION_AGGRESSIVE_THROTTLE_MS);
+    this.onEdit.emit(this.record);
+  }
+
+  async copyUsername(value: string) {
     this.resetFeedback();
     this.copy(value);
     this.showFeedback('username');
   }
 
-  copyPassword(value: string) {
+  async copyPassword(value: string) {
     if (this.justCopied() && this.copiedStatus() === 'password') return;
 
     if (!this.copyConfirmActive()) {
@@ -374,6 +398,7 @@ export class RecordCardComponent implements OnDestroy {
       return;
     }
 
+    await this.session.verifySession(SESSION_AGGRESSIVE_THROTTLE_MS);
     this.copy(value);
     this.copyConfirmActive.set(false);
     if (this.copyTimeout) clearTimeout(this.copyTimeout);

@@ -3,12 +3,14 @@ import { inject } from '@angular/core';
 import { Observable, catchError, finalize, shareReplay, switchMap, tap, throwError } from 'rxjs';
 import { AuthApiService, TokenResponse } from '../api/auth-api.service';
 import { AuthStateService } from './auth-state.service';
+import { SessionService } from './session.service';
 
 let refreshInFlight$: Observable<TokenResponse> | null = null;
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authState = inject(AuthStateService);
   const authApi = inject(AuthApiService);
+  const session = inject(SessionService);
 
   if (
     req.url.includes('/auth/refresh') ||
@@ -44,8 +46,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             }),
             catchError((err) => {
               authState.setAccessToken(null);
+              if (err instanceof HttpErrorResponse && (err.status === 401 || err.status === 403)) {
+                session.logout('Your session was terminated or has expired.');
+              }
               return throwError(() => err);
-            })
+            }),
           );
         }
 
@@ -55,10 +60,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               setHeaders: { Authorization: `Bearer ${res.Token}` },
             });
             return next(newReq);
-          })
+          }),
         );
       }
       return throwError(() => error);
-    })
+    }),
   );
 };
