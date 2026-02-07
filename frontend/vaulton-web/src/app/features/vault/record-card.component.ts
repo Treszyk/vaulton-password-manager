@@ -83,8 +83,8 @@ import {
               class="flex items-center justify-center transition-[background-color,color,border-color,box-shadow,fill,stroke] duration-500 rounded-xl overflow-hidden px-2.5 h-full w-fit max-w-[150px]"
               [class.trash-btn]="!deleteConfirmActive()"
               [ngClass]="{
-                'bg-red-500 text-white shadow-lg shadow-red-500/20': deleteConfirmActive(),
-                'text-red-500/50 hover:bg-red-500/10 shadow-none': !deleteConfirmActive(),
+                'bg-red-800 text-white shadow-lg shadow-red-800/20': deleteConfirmActive(),
+                'text-red-500/50 hover:bg-red-800/10 shadow-none': !deleteConfirmActive(),
               }"
               title="Delete Entry"
               [attr.aria-label]="deleteConfirmActive() ? 'Confirm Delete' : 'Delete Entry'"

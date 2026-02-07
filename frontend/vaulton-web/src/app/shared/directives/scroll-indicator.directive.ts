@@ -192,7 +192,10 @@ export class ScrollIndicatorDirective implements OnInit, OnDestroy, AfterViewIni
 
     const maxThumbTravel = trackWidth - thumbWidth;
     const leftPos = pl + progress * maxThumbTravel;
-    const topPos = el.offsetTop + el.offsetHeight - (el.offsetHeight > 30 ? 14 : 6);
+
+    const isInput = el.tagName === 'INPUT';
+    const bottomOffset = (el.offsetHeight > 30 ? 14 : 6) - (isInput ? 0 : 6);
+    const topPos = el.offsetTop + el.offsetHeight - bottomOffset;
 
     this.renderer.setStyle(this.indicator, 'width', `${thumbWidth}px`);
     this.renderer.setStyle(this.indicator, 'transform', `translate(${leftPos}px, ${topPos}px)`);

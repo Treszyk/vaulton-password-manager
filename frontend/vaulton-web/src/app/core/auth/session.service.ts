@@ -45,6 +45,7 @@ export class SessionService {
 
   readonly showWipeConfirm = signal(false);
   readonly showLogoutConfirm = signal(false);
+  readonly showLogoutAllConfirm = signal(false);
 
   triggerWipeConfirm(): void {
     this.showWipeConfirm.set(true);
@@ -60,6 +61,14 @@ export class SessionService {
 
   cancelLogoutConfirm(): void {
     this.showLogoutConfirm.set(false);
+  }
+
+  triggerLogoutAllConfirm(): void {
+    this.showLogoutAllConfirm.set(true);
+  }
+
+  cancelLogoutAllConfirm(): void {
+    this.showLogoutAllConfirm.set(false);
   }
 
   tryRestore(): Observable<boolean> {
@@ -228,6 +237,19 @@ export class SessionService {
         window.location.href = '/auth';
       },
     });
+  }
+
+  async logoutAll(): Promise<void> {
+    try {
+      await firstValueFrom(this.authApi.logoutAll());
+      this.toast.trigger('Logged out from all devices');
+    } catch (e) {
+      console.warn('Logout all failed', e);
+      this.toast.trigger('Failed to logout all devices', true);
+    } finally {
+      this.cancelLogoutAllConfirm();
+      await this.logout('Local session terminated.');
+    }
   }
 
   getNewAccount(): Observable<{ AccountId: string; CryptoSchemaVer: number }> {

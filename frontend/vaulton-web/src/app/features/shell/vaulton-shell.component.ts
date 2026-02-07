@@ -9,6 +9,7 @@ import { SettingsService } from '../../core/settings/settings.service';
 import { UnlockOverlayComponent } from './unlock-overlay/unlock-overlay.component';
 import { WipeConfirmationComponent } from './wipe-confirmation.component';
 import { LogoutConfirmationComponent } from './logout-confirmation.component';
+import { LogoutAllConfirmationComponent } from './logout-all-confirmation.component';
 
 @Component({
   selector: 'app-vaulton-shell',
@@ -20,6 +21,7 @@ import { LogoutConfirmationComponent } from './logout-confirmation.component';
     UnlockOverlayComponent,
     WipeConfirmationComponent,
     LogoutConfirmationComponent,
+    LogoutAllConfirmationComponent,
   ],
   host: {
     class: 'flex-1 min-h-0 flex flex-col',
@@ -36,13 +38,18 @@ import { LogoutConfirmationComponent } from './logout-confirmation.component';
         *ngIf="
           (authState.isInitialized() && !authState.isUnlocked()) ||
           session.showWipeConfirm() ||
-          session.showLogoutConfirm()
+          session.showLogoutConfirm() ||
+          session.showLogoutAllConfirm()
         "
         class="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-md animate-fade-in"
       >
         <div class="min-h-full w-full flex items-center justify-center p-4">
           <app-unlock-overlay
-            *ngIf="!session.showWipeConfirm() && !session.showLogoutConfirm()"
+            *ngIf="
+              !session.showWipeConfirm() &&
+              !session.showLogoutConfirm() &&
+              !session.showLogoutAllConfirm()
+            "
             class="w-full flex justify-center"
           ></app-unlock-overlay>
 
@@ -60,6 +67,13 @@ import { LogoutConfirmationComponent } from './logout-confirmation.component';
             (requestWipe)="triggerWipeFromLogout()"
             class="w-full flex justify-center"
           ></app-logout-confirmation>
+
+          <app-logout-all-confirmation
+            *ngIf="session.showLogoutAllConfirm()"
+            (confirmLogoutAll)="session.logoutAll()"
+            (cancel)="session.cancelLogoutAllConfirm()"
+            class="w-full flex justify-center"
+          ></app-logout-all-confirmation>
         </div>
       </div>
     </div>

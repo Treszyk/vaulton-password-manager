@@ -96,6 +96,10 @@ export class AuthApiService {
     return this.http.post<void>(`${this.baseUrl}/auth/logout`, {});
   }
 
+  logoutAll(): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/auth/logout-all`, {});
+  }
+
   me(): Observable<MeResponse> {
     return this.http.get<MeResponse>(`${this.baseUrl}/auth/me`);
   }

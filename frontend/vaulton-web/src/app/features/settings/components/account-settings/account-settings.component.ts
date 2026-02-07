@@ -1,7 +1,9 @@
-import { Component, input, inject } from '@angular/core';
+import { Component, input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../../shared/ui/toast/toast.service';
+import { AuthApiService } from '../../../../core/api/auth-api.service';
+import { SessionService } from '../../../../core/auth/session.service';
 import { ScrollIndicatorDirective } from '../../../../shared/directives/scroll-indicator.directive';
 
 @Component({
@@ -12,6 +14,8 @@ import { ScrollIndicatorDirective } from '../../../../shared/directives/scroll-i
 })
 export class AccountSettingsComponent {
   protected readonly toast = inject(ToastService);
+  protected readonly session = inject(SessionService);
+
   accountId = input.required<string>();
 
   copyToClipboard(text: string) {
@@ -19,5 +23,9 @@ export class AccountSettingsComponent {
     navigator.clipboard.writeText(text).then(() => {
       this.toast.trigger('Copied to Clipboard');
     });
+  }
+
+  logoutAll() {
+    this.session.triggerLogoutAllConfirm();
   }
 }
