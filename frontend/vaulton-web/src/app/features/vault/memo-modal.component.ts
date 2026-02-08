@@ -11,7 +11,7 @@ import { VaultRecord } from './vault-record.model';
       class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in"
     >
       <div class="w-full max-w-md p-8 rounded-3xl overlay-card animate-slide-up">
-        <div class="flex flex-col items-center text-center mb-8">
+        <div class="flex flex-col items-center text-center mb-6">
           <div
             class="w-16 h-16 rounded-full bg-vault-purple/20 flex items-center justify-center mb-4"
           >
@@ -40,13 +40,16 @@ import { VaultRecord } from './vault-record.model';
 
         <div class="space-y-4 mb-8">
           <div
-            class="bg-vault-dark border border-zinc-700 rounded-2xl p-6 max-h-[40vh] overflow-y-auto"
+            class="bg-vault-dark border border-zinc-700 rounded-2xl overflow-hidden max-h-[40vh] flex flex-col"
           >
-            <p
-              class="text-[0.875rem] md:text-[1.125rem] text-zinc-300 leading-relaxed whitespace-pre-wrap selection:bg-vault-purple/30"
+            <div
+              class="px-6 py-5 overflow-y-auto overflow-x-hidden flex-1 selection:bg-vault-purple/30"
             >
-              {{ record.notes }}
-            </p>
+              <p
+                class="text-[0.875rem] md:text-[1.125rem] text-zinc-300 leading-relaxed whitespace-pre-wrap break-words"
+                [textContent]="record.notes.trim()"
+              ></p>
+            </div>
           </div>
         </div>
 

@@ -206,13 +206,17 @@ import { ScrollIndicatorDirective } from '../../shared/directives/scroll-indicat
                     class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-white/85 ml-1"
                     >Notes</label
                   >
-                  <textarea
-                    name="notes"
-                    [(ngModel)]="form.notes"
-                    rows="2"
-                    placeholder="Private annotations..."
-                    class="w-full !bg-vault-black !border-zinc-700 focus:!border-vault-purple/30 !rounded-xl !py-3.5 transition-all resize-none !text-xs md:!text-base"
-                  ></textarea>
+                  <div
+                    class="w-full bg-vault-black border border-zinc-700 rounded-xl overflow-hidden focus-within:border-vault-purple/30 transition-all"
+                  >
+                    <textarea
+                      name="notes"
+                      [(ngModel)]="form.notes"
+                      rows="2"
+                      placeholder="Private annotations..."
+                      class="w-full !bg-transparent border-none !px-4 !py-3.5 outline-none resize-none !text-xs md:!text-base block"
+                    ></textarea>
+                  </div>
                 </div>
 
                 <div

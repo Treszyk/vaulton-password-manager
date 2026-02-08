@@ -385,6 +385,7 @@ button.btn-secondary {
 }
 ::-webkit-scrollbar-thumb {
   @apply bg-vault-grey rounded-full hover:bg-vault-grey-light transition-all;
+  cursor: pointer !important;
 }
 
 @keyframes slideInLeft {
