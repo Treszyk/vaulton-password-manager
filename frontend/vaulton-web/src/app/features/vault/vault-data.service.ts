@@ -34,7 +34,13 @@ export class VaultDataService {
 
       for (const entry of encryptedEntries) {
         try {
-          const data = await this.vaultCrypto.decryptEntry(entry.Payload, entry.Id);
+          const accountId = this.authState.accountId();
+          if (!accountId) throw new Error('Account ID missing');
+
+          const data = await this.vaultCrypto.decryptEntry(
+            entry.Payload,
+            `${accountId}:${entry.Id}`,
+          );
 
           decryptedRecords.push({
             id: entry.Id,
@@ -52,7 +58,11 @@ export class VaultDataService {
 
   async addRecord(input: VaultRecordInput) {
     const { EntryId } = await firstValueFrom(this.api.preCreate());
-    const encrypted = await this.vaultCrypto.encryptEntry(input, EntryId);
+
+    const accountId = this.authState.accountId();
+    if (!accountId) throw new Error('Account ID missing');
+
+    const encrypted = await this.vaultCrypto.encryptEntry(input, `${accountId}:${EntryId}`);
 
     await firstValueFrom(
       this.api.create({
@@ -69,7 +79,10 @@ export class VaultDataService {
   }
 
   async updateRecord(id: string, input: VaultRecordInput) {
-    const encrypted = await this.vaultCrypto.encryptEntry(input, id);
+    const accountId = this.authState.accountId();
+    if (!accountId) throw new Error('Account ID missing');
+
+    const encrypted = await this.vaultCrypto.encryptEntry(input, `${accountId}:${id}`);
 
     await firstValueFrom(
       this.api.update(id, {
