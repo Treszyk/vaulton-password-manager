@@ -50,6 +50,8 @@ In the current prototype all accounts use **`CryptoSchemaVer = 1`**. No branchin
    - `S_Rk` (for `rkVerifier`)
 5. The server hashes the client's proofs with these salts using PBKDF2 (and a server-side pepper) and stores the final **stored verifiers**. It never sees the password or the master key in plaintext.
 
+![Registration Flow](/docs/diagrams/registration-flow.jpeg)
+
 ### 2.3 Login (high level)
 
 1. The client calls `POST /auth/pre-login` with the `AccountId` to fetch the per-user `S_Pwd` and `KdfMode`.
@@ -60,6 +62,8 @@ In the current prototype all accounts use **`CryptoSchemaVer = 1`**. No branchin
    - Sets a refresh token cookie (`Vaulton.Refresh`) or returns it in JSON.
    - Returns both `MKWrapPwd` and `MKWrapRk` so the client can immediately begin decryption.
 5. The client uses the access token to call protected endpoints. The refresh token is used to obtain new access tokens.
+
+![Login Flow](/docs/diagrams/login-flow.jpeg)
 
 ### 2.4 Session vs vault unlock (conceptual)
 

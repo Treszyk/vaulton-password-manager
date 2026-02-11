@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal, computed, viewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { AuthStateService } from '../../../core/auth/auth-state.service';
 import { AuthPersistenceService } from '../../../core/auth/auth-persistence.service';
@@ -21,6 +21,7 @@ import { validateNewPassword } from '../../../core/auth/auth-utils';
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     StarfieldComponent,
     StrengthMeterComponent,
     ScrollIndicatorDirective,

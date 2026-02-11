@@ -29,6 +29,19 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'docs',
+    loadComponent: () =>
+      import('./features/docs/docs-layout.component').then((m) => m.DocsLayoutComponent),
+    children: [
+      {
+        path: ':slug',
+        loadComponent: () =>
+          import('./features/docs/docs-viewer.component').then((m) => m.DocsViewerComponent),
+      },
+      { path: '', redirectTo: 'auth', pathMatch: 'full' },
+    ],
+  },
   { path: '', redirectTo: 'auth', pathMatch: 'full' },
   { path: '**', redirectTo: 'auth' },
 ];

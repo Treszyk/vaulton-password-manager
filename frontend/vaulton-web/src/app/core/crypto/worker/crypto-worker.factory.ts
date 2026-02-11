@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
+import DOMPurify from 'dompurify';
 
 let workerPolicy: any = null;
 
-function getWorkerPolicy(): any {
+export function getWorkerPolicy(): any {
   if (workerPolicy) return workerPolicy;
 
   const win = window as any;
@@ -28,6 +29,7 @@ function getWorkerPolicy(): any {
             throw new Error(`Invalid worker URL: ${url}`);
           }
         },
+        createHTML: (html: string) => DOMPurify.sanitize(html),
       });
     } catch (e) {
       // Re-creating trusted type policy failed

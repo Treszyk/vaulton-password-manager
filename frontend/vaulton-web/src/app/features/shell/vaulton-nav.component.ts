@@ -26,14 +26,6 @@ import { SessionService } from '../../core/auth/session.service';
 
         <div *ngIf="!isAuthPage()" class="flex items-center gap-6 h-full animate-fade-in pt-1">
           <a
-            routerLink="/"
-            routerLinkActive="!text-vault-purple !opacity-100"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="text-xs font-black uppercase tracking-[0.25em] text-zinc-200 hover:text-white transition-all active:scale-[0.98] decoration-none"
-          >
-            Home
-          </a>
-          <a
             routerLink="/vault"
             routerLinkActive="!text-vault-purple !opacity-100"
             [routerLinkActiveOptions]="{ exact: true }"
@@ -47,6 +39,13 @@ import { SessionService } from '../../core/auth/session.service';
             class="text-xs font-black uppercase tracking-[0.25em] text-zinc-200 hover:text-white transition-all active:scale-[0.98] decoration-none"
           >
             Settings
+          </a>
+          <a
+            routerLink="/docs/auth"
+            routerLinkActive="!text-vault-purple !opacity-100"
+            class="text-xs font-black uppercase tracking-[0.25em] text-zinc-200 hover:text-white transition-all active:scale-[0.98] decoration-none"
+          >
+            Docs
           </a>
         </div>
       </div>

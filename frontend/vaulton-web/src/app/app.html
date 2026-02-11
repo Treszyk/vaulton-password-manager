@@ -2,13 +2,17 @@
   <div
     class="h-screen transition-opacity duration-500 selection:bg-vault-purple/30 selection:text-vault-purple-bright flex flex-col overflow-hidden"
   >
-    <app-vaulton-nav class="flex-none"></app-vaulton-nav>
+    @if (!router.url.includes('/docs')) {
+      <app-vaulton-nav class="flex-none"></app-vaulton-nav>
+    }
 
     <main
       class="w-full flex-1 min-h-0 flex flex-col"
       [class.auth-layout]="router.url.includes('/auth') || router.url === '/' || router.url === ''"
       [class.max-w-7xl]="router.url.includes('/vault')"
       [class.mx-auto]="router.url.includes('/vault')"
+      [class.px-4]="router.url.includes('/vault')"
+      [class.md:px-8]="router.url.includes('/vault')"
     >
       <router-outlet></router-outlet>
     </main>

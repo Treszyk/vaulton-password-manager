@@ -82,7 +82,7 @@ Used on the client to encrypt sensitive material. Every AES-GCM operation in Vau
 - **Master Key Wrap (Password)**: `vaulton:mk-wrap-pwd:schema<N>:<AccountId>`
 - **Master Key Wrap (Recovery)**: `vaulton:mk-wrap-rk:schema<N>:<AccountId>`
 - **Master Key Wrap (Passcode/Local)**: `vaulton:local-passcode-wrap:<AccountId>`
-- **Vault Entries**: `vaulton:v-entry:<EntryId>`
+- **Vault Entries**: `vaulton:v-entry:<AccountId>:<EntryId>`
 
 Each operation uses a **random 12-byte nonce** and produces a **16-byte authentication tag**.
 
@@ -97,6 +97,9 @@ Vaulton uses three independent proofs to protect different actions:
 3.  **Recovery Proof (`rkVerifier`)**:
     - Derived from the high-entropy random **Recovery Key (`RK`)** via `HKDF(rkBaseKey, info="vaulton/rk-vrf")`.
     - Proves possession of the Recovery Key during account recovery.
+
+![Vault Entry Encryption](/docs/diagrams/encryption-flow.jpeg)
+![Vault Entry Decryption](/docs/diagrams/decryption-flow.jpeg)
 
 ### 3.2 Server-side primitives
 
