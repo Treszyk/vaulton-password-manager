@@ -37,7 +37,7 @@
         
         # Content Security Policy (Mirrored from Backend but enforced at Edge)
         # Note: frame-ancestors 'none' MUST be in the header to work properly
-        Content-Security-Policy "default-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests; block-all-mixed-content; require-trusted-types-for 'script'; trusted-types angular vaulton-worker-policy;"
+        Content-Security-Policy "default-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests; block-all-mixed-content; require-trusted-types-for 'script'; trusted-types angular vaulton-worker-policy dompurify;"
         
         # Clean up identifying headers
         -Server

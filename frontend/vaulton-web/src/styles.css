@@ -665,6 +665,7 @@ button.btn-secondary {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 1px;
+  pointer-events: none;
   z-index: 999999;
 }
 
@@ -677,8 +678,8 @@ button.btn-secondary {
   .demo-countdown {
     top: 8px;
     bottom: auto;
-    left: 8px;
-    transform: none;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 12px;
     padding: 6px 12px;
   }
