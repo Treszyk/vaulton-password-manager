@@ -2,8 +2,8 @@ import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { SessionTimerService } from '../../core/auth/session-timer.service';
-import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 import { SessionService } from '../../core/auth/session.service';
+import { SessionUiService } from '../../core/auth/session-ui.service';
 
 @Component({
   selector: 'app-vaulton-nav',
@@ -158,6 +158,7 @@ export class VaultonNavComponent {
   public readonly router = inject(Router);
   protected readonly timer = inject(SessionTimerService);
   private readonly session = inject(SessionService);
+  private readonly sessionUi = inject(SessionUiService);
 
   isAuthPage(): boolean {
     const url = this.router.url;
@@ -173,10 +174,10 @@ export class VaultonNavComponent {
   }
 
   triggerLogout(): void {
-    this.session.triggerLogoutConfirm();
+    this.sessionUi.triggerLogoutConfirm();
   }
 
   triggerWipe(): void {
-    this.session.triggerWipeConfirm();
+    this.sessionUi.triggerWipeConfirm();
   }
 }

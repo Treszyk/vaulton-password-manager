@@ -2,9 +2,9 @@ import { Component, inject, ViewEncapsulation, effect, HostListener } from '@ang
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StarfieldComponent } from '../../shared/ui/starfield/starfield.component';
-import { AuthCryptoService } from '../../core/auth/auth-crypto.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { SessionService } from '../../core/auth/session.service';
+import { SessionUiService } from '../../core/auth/session-ui.service';
 import { SettingsService } from '../../core/settings/settings.service';
 import { UnlockOverlayComponent } from './unlock-overlay/unlock-overlay.component';
 import { WipeConfirmationComponent } from './wipe-confirmation.component';
@@ -37,41 +37,41 @@ import { LogoutAllConfirmationComponent } from './logout-all-confirmation.compon
       <div
         *ngIf="
           (authState.isInitialized() && !authState.isUnlocked()) ||
-          session.showWipeConfirm() ||
-          session.showLogoutConfirm() ||
-          session.showLogoutAllConfirm()
+          sessionUi.showWipeConfirm() ||
+          sessionUi.showLogoutConfirm() ||
+          sessionUi.showLogoutAllConfirm()
         "
         class="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-md animate-fade-in"
       >
         <div class="min-h-full w-full flex items-center justify-center p-4">
           <app-unlock-overlay
             *ngIf="
-              !session.showWipeConfirm() &&
-              !session.showLogoutConfirm() &&
-              !session.showLogoutAllConfirm()
+              !sessionUi.showWipeConfirm() &&
+              !sessionUi.showLogoutConfirm() &&
+              !sessionUi.showLogoutAllConfirm()
             "
             class="w-full flex justify-center"
           ></app-unlock-overlay>
 
           <app-wipe-confirmation
-            *ngIf="session.showWipeConfirm()"
+            *ngIf="sessionUi.showWipeConfirm()"
             (confirmWipe)="session.wipeDevice()"
-            (cancel)="session.cancelWipeConfirm()"
+            (cancel)="sessionUi.cancelWipeConfirm()"
             class="w-full flex justify-center"
           ></app-wipe-confirmation>
 
           <app-logout-confirmation
-            *ngIf="session.showLogoutConfirm()"
+            *ngIf="sessionUi.showLogoutConfirm()"
             (confirmLogout)="session.logout()"
-            (cancel)="session.cancelLogoutConfirm()"
+            (cancel)="sessionUi.cancelLogoutConfirm()"
             (requestWipe)="triggerWipeFromLogout()"
             class="w-full flex justify-center"
           ></app-logout-confirmation>
 
           <app-logout-all-confirmation
-            *ngIf="session.showLogoutAllConfirm()"
+            *ngIf="sessionUi.showLogoutAllConfirm()"
             (confirmLogoutAll)="session.logoutAll()"
-            (cancel)="session.cancelLogoutAllConfirm()"
+            (cancel)="sessionUi.cancelLogoutAllConfirm()"
             class="w-full flex justify-center"
           ></app-logout-all-confirmation>
         </div>
@@ -83,6 +83,7 @@ import { LogoutAllConfirmationComponent } from './logout-all-confirmation.compon
 export class VaultonShellComponent {
   protected readonly authState = inject(AuthStateService);
   protected readonly session = inject(SessionService);
+  protected readonly sessionUi = inject(SessionUiService);
   protected readonly settings = inject(SettingsService);
 
   constructor() {
@@ -102,7 +103,7 @@ export class VaultonShellComponent {
   }
 
   triggerWipeFromLogout(): void {
-    this.session.cancelLogoutConfirm();
-    this.session.triggerWipeConfirm();
+    this.sessionUi.cancelLogoutConfirm();
+    this.sessionUi.triggerWipeConfirm();
   }
 }

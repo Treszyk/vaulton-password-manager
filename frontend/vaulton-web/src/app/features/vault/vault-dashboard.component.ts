@@ -258,26 +258,18 @@ export class VaultDashboardComponent implements OnDestroy {
     try {
       if (editRec) {
         await this.vault.updateRecord(editRec.id, input);
-        this.toast.trigger('Vault Updated', true);
       } else {
         await this.vault.addRecord(input);
-        this.toast.trigger('Secret Added', true);
       }
       editor.triggerClose();
     } catch (e) {
-      this.toast.trigger('Something went wrong', false);
       this.closeEditor();
       this.vault.loadRecords();
     }
   }
 
   async deleteRecord(id: string) {
-    try {
-      await this.vault.deleteRecord(id);
-      this.toast.trigger('Secret Removed', true);
-    } catch (e) {
-      this.toast.trigger('Something went wrong', false);
-    }
+    await this.vault.deleteRecord(id).catch(() => {});
   }
 
   editRecord(record: VaultRecord) {

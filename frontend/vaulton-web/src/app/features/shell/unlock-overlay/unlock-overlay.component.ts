@@ -12,6 +12,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthPersistenceService } from '../../../core/auth/auth-persistence.service';
 import { SessionService } from '../../../core/auth/session.service';
+import { SessionUiService } from '../../../core/auth/session-ui.service';
 import { SessionTimerService } from '../../../core/auth/session-timer.service';
 import { ToastService } from '../../../shared/ui/toast/toast.service';
 import { ScrollIndicatorDirective } from '../../../shared/directives/scroll-indicator.directive';
@@ -25,6 +26,7 @@ import { ScrollIndicatorDirective } from '../../../shared/directives/scroll-indi
 })
 export class UnlockOverlayComponent implements OnInit {
   private readonly session = inject(SessionService);
+  private readonly sessionUi = inject(SessionUiService);
   private readonly persistence = inject(AuthPersistenceService);
   private readonly toast = inject(ToastService);
   private readonly sessionTimer = inject(SessionTimerService);
@@ -111,10 +113,10 @@ export class UnlockOverlayComponent implements OnInit {
   }
 
   triggerLogout() {
-    this.session.triggerLogoutConfirm();
+    this.sessionUi.triggerLogoutConfirm();
   }
 
   triggerWipe() {
-    this.session.triggerWipeConfirm();
+    this.sessionUi.triggerWipeConfirm();
   }
 }

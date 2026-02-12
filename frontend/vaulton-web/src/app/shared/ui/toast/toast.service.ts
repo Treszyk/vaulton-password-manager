@@ -17,25 +17,47 @@ export class ToastService {
     }
   }
 
+  private queueList: { msg: string; success: boolean }[] = [];
+  private isProcessing = false;
+
   trigger(msg: string, success: boolean = true) {
-    this.message.set(msg);
-    this.isSuccess.set(success);
-    this.show.set(false);
+    this.queueList.push({ msg, success });
+
+    if (this.queueList.length > 5) {
+      this.queueList = this.queueList.slice(-5);
+    }
+
+    this.processQueue();
+  }
+
+  private processQueue() {
+    if (this.isProcessing || this.queueList.length === 0) {
+      return;
+    }
+
+    this.isProcessing = true;
+    const next = this.queueList.shift();
+    if (!next) {
+      this.isProcessing = false;
+      return;
+    }
+
+    this.message.set(next.msg);
+    this.isSuccess.set(next.success);
 
     this.show.set(false);
 
     setTimeout(() => {
       this.show.set(true);
 
-      this.show.set(true);
-
       setTimeout(() => {
         this.show.set(false);
-        this.show.set(false);
+
         setTimeout(() => {
-          if (!this.show()) this.message.set('');
-        }, 500);
-      }, 2500);
+          this.isProcessing = false;
+          this.processQueue();
+        }, 400);
+      }, 3000);
     }, 50);
   }
 

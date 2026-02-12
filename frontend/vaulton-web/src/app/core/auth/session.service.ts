@@ -20,6 +20,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 import { VaultDataService } from '../../features/vault/vault-data.service';
 import { SettingsService } from '../../core/settings/settings.service';
 import { zeroize } from '../../core/crypto/zeroize';
+import { SessionUiService } from './session-ui.service';
 
 export const SESSION_HEARTBEAT_MS = 300000; // 5 minutes
 export const SESSION_CHECK_THROTTLE_MS = 10000; // 10 seconds
@@ -37,39 +38,12 @@ export class SessionService {
     private readonly router: Router,
     private readonly toast: ToastService,
     private readonly settings: SettingsService,
+    private readonly sessionUi: SessionUiService,
   ) {}
 
   private heartbeatSub: Subscription | null = null;
   private lastVerificationTime = 0;
   private verificationInFlight = false;
-
-  readonly showWipeConfirm = signal(false);
-  readonly showLogoutConfirm = signal(false);
-  readonly showLogoutAllConfirm = signal(false);
-
-  triggerWipeConfirm(): void {
-    this.showWipeConfirm.set(true);
-  }
-
-  cancelWipeConfirm(): void {
-    this.showWipeConfirm.set(false);
-  }
-
-  triggerLogoutConfirm(): void {
-    this.showLogoutConfirm.set(true);
-  }
-
-  cancelLogoutConfirm(): void {
-    this.showLogoutConfirm.set(false);
-  }
-
-  triggerLogoutAllConfirm(): void {
-    this.showLogoutAllConfirm.set(true);
-  }
-
-  cancelLogoutAllConfirm(): void {
-    this.showLogoutAllConfirm.set(false);
-  }
 
   tryRestore(): Observable<boolean> {
     return this.authApi.refresh().pipe(
@@ -247,7 +221,7 @@ export class SessionService {
       console.warn('Logout all failed', e);
       this.toast.trigger('Failed to logout all devices', true);
     } finally {
-      this.cancelLogoutAllConfirm();
+      this.sessionUi.cancelLogoutAllConfirm();
       await this.logout('Local session terminated.');
     }
   }

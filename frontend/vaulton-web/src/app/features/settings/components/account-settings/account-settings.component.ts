@@ -2,9 +2,9 @@ import { Component, input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../../shared/ui/toast/toast.service';
-import { AuthApiService } from '../../../../core/api/auth-api.service';
 import { SessionService } from '../../../../core/auth/session.service';
 import { ScrollIndicatorDirective } from '../../../../shared/directives/scroll-indicator.directive';
+import { SessionUiService } from '../../../../core/auth/session-ui.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -15,6 +15,7 @@ import { ScrollIndicatorDirective } from '../../../../shared/directives/scroll-i
 export class AccountSettingsComponent {
   protected readonly toast = inject(ToastService);
   protected readonly session = inject(SessionService);
+  protected readonly sessionUi = inject(SessionUiService);
 
   accountId = input.required<string>();
 
@@ -26,6 +27,6 @@ export class AccountSettingsComponent {
   }
 
   logoutAll() {
-    this.session.triggerLogoutAllConfirm();
+    this.sessionUi.triggerLogoutAllConfirm();
   }
 }
