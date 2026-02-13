@@ -161,14 +161,14 @@ public class AuthServiceLockoutTests : SqliteTestBase
     }
 
     [Fact]
-    public async Task Lockout_After5Failures_ShouldReturnLockedUntil()
+    public async Task Lockout_After7Failures_ShouldReturnLockedUntil()
     {
         var userId = Guid.NewGuid();
         var user = CreateTestUser(userId);
         var cmd = new LoginCommand(userId, new byte[32]);
         _validator.Setup(v => v.ValidateLogin(cmd)).Returns((Application.Services.Auth.Errors.LoginError?)null);
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 7; i++)
         {
             await _sut.LoginAsync(cmd);
         }

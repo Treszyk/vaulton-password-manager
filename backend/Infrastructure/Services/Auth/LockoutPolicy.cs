@@ -5,8 +5,8 @@ namespace Infrastructure.Services.Auth
 {
 	public sealed class LockoutPolicy : ILockoutPolicy
 	{
-		private const int MaxFailedLoginAttempts = 5;
-		private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
+		private const int MaxFailedLoginAttempts = 7;
+		private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(10);
 
 		public bool IsLockedOut(User user, DateTime now)
 			=> user.LockedUntil is not null && user.LockedUntil > now;
