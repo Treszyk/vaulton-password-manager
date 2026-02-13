@@ -4,5 +4,6 @@ public enum RefreshTokenRotationStatus
 {
 	Invalid,
 	Revoked,
+	RecentlyRevoked,
 	Rotated
 }

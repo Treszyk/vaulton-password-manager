@@ -3,5 +3,6 @@
 public enum RefreshError
 {
 	MissingRefreshToken,
-	InvalidRefreshToken
+	InvalidRefreshToken,
+	RecentlyRevoked
 }

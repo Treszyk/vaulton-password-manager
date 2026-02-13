@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { HttpErrorResponse, HttpClient } from '@angular/common/http';
+import { Observable, throwError, timer, of } from 'rxjs';
+import { catchError, finalize, map, retry, switchMap } from 'rxjs/operators';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 
 import type { RegisterRequest } from '../crypto/worker/crypto.worker.types';
 
@@ -62,6 +63,8 @@ import type { EncryptedValueDto } from '../crypto/worker/crypto.worker.types';
 export class AuthApiService {
   private readonly baseUrl = '/api';
 
+  private readonly toast = inject(ToastService);
+
   constructor(private readonly http: HttpClient) {}
 
   preRegister(): Observable<PreRegisterResponse> {
@@ -89,7 +92,37 @@ export class AuthApiService {
   }
 
   refresh(): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(`${this.baseUrl}/auth/refresh`, {});
+    return of(null).pipe(
+      switchMap(() => {
+        const lock = localStorage.getItem('v_ref');
+        if (lock && Date.now() - Number(lock) < 2000) {
+          return throwError(
+            () => new HttpErrorResponse({ status: 409, statusText: 'Refresh Lock Active' }),
+          );
+        }
+        localStorage.setItem('v_ref', Date.now().toString());
+        return this.http.post<TokenResponse>(`${this.baseUrl}/auth/refresh`, {});
+      }),
+      retry({
+        count: 5,
+        delay: (err) => {
+          if (err.status === 409) {
+            // this.toast.queue('Waiting for session sync...', true);
+            return timer(1000);
+          }
+          return throwError(() => err);
+        },
+      }),
+      finalize(() => localStorage.removeItem('v_ref')),
+      catchError((err) => {
+        if (err.status === 429) {
+          this.toast.queue('Too many requests. Please try again later.', false);
+        } else if (err.status === 409) {
+          this.toast.queue('Session synchronization issue. Please log in again.', false);
+        }
+        return throwError(() => err);
+      }),
+    );
   }
 
   logout(): Observable<void> {

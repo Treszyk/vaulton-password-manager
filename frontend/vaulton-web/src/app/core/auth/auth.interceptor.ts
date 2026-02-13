@@ -36,9 +36,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (error instanceof HttpErrorResponse && error.status === 401) {
         if (!refreshInFlight$) {
           refreshInFlight$ = authApi.refresh().pipe(
-            tap((res) => {
-              authState.setAccessToken(res.Token);
-            }),
+            tap((res) => authState.setAccessToken(res.Token)),
             shareReplay(1),
             finalize(() => {
               refreshInFlight$ = null;

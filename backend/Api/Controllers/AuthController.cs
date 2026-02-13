@@ -258,7 +258,16 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		var result = await _auth.RefreshAsync(new RefreshCommand(rt));
 
 		if (!result.Success)
+		{
+			Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/" });
+
+			if (result.Error == RefreshError.RecentlyRevoked)
+			{
+				return Conflict(new { message = "Session synchronization in progress." });
+			}
+
 			return Unauthorized(new { message = "Invalid refresh token." });
+		}
 
 		Response.Cookies.Append(
 			RefreshCookieName,
@@ -276,7 +285,16 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		var result = await _auth.RefreshAsync(new RefreshCommand(request.RefreshToken));
 
 		if (!result.Success)
+		{
+			Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/" });
+
+			if (result.Error == RefreshError.RecentlyRevoked)
+			{
+				return Conflict(new { message = "Session synchronization in progress." });
+			}
+
 			return Unauthorized(new { message = "Invalid refresh token." });
+		}
 
 		return Ok(new ExtRefreshResponse(result.AccessToken!, result.RefreshToken!, result.RefreshExpiresAt!.Value));
 	}

@@ -157,6 +157,8 @@ namespace Infrastructure.Services.Auth
 						await refreshTokenStore.RevokeAllAsync(rotation.UserId.Value, now);
 					}
 					return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
+				case RefreshTokenRotationStatus.RecentlyRevoked:
+					return RefreshResult.Fail(RefreshError.RecentlyRevoked);
 				case RefreshTokenRotationStatus.Rotated:
 					if (rotation.UserId is null || rotation.Token is null || rotation.ExpiresAt is null)
 						return RefreshResult.Fail(RefreshError.InvalidRefreshToken);

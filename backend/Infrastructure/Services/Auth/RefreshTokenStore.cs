@@ -53,7 +53,17 @@ namespace Infrastructure.Services.Auth
 					return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Invalid, null, null, null);
 
 				if (tokenRow.RevokedAt is not null)
+				{
+					var sinceRevocation = now - tokenRow.RevokedAt.Value;
+					if (sinceRevocation < TimeSpan.FromSeconds(5))
+					{
+						tokenRow.RevokedAt = now;
+						await db.SaveChangesAsync();
+						return new RefreshTokenRotationResult(RefreshTokenRotationStatus.RecentlyRevoked, tokenRow.UserId, null, null);
+					}
+
 					return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Revoked, tokenRow.UserId, null, null);
+				}
 
 				tokenRow.RevokedAt = now;
 
