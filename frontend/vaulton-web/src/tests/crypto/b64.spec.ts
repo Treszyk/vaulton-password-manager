@@ -15,7 +15,6 @@ describe('Base64 Utilities (b64.ts)', () => {
   });
 
   it('should handle roundtrip perfectly', () => {
-    // 256 bytes covering full range 0-255
     const original = new Uint8Array(256);
     for (let i = 0; i < 256; i++) original[i] = i;
 

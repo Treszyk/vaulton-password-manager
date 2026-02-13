@@ -5,7 +5,6 @@ describe('Argon2 KDF (argon2-kdf.ts)', () => {
   let provider: Argon2KdfProvider;
 
   beforeAll(async () => {
-    // Explicitly wait for sodium to be ready
     await sodium.ready;
     provider = new Argon2KdfProvider();
   });

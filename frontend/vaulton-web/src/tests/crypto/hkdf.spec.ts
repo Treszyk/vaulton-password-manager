@@ -5,8 +5,7 @@ describe('HKDF (hkdf.ts)', () => {
   let masterKey: CryptoKey;
 
   beforeAll(async () => {
-    // Generate a base key to act as input for HKDF
-    const rawKey = new Uint8Array(32); // 256 bits
+    const rawKey = new Uint8Array(32);
     crypto.getRandomValues(rawKey);
     masterKey = await crypto.subtle.importKey('raw', rawKey, 'HKDF', false, [
       'deriveKey',
