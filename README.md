@@ -66,7 +66,7 @@ The `-v` flag removes the persistent volume (`vaulton-db-dev-data`), giving you 
 - **Timing Attack Protection**: deterministic fake salts and dummy work for non-existent users.
 - **Health-Aware Startup**: the API waits for the PostgreSQL database to be healthy before starting.
 - **Swagger UI**: accessible at `http://localhost:8080/swagger` during development.
-- **Frontend App**: accessible at `http://localhost:4200` (Angular 21.0 + Tailwind CSS).
+- **Frontend App**: accessible at `http://localhost:4200` (Angular 21.1 + Tailwind CSS).
 
 ## Production Deployment
 
