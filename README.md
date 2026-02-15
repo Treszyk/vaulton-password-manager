@@ -76,3 +76,10 @@ Production deployment is managed via the `deploy/` directory. For detailed techn
 
 - `docs/auth.md` for the authentication/session model.
 - `docs/crypto.md` for the key ladder and encryption design.
+
+## License
+
+This project is licensed under the MIT License.
+
+It uses third-party dependencies via npm and NuGet under their respective licenses.
+.
