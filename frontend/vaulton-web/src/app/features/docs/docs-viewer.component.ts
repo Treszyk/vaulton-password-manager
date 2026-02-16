@@ -11,7 +11,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { DomSanitizer } from '@angular/platform-browser';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
 import { map, switchMap, Subscription } from 'rxjs';
 import { getWorkerPolicy } from '../../core/crypto/worker/crypto-worker.factory';
@@ -48,7 +47,7 @@ export class DocsViewerComponent implements OnDestroy {
     auth: 'AUTHENTICATION',
     crypto: 'CRYPTOGRAPHY',
     threatmodel: 'THREAT MODEL',
-    // extension: 'EXTENSION',
+    extension: 'EXTENSION',
   };
 
   constructor() {

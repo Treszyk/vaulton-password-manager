@@ -159,6 +159,14 @@ import { Subscription, filter } from 'rxjs';
                 >
                   Threat Model
                 </a>
+                <a
+                  routerLink="/docs/extension"
+                  routerLinkActive="text-vault-purple border-vault-purple bg-vault-purple/5"
+                  (click)="closeMenu()"
+                  class="block py-2 px-3 text-sm font-bold uppercase tracking-wider text-zinc-300 hover:text-white border-l-2 border-transparent hover:border-zinc-700 transition-all rounded-r-lg"
+                >
+                  Extension
+                </a>
               </div>
             </div>
           </div>

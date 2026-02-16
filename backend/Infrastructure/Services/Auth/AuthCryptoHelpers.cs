@@ -28,16 +28,16 @@ namespace Infrastructure.Services.Auth
 			return ComputeFakeBlob(accountId, "Vaulton.FakeSalt.v1", CryptoSizes.SaltLen);
 		}
 
-		public (byte[] Nonce, byte[] CipherText, byte[] Tag) ComputeFakeWraps(Guid accountId, string label)
+		public (byte[] Nonce, byte[] CipherText, byte[] Tag) ComputeFakeWraps(Guid accountId, string label, ReadOnlySpan<byte> extraSeed = default)
 		{
-			var nonce = ComputeFakeBlob(accountId, $"Vaulton.FakeNonce.v1.{label}", CryptoSizes.GcmNonceLen);
-			var ct = ComputeFakeBlob(accountId, $"Vaulton.FakeCT.v1.{label}", CryptoSizes.MkLen);
-			var tag = ComputeFakeBlob(accountId, $"Vaulton.FakeTag.v1.{label}", CryptoSizes.GcmTagLen);
+			var nonce = ComputeFakeBlob(accountId, $"Vaulton.FakeNonce.v1.{label}", CryptoSizes.GcmNonceLen, extraSeed);
+			var ct = ComputeFakeBlob(accountId, $"Vaulton.FakeCT.v1.{label}", CryptoSizes.MkLen, extraSeed);
+			var tag = ComputeFakeBlob(accountId, $"Vaulton.FakeTag.v1.{label}", CryptoSizes.GcmTagLen, extraSeed);
 
 			return (nonce, ct, tag);
 		}
 
-		private byte[] ComputeFakeBlob(Guid accountId, string contextLabel, int length)
+		private byte[] ComputeFakeBlob(Guid accountId, string contextLabel, int length, ReadOnlySpan<byte> extraSeed = default)
 		{
 			byte[] context = System.Text.Encoding.UTF8.GetBytes(contextLabel);
 			
@@ -47,11 +47,16 @@ namespace Infrastructure.Services.Auth
 				throw new InvalidOperationException("Failed to write Guid bytes.");
 			}
 
-			var inputLen = context.Length + idBytes.Length;
+			var inputLen = context.Length + idBytes.Length + extraSeed.Length;
 			byte[] input = new byte[inputLen];
 			
 			Buffer.BlockCopy(context, 0, input, 0, context.Length);
 			idBytes.CopyTo(input.AsSpan(context.Length));
+			
+			if (extraSeed.Length > 0)
+			{
+				extraSeed.CopyTo(input.AsSpan(context.Length + idBytes.Length));
+			}
 
 			try
 			{

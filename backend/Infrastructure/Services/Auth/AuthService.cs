@@ -386,8 +386,8 @@ namespace Infrastructure.Services.Auth
 					await db.SaveChangesAsync();
 				}
 
-				var (pwdNonce, pwdCt, pwdTag) = cryptoHelpers.ComputeFakeWraps(accountId, "mk-wrap-pwd");
-				var (rkNonce, rkCt, rkTag) = cryptoHelpers.ComputeFakeWraps(accountId, "mk-wrap-rk");
+				var (pwdNonce, pwdCt, pwdTag) = cryptoHelpers.ComputeFakeWraps(accountId, "mk-wrap-pwd", rkVerifier);
+				var (rkNonce, rkCt, rkTag) = cryptoHelpers.ComputeFakeWraps(accountId, "mk-wrap-rk", rkVerifier);
 
 				return WrapsResult.Ok(
 					new EncryptedValue { Nonce = pwdNonce, CipherText = pwdCt, Tag = pwdTag },

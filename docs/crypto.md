@@ -29,10 +29,10 @@ This doc describes how Vaulton derives keys, encrypts data and maps cryptographi
 
 Vaulton stores a coarse-grained `KdfMode` selector instead of per-user Argon2 parameters. The client runs Argon2id (v1.3) and maps the mode to a concrete Argon2id profile:
 
-- **`KdfMode = 1` (Default)**:
+- **`KdfMode = 1` (Standard)**:
   - Memory: 128 MB
   - Iterations (opsLimit): 3
-- **`KdfMode = 2` (Strong)**:
+- **`KdfMode = 2` (Hardened)**:
   - Memory: 256 MB
   - Iterations (opsLimit): 4
 - **`KdfMode = 3` (Passcode/Local)**:
@@ -125,6 +125,7 @@ Used to issue short-lived access tokens after successful login.
 
 - Symmetric signing key stored in configuration.
 - Tokens contain `sub = AccountId`, `jti`, `iat`, `exp` (around 20 minutes).
+- On protected endpoints, token acceptance is additionally coupled to refresh-session state by validating a SHA-256 hash of the JWT `jti` against active (non-revoked, non-expired) refresh-token records for the account.
 
 #### **TLS (outside Vaulton scope)**
 

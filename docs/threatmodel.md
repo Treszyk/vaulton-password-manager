@@ -7,7 +7,7 @@ This document provides a security analysis of the Vaulton Password Manager, focu
 Vaulton operates on the principle that the user is the sole owner of their cryptographic keys.
 
 - **Zero-Knowledge**: All sensitive data is encrypted on the client side before being transmitted to the backend. The backend stores only opaque, encrypted blobs.
-- **Key Isolation**: Sensitive cryptographic keys are isolated from the main application thread to minimize the risk of exfiltration via common web vulnerabilities.
+- **Key Isolation**: Sensitive cryptographic operations run in a dedicated Web Worker context, isolated from the main UI thread to reduce accidental key exposure paths. This improves resilience, but does not replace browser trust boundaries if the origin runtime is fully compromised.
 - **Identity Privacy**: Users are identified by anonymous identifiers. No personally identifiable information (PII) such as emails or usernames is stored by the backend.
 
 ## 2. Core Security Assets
@@ -46,7 +46,7 @@ All communication is protected by industry-standard encryption (TLS). Additional
 
 Vaulton employs modern browser security features to protect data within the user's browser:
 
-- **Component Isolation**: The most sensitive keys are kept in a separate execution context from the user interface. This ensures that even if a vulnerability were found in the UI, exfiltrating the keys would be significantly more difficult.
+- **Component Isolation**: The most sensitive key operations are performed in a separate worker execution context from the user interface. This meaningfully raises the bar for trivial UI-thread leakage, but should be understood as defense-in-depth rather than absolute isolation.
 - **Security Headers**: Strict browser policies (including CSP) are enforced at the edge proxy in production deployments to prevent unauthorized scripts and ensure only trusted resources are loaded.
 - **Memory Hygiene**: Best-effort measures are taken to overwrite sensitive data in memory. While technical buffers (ArrayBuffers) are explicitly cleared after use, JavaScript strings (such as the initial password input) are immutable and managed by the garbage collector, making their erasure a "best-effort" mitigation.
 

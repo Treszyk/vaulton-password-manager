@@ -112,7 +112,8 @@ Allocate a new, unused `AccountId` for a future account. This call does not crea
 **Response (200 OK)**
 
     {
-      "AccountId": "4e3d1c7d-9f9e-4a31-b720-9f6a2a6e3f5a"
+      "AccountId": "4e3d1c7d-9f9e-4a31-b720-9f6a2a6e3f5a",
+      "CryptoSchemaVer": 1
     }
 
 Notes:
@@ -132,7 +133,7 @@ The client must have already:
 - Generated a random Master Key (`MK`) and Recovery Key (`RK`).
 - Derived `kekKey` and computed `MkWrapPwd`.
 - Derived `rkKek` and computed `MkWrapRk`.
-- Selected a `KdfMode` (currently `1 = Default`, `2 = Strong`).
+- Selected a `KdfMode` (`1 = Standard/Default`, `2 = Hardened/Strong`).
 
 **Request (JSON)**
 
@@ -238,7 +239,7 @@ In addition to the JSON body, the server also sets a refresh token cookie, for e
 
 - Name: `Vaulton.Refresh`
 - Flags: `HttpOnly`, `SameSite=Strict`, `Secure` unless running in development
-- Path: `/auth`
+- Path: `/`
 - Expires: several days in the future
 
 The refresh token value itself is a random opaque string (not a JWT). Only a hash of this value is stored in the database.
@@ -284,14 +285,14 @@ The refresh token value itself is a random opaque string (not a JWT). Only a has
 ### 3.5 POST /auth/refresh
 
 **Purpose**  
-Rotate the refresh token and issue a new access token without requiring the password again.
+Rotate the refresh token and issue a new access token without requiring the password.
 
 **Request**
 
 - Method: POST
 - Path: `/auth/refresh`
 - Body: empty JSON object `{}` or no body.
-- The refresh token is sent automatically by the browser as an HttpOnly cookie (`Vaulton.Refresh`).
+- Uses the refresh token cookie (`Vaulton.Refresh`) to authenticate the request.
 
 **Response (200 OK)**
 
@@ -329,11 +330,17 @@ Rotate the refresh token and issue a new access token without requiring the pass
         "message": "Invalid refresh token."
       }
 
+- Recently reused/replayed refresh token in a short race window → `409 Conflict`:
+
+      {
+        "message": "Session synchronization in progress."
+      }
+
 5. If validation succeeds:
    - Create a new JWT access token for the associated `AccountId`.
    - Generate a new refresh token value.
    - Store the new refresh token hash in the database and mark the old one as revoked (rotation).
-   - Set a new `Vaulton.Refresh` cookie with the new value (HttpOnly, `SameSite=Strict`, `Path=/auth`, `Secure` unless running in development).
+   - Set a new `Vaulton.Refresh` cookie with the new value (HttpOnly, `SameSite=Strict`, `Path=/`, `Secure` unless running in development).
    - Return `200 OK` with `{ "Token": "<new-jwt>" }`.
 
 ### 3.6 POST /auth/logout
@@ -392,7 +399,7 @@ Return the `AccountId` for the current access token.
       "AccountId": "4e3d1c7d-9f9e-4a31-b720-9f6a2a6e3f5a"
     }
 
-### 3.8 POST /auth/recovery-wraps
+### 3.9 POST /auth/recovery-wraps
 
 **Purpose**  
 Fetches the `MkWrapPwd` and `MkWrapRk` blobs for an account. Requires the `RkVerifier` (recovery proof) to authorize the release of these encrypted Master Key wraps. This prevents unauthorized access to encrypted blobs and provides protection against account enumeration.
@@ -413,7 +420,11 @@ Fetches the `MkWrapPwd` and `MkWrapRk` blobs for an account. Requires the `RkVer
       "CryptoSchemaVer": 1
     }
 
-### 3.9 POST /auth/recover
+**Notes**
+
+> **Current Implementation Behavior**: To prevent account enumeration, the implemented endpoint returns deterministic "fake" wraps for invalid `RkVerifier`s or non-existent accounts. This ensures that an observer cannot distinguish between a real account with a bad key and a non-existent account, as both return a `200 OK` response with structurally valid (but useless) cryptographic material.
+
+### 3.10 POST /auth/recover
 
 **Purpose**  
 Resets account credentials (verifier, salt, wraps) using the Recovery Key proof (`RkVerifier`).
@@ -433,9 +444,9 @@ Resets account credentials (verifier, salt, wraps) using the Recovery Key proof 
       "CryptoSchemaVer": 1
     }
 
-**Response (200 OK or 204 No Content)**
+**Response (204 No Content)**
 
-### 3.10 POST /auth/wraps (Admin)
+### 3.11 POST /auth/wraps (Admin)
 
 **Purpose**  
 Fetches the current Master Key wraps. Requires the `AdminVerifier`. This is used during the "Password Change" (Rekey) flow to ensure the user still has administrative rights before they can rotate keys.
@@ -443,7 +454,6 @@ Fetches the current Master Key wraps. Requires the `AdminVerifier`. This is used
 **Request (JSON)**
 
     {
-      "AccountId": "4e3d1c7d-9f9e-4a31-b720-9f6a2a6e3f5a",
       "AdminVerifier": "base64(32 bytes)"
     }
 
@@ -456,7 +466,7 @@ Fetches the current Master Key wraps. Requires the `AdminVerifier`. This is used
       "CryptoSchemaVer": 1
     }
 
-### 3.11 POST /auth/change-password (Admin)
+### 3.12 POST /auth/change-password (Admin)
 
 **Purpose**  
 Updates all account credentials and wraps. Requires the `AdminVerifier`.
@@ -464,12 +474,12 @@ Updates all account credentials and wraps. Requires the `AdminVerifier`.
 **Request (JSON)**  
 (Similar to `/auth/recover` but uses `AdminVerifier` instead of `RkVerifier`).
 
-### 3.12 Extension-Specific API (`/auth/ext/*`)
+### 3.13 Extension-Specific API (`/auth/ext/*`)
 
 Browser extensions often operate in environments where cookie-based authentication is restricted or less reliable. Vaulton provides a parallel set of stateless endpoints that return tokens in the JSON response body.
 
-- **`POST /auth/ext/login`**: Authenticates and returns `{ Token, RefreshToken, RefreshExpiresAt, MkWrapPwd, MkWrapRk }`.
-- **`POST /auth/ext/refresh`**: Takes a `RefreshToken` in the body and returns a new `{ Token, RefreshToken, RefreshExpiresAt }`.
+- **`POST /auth/ext/login`**: Authenticates and returns `{ AccessToken, RefreshToken, RefreshExpiresAt, MkWrapPwd, MkWrapRk }`.
+- **`POST /auth/ext/refresh`**: Takes a `RefreshToken` in the body and returns a new `{ AccessToken, RefreshToken, RefreshExpiresAt }`.
 - **`POST /auth/ext/logout`**: Revokes the provided `RefreshToken`.
 - **`POST /auth/ext/logout-all`**: Revokes all refresh tokens for the account.
 
@@ -486,10 +496,12 @@ Vaulton supports two session models:
     - `refresh_token` stored manually by the extension in `chrome.storage.local`.
     - Allows stateless operations across different browser contexts.
 
+For both models, access-token acceptance is additionally coupled to refresh-session state by checking a hashed JWT `jti` against active refresh-token rows.
+
 ## 5. Security considerations
 
 - **Triple Verifier**: Separation of concerns between login, sensitive admin actions, and recovery.
 - **Constant-Time Comparison**: Server-side verifier checks are protected against timing attacks.
 - **Deterministic Fake Data**: `/auth/pre-login` and `/auth/recovery-wraps` return consistent data for non-existent accounts to prevent enumeration.
-- **Lockout Policy**: Aggressive 5-fail lockout for all verifier-based endpoints.
+- **Lockout Policy**: 7 failed verifier attempts trigger a 10-minute lockout window.
 - **Token Rotation**: Refresh tokens are one-time use; reuse of an old token triggers a global session revocation for that user.
