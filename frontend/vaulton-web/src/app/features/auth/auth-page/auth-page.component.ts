@@ -193,7 +193,7 @@ export class AuthPageComponent {
   }
 
   async login() {
-    if (this.isWorking()) return;
+    if (this.isWorking() || !this.accountId() || !this.password()) return;
     this.isWorking.set(true);
     const pwd = this.password();
     this.password.set('');
@@ -209,7 +209,7 @@ export class AuthPageComponent {
   }
 
   async register() {
-    if (this.isWorking()) return;
+    if (this.isWorking() || !this.accountId() || !this.password() || !this.isOptimized()) return;
 
     const validationError = validateNewPassword(this.password(), this.accountId());
     if (validationError) {
@@ -217,10 +217,6 @@ export class AuthPageComponent {
       return;
     }
 
-    if (!this.isOptimized()) {
-      this.toast.trigger('Please run the benchmark first.', false);
-      return;
-    }
     this.isWorking.set(true);
     const pwd = this.password();
     this.password.set('');

@@ -86,10 +86,7 @@ export class RecoverAccountModal implements OnInit, OnDestroy {
   }
 
   async onNextToKeySetup() {
-    if (!this.accountId() || !this.recoveryKey()) {
-      this.toast.trigger('Please fill all fields', false);
-      return;
-    }
+    if (!this.accountId() || !this.recoveryKey()) return;
 
     if (this.recoveryKey().trim().length < 32) {
       this.toast.trigger('Invalid recovery key length', false);
@@ -146,6 +143,8 @@ export class RecoverAccountModal implements OnInit, OnDestroy {
   }
 
   async onRecover() {
+    if (!this.isOptimized() || this.newPassword() !== this.confirmPassword()) return;
+
     const validationError = validateNewPassword(
       this.newPassword(),
       this.accountId(),

@@ -109,10 +109,13 @@ export class RekeyVaultComponent {
   }
 
   async updateMasterKey() {
-    if (!this.isOptimized()) {
-      this.toast.trigger('Please run the benchmark first');
+    if (
+      this.isRekeyBusy() ||
+      !this.isOptimized() ||
+      this.isRekeySuccess() ||
+      !this.isPasswordStrong()
+    )
       return;
-    }
 
     this.isRekeyBusy.set(true);
     try {
