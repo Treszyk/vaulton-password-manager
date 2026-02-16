@@ -175,7 +175,7 @@ export class SessionService {
     this.authState.clear();
     this.vault.clearData();
 
-    this.toast.queue(message || 'Logged out successfully', false);
+    this.toast.queue(message || 'Logged out successfully', true);
 
     this.authApi.logout().subscribe({
       complete: () => {

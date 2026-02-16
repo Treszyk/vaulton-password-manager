@@ -1,6 +1,6 @@
 # Vaulton's crypto design
 
-This doc describes how Vaulton derives keys, encrypts data and maps cryptographic material to database fields. It focuses on the client-side “key ladder” and the server-side storage format.
+This doc describes how Vaulton derives keys, encrypts data and maps cryptographic material to database fields. It focuses on the client-side “key ladder” and the server-side storage format. For details on how user sessions and identities are managed, see `auth.md`.
 
 ## 1. Goals and assumptions
 

@@ -655,35 +655,19 @@ button.btn-secondary {
 }
 
 .demo-countdown {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
+  @apply w-full py-1 flex items-center justify-center border-t border-red-900/10 transition-all z-[100] flex-none !important;
   background: transparent;
   color: #dc2626;
-  padding: 8px 16px;
-  border-radius: 6px;
   font-family: 'Courier New', monospace;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 1px;
   pointer-events: none;
-  z-index: 999999;
 }
 
 .demo-text {
   display: block;
   white-space: nowrap;
-}
-
-@media (max-width: 768px) {
-  .demo-countdown {
-    top: 8px;
-    bottom: auto;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 12px;
-    padding: 6px 12px;
-  }
 }
 
 .prose img {
@@ -702,9 +686,8 @@ button.btn-secondary {
 
 .prose img:hover {
   opacity: 1;
-  filter: brightness(1);
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  filter: brightness(0.8);
+  transform: translateY(-2px) scale(1.0025);
 }
 
 .prose {
@@ -712,17 +695,72 @@ button.btn-secondary {
   word-break: break-word;
   max-width: 100%;
   min-width: 0;
+  @apply text-zinc-300;
+}
+
+.prose > :first-child {
+  margin-top: 0 !important;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose pre code {
+  @apply text-zinc-300 font-medium !important;
+}
+
+.doc-ref-link {
+  @apply text-orange-500 font-bold text-[0.8em] tracking-tight no-underline transition-all duration-300 px-1.5 py-0.5 rounded-md !important;
+  background-color: #190b02;
+  border: 1px solid #321704;
+  text-shadow: 0 0 8px #190b02;
+}
+
+.doc-ref-link:hover {
+  @apply text-orange-400 !important;
+  background-color: #251203;
+  border-color: #f97316;
+}
+
+.prose hr {
+  @apply my-8 border-t border-zinc-800 !important;
 }
 
 .prose pre {
+  @apply my-6 rounded-xl border border-zinc-800 !important;
   max-width: 100%;
   overflow-x: auto;
-  white-space: pre;
+  word-wrap: normal;
 }
 
 .prose table {
+  @apply my-6 w-full !important;
   display: block;
-  width: 100%;
   overflow-x: auto;
-  white-space: nowrap;
+}
+
+.prose img {
+  @apply rounded-xl my-8 transition-all duration-300 mx-auto !important;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #1e1e1e;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.prose :not(pre) > code {
+  @apply text-violet-300 px-1.5 py-0.5 rounded-md font-mono text-[0.9em] !important;
+  background-color: #0c0618;
+  border: 1px solid #190b30;
+}
+
+.prose blockquote {
+  @apply border-l-4 !important;
+  background-color: #0c0618;
+  border-color: #7c3aed;
+}
+
+.prose :not(pre) > code::before,
+.prose :not(pre) > code::after {
+  content: '' !important;
 }
