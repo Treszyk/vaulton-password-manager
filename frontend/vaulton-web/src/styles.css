@@ -740,14 +740,6 @@ button.btn-secondary {
   overflow-x: auto;
 }
 
-.prose img {
-  @apply rounded-xl my-8 transition-all duration-300 mx-auto !important;
-  max-width: 100%;
-  height: auto;
-  border: 1px solid #1e1e1e;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
 .prose :not(pre) > code {
   @apply text-violet-300 px-1.5 py-0.5 rounded-md font-mono text-[0.9em] !important;
   background-color: #0c0618;

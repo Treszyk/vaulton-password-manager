@@ -12,13 +12,13 @@ Vaulton operates on the principle that the user is the sole owner of their crypt
 
 ## 2. Core Security Assets
 
-| Asset                     | Protection Strategy                                                                             |
-| :------------------------ | :---------------------------------------------------------------------------------------------- |
-| **User Password**         | Never stored. Used only to derive keys locally using computationally expensive algorithms.      |
-| **Master Key**            | The root key for the vault. Stored only in volatile memory and protected by advanced isolation. |
-| **Recovery Key**          | High-entropy key managed by the user offline. Authorizes recovery in case of password loss.     |
-| **Vault Data**            | Protected by industry-standard authenticated encryption (AES-GCM).                              |
-| **Authentication Proofs** | Stored on the server as salted and peppered PBKDF2 hashes to protect against database leaks.    |
+| Asset                     | Protection Strategy                                                                               |
+| :------------------------ | :------------------------------------------------------------------------------------------------ |
+| **User Password**         | Never stored. Used only to derive keys locally using computationally expensive algorithms.        |
+| **Master Key**            | The root key for the vault. Stored only in volatile memory and protected by Web Worker isolation. |
+| **Recovery Key**          | High-entropy key managed by the user offline. Authorizes recovery in case of password loss.       |
+| **Vault Data**            | Protected by industry-standard authenticated encryption (AES-GCM) using a MK-derived VaultKey.    |
+| **Authentication Proofs** | Stored on the server as salted and peppered PBKDF2 hashes to protect against database leaks.      |
 
 ## 3. Threat Mitigations
 
@@ -34,7 +34,7 @@ The system strives to mitigate account discovery by responding consistently to p
 
 The system employs multiple layers of defense against automated guessing attacks:
 
-- **Client-Side Work**: Deriving keys requires significant computational effort and memory (standard configuration requires at least 128MB of RAM) by the client, naturally slowing down any guessing attempt and making hardware-accelerated attacks significantly more expensive.
+- **Client-Side Work**: Deriving keys requires significant computational effort and memory (standard configuration requires at least 128MB of RAM per guess) by the client, naturally slowing down any guessing attempt and making hardware-accelerated attacks significantly more expensive.
 - **Smart Lockout**: Repeated failed authentication attempts lead to temporary lockouts, enforced at the application layer.
 - **Rate Limiting**: Auth endpoints are protected with per-IP rate limiting to reduce abusive automation.
 
@@ -54,11 +54,11 @@ Vaulton employs modern browser security features to protect data within the user
 
 - **Session Security**: Authentication is split into short-lived Access Tokens (held only in volatile memory) and long-lived Refresh Tokens. Refresh Tokens are protected by secure browser flags (`HttpOnly`, `SameSite=Strict`, and `Secure` in production) that prevent access by scripts, mitigating session hijacking via XSS.
 - **Tab Isolation**: Closing the application tab clears the sensitive keys from memory, requiring re-authentication to re-open the vault.
-- **Convenience vs. Security**: Optional features like PIN/Passcode-based unlocking offer a user-controlled trade-off between the high security of the full password and the convenience of quick access on a trusted device.
+- **Convenience vs. Security**: Optional features like PIN/Passcode-based unlocking offer a user-controlled trade-off between the high local security of the full password and the convenience of quick access on a trusted device.
 
 ## 4. Account Recovery & Integrity
 
-Vaulton provides a recovery path using a high-entropy offline key. While the key itself is managed independently, the **recovery process** is bound to the user's identity through strict authorization and cryptographic "Context Binding" (AAD). This ensures that recovery data is mathematically tied to the specific account, preventing an attacker from reusing or moving encrypted secrets between different user identities. All cryptographic operations are designed to fail if sensitive data is presented in an unauthorized context.
+Vaulton provides a recovery path using a high-entropy offline key. While the key itself is managed independently, the **recovery process** is bound to the user's identity through strict authorization and cryptographic "Context Binding" (AAD) of the Master Key wrap. This ensures that recovery data is mathematically tied to the specific account, preventing an attacker from reusing or moving encrypted secrets between different user identities. All cryptographic operations are designed to fail if sensitive data is presented in an unauthorized context.
 
 ## 5. Summary of Residual Risks
 
