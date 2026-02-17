@@ -57,6 +57,7 @@
     "vitest": "4.0.16"
   },
   "overrides": {
-    "lodash-es": "4.17.23"
+    "lodash-es": "4.17.23",
+    "ajv": "8.18.0"
   }
 }
