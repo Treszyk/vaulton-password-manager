@@ -174,8 +174,8 @@ public class AuthServiceLockoutTests : SqliteTestBase
         }
 
         var lockedUser = Db.Users.Find(userId);
-        lockedUser!.LockedUntil.Should().NotBeNull();
-        lockedUser.LockedUntil.Value.Should().BeAfter(DateTime.UtcNow);
+        lockedUser!.LockedUntil.HasValue.Should().BeTrue();
+        lockedUser.LockedUntil!.Value.Should().BeAfter(DateTime.UtcNow);
         
         var result6 = await _sut.LoginAsync(cmd);
         result6.Success.Should().BeFalse();
