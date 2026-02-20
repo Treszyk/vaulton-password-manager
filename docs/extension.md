@@ -57,10 +57,10 @@ The Vaulton browser extension shares the **Zero-Knowledge** `threatmodel.md` in 
 
 The extension operates in a unique environment (`MV3 Service Worker`) which introduces distinct local threat vectors compared to the web-based SPA.
 
-| Vector      | Web App (SPA)                                 | Browser Extension (MV3)                                                       |
-| :---------- | :-------------------------------------------- | :---------------------------------------------------------------------------- |
-| **Keys**    | Volatile JS Memory (Cleared on refresh/close) | `chrome.storage.session` OR `chrome.storage.local` (depends on User's choice) |
-| **Context** | Single Origin                                 | Universal Injection (Content Scripts)                                         |
+| Vector      | Web App (SPA)                                 | Browser Extension (MV3)                                                                            |
+| :---------- | :-------------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| **Keys**    | Volatile JS Memory (Cleared on refresh/close) | `chrome.storage.session` by default (incl. vault cache); `chrome.storage.local` in Persistent mode |
+| **Context** | Single Origin                                 | Universal Injection (Content Scripts)                                                              |
 
 ### MV3 Persistence Model
 
@@ -70,7 +70,7 @@ This necessitates a shift from the "Memory-Only" model of the SPA to a **Storage
 
 1.  **Session Storage (Default)**: By default, the sensitive `VAULT_KEY` material and session tokens are stored in `chrome.storage.session`. This area is managed by the browser process and held in memory, clearing when the browser session ends or the auto lock timer expires.
 2.  **Local Storage (Optional Persistence)**: If the user enables "Never Lock Out" (or "Persistent" mode), these keys are explicitly written to `chrome.storage.local`. This persists the cryptographic material to disk within the browser's profile, trading some security for the convenience of surviving browser restarts.
-3.  **Encrypted Vault Cache**: The full vault database is always cached in `chrome.storage.local` (encrypted with a per-session key for domain separation) to ensure instant access without network round-trips upon service worker wake-up.
+3.  **Encrypted Vault Cache**: The full vault database is cached in `chrome.storage.session` (encrypted with a per-session key for domain separation) to ensure instant access without network round-trips upon service worker wake-up. The per-session wrapping key (`VaultSessionKey`) is also kept in `chrome.storage.session` and is never persisted to disk. This means the cached vault remains accessible if internet connectivity drops during an active session, but requires a fresh network sync after a full browser restart. The extension is not designed to function as a fully persistent offline vault.
 
 ## 4. Summary of Residual Risks
 
