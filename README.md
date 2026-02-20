@@ -79,7 +79,8 @@ Production deployment is managed via the `deploy/` directory. For detailed techn
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE).
+
+This project bundles the [Inter](https://github.com/rsms/inter) font, licensed under the [SIL Open Font License 1.1](frontend/vaulton-web/public/fonts/LICENSE.txt).
 
 It uses third-party dependencies via npm and NuGet under their respective licenses.
-.
