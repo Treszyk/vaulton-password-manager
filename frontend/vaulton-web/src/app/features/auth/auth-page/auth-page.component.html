@@ -341,7 +341,7 @@
                       data-tooltip="This setting influences both vault security and login time."
                     >
                       <label
-                        class="text-xs md:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 cursor-help whitespace-nowrap"
+                        class="text-xs font-bold uppercase tracking-wider md:tracking-[0.2em] text-zinc-400 cursor-help"
                         >Vault Hardening Grade</label
                       >
                       <svg
@@ -363,7 +363,7 @@
                     <div class="flex items-center justify-end gap-2 h-5 flex-1">
                       <span
                         *ngIf="isBenchmarking()"
-                        class="text-[0.625rem] font-bold uppercase tracking-wider text-vault-purple-bright animate-pulse truncate min-w-0"
+                        class="text-[0.625rem] font-bold uppercase tracking-normal sm:tracking-wider text-vault-purple-bright animate-pulse whitespace-nowrap"
                       >
                         {{ benchmarkStatus() }}...
                       </span>
@@ -504,7 +504,7 @@
                         class="flex flex-col items-center justify-center p-4 pointer-events-auto w-full relative"
                       >
                         <p
-                          class="text-xs md:text-[0.6875rem] font-bold uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
+                          class="text-xs md:text-[0.6875rem] font-bold uppercase tracking-tight md:tracking-[0.2em] mb-4 text-center whitespace-nowrap drop-shadow-md transition-colors duration-500"
                           [class.text-zinc-200]="isPasswordStrong()"
                           [class.text-red-400]="!isPasswordStrong()"
                         >
@@ -521,7 +521,7 @@
                           [class.border-red-400/50]="!isPasswordStrong()"
                           [class.animate-pulse]="!isPasswordStrong()"
                           [class.pointer-events-none]="!isPasswordStrong()"
-                          class="flex items-center gap-2.5 px-6 py-3 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-zinc-600 hover:brightness-110"
+                          class="flex items-center gap-2.5 px-4 py-3 md:px-6 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-zinc-600 hover:brightness-110"
                           [class.shadow-vault-purple/40]="isPasswordStrong()"
                           [class.shadow-red-600/50]="!isPasswordStrong()"
                         >
@@ -550,7 +550,7 @@
                             />
                           </svg>
                           <span
-                            class="text-xs md:text-[0.75rem] font-bold uppercase tracking-widest leading-none"
+                            class="text-xs md:text-[0.75rem] font-bold uppercase tracking-tight md:tracking-widest leading-none"
                           >
                             {{ isPasswordStrong() ? 'Run Benchmark' : 'Weak Password' }}
                           </span>

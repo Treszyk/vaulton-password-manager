@@ -664,6 +664,7 @@ button.btn-secondary {
 
 .demo-countdown {
   @apply w-full py-1 flex items-center justify-center border-t border-red-900/10 transition-all z-[100] flex-none !important;
+  padding-bottom: env(safe-area-inset-bottom, 0);
   background: transparent;
   color: #dc2626;
   font-family: 'Courier New', monospace;

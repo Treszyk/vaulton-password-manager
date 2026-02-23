@@ -1,6 +1,6 @@
 @if (!loading()) {
   <div
-    class="h-screen transition-opacity duration-500 selection:bg-vault-purple/30 selection:text-vault-purple-bright flex flex-col overflow-hidden"
+    class="h-[100dvh] transition-opacity duration-500 selection:bg-vault-purple/30 selection:text-vault-purple-bright flex flex-col overflow-hidden"
   >
     @if (!router.url.includes('/docs')) {
       <app-vaulton-nav class="flex-none"></app-vaulton-nav>
@@ -20,7 +20,7 @@
     <app-demo-countdown></app-demo-countdown>
   </div>
 } @else {
-  <div class="h-screen bg-black flex items-center justify-center">
+  <div class="h-[100dvh] bg-black flex items-center justify-center">
     <div
       class="w-12 h-12 border-4 border-vault-purple/20 border-t-vault-purple rounded-full animate-spin"
     ></div>

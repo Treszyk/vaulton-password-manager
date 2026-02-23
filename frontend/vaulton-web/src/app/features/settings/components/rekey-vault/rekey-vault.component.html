@@ -76,7 +76,8 @@
               class="flex items-center gap-1.5 group/info cursor-help tooltip-full"
               data-tooltip="This setting influences both vault security and login time."
             >
-              <label class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 cursor-help"
+              <label
+                class="text-xs font-bold uppercase tracking-wider md:tracking-[0.2em] text-zinc-400 cursor-help"
                 >Vault Hardening Grade</label
               >
             </div>
@@ -84,9 +85,9 @@
             <div class="flex items-center gap-2 h-5">
               <span
                 *ngIf="isBenchmarking()"
-                class="text-[0.5625rem] md:text-xs font-black uppercase tracking-wider text-vault-purple-bright animate-pulse"
+                class="text-[0.625rem] font-bold uppercase tracking-normal sm:tracking-wider text-vault-purple-bright animate-pulse whitespace-nowrap"
               >
-                Benchmarking {{ benchmarkStatus() }}...
+                {{ benchmarkStatus() }}...
               </span>
 
               <button
@@ -189,7 +190,7 @@
             >
               <div class="flex flex-col items-center justify-center p-4 pointer-events-auto w-full">
                 <p
-                  class="text-xs md:text-[0.6875rem] font-bold uppercase tracking-[0.2em] mb-4 whitespace-nowrap drop-shadow-md transition-colors duration-500"
+                  class="text-xs md:text-[0.6875rem] font-bold uppercase tracking-tight md:tracking-[0.2em] mb-4 text-center whitespace-nowrap drop-shadow-md transition-colors duration-500"
                   [class.text-zinc-200]="isPasswordStrong()"
                   [class.text-red-400]="!isPasswordStrong()"
                 >
@@ -203,7 +204,7 @@
                 <button
                   (click)="onOptimizeKdf()"
                   [disabled]="!rekeyNewPassword || !isPasswordStrong()"
-                  class="flex items-center gap-2.5 px-6 py-3 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-zinc-600 disabled:opacity-50 disabled:pointer-events-none hover:brightness-110"
+                  class="flex items-center gap-2.5 px-4 py-3 md:px-6 text-white rounded-2xl transition-all active:scale-95 shadow-2xl border border-zinc-600 disabled:opacity-50 disabled:pointer-events-none hover:brightness-110"
                   [class.bg-vault-purple]="isPasswordStrong()"
                   [class.shadow-vault-purple/40]="isPasswordStrong()"
                   [class.bg-red-600]="!isPasswordStrong()"
@@ -235,7 +236,9 @@
                       d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                     />
                   </svg>
-                  <span class="text-xs font-black uppercase tracking-widest leading-none">
+                  <span
+                    class="text-xs md:text-[0.75rem] font-bold uppercase tracking-tight md:tracking-widest leading-none"
+                  >
                     {{ isPasswordStrong() ? 'Benchmark & Select' : 'Weak Password' }}
                   </span>
                 </button>
