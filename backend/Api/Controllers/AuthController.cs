@@ -286,8 +286,6 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 
 		if (!result.Success)
 		{
-			Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/" });
-
 			if (result.Error == RefreshError.RecentlyRevoked)
 			{
 				return Conflict(new { message = "Session synchronization in progress." });

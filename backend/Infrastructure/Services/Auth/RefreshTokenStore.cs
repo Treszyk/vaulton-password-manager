@@ -2,6 +2,7 @@
 using Application.Services.Auth.Results;
 using Core.Crypto;
 using Core.Entities;
+using Core.Enums;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -36,10 +37,10 @@ namespace Infrastructure.Services.Auth
 		public async Task<RefreshTokenRotationResult> RotateAsync(string refreshToken, byte[] jtiHash, DateTime now)
 		{
 			if (string.IsNullOrWhiteSpace(refreshToken))
-				return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Invalid, null, null, null);
+				return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Invalid, null, null, null, null);
 
 			if (!AuthCryptoHelpers.TryHashRefreshToken(refreshToken, out var hash))
-				return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Invalid, null, null, null);
+				return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Invalid, null, null, null, null);
 
 			try
 			{
@@ -47,10 +48,10 @@ namespace Infrastructure.Services.Auth
 					.SingleOrDefaultAsync(x => x.TokenHash.SequenceEqual(hash));
 
 				if (tokenRow is null)
-					return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Invalid, null, null, null);
+					return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Invalid, null, null, null, null);
 
 				if (tokenRow.ExpiresAt <= now)
-					return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Invalid, null, null, null);
+					return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Invalid, null, null, null, null);
 
 				if (tokenRow.RevokedAt is not null)
 				{
@@ -59,13 +60,14 @@ namespace Infrastructure.Services.Auth
 					{
 						tokenRow.RevokedAt = now;
 						await db.SaveChangesAsync();
-						return new RefreshTokenRotationResult(RefreshTokenRotationStatus.RecentlyRevoked, tokenRow.UserId, null, null);
+						return new RefreshTokenRotationResult(RefreshTokenRotationStatus.RecentlyRevoked, tokenRow.UserId, null, null, tokenRow.RevocationReason);
 					}
 
-					return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Revoked, tokenRow.UserId, null, null);
+					return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Revoked, tokenRow.UserId, null, null, tokenRow.RevocationReason);
 				}
 
 				tokenRow.RevokedAt = now;
+				tokenRow.RevocationReason = RevocationReason.Regular;
 
 				var (newToken, newHash) = AuthCryptoHelpers.MintRefreshToken();
 				var newExpires = now.Add(RefreshTtl);
@@ -83,7 +85,7 @@ namespace Infrastructure.Services.Auth
 
 				await db.SaveChangesAsync();
 
-				return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Rotated, tokenRow.UserId, newToken, newExpires);
+				return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Rotated, tokenRow.UserId, newToken, newExpires, null);
 			}
 			finally
 			{
@@ -108,6 +110,7 @@ namespace Infrastructure.Services.Auth
 					return;
 
 				rt.RevokedAt = now;
+				rt.RevocationReason = RevocationReason.Security;
 				await db.SaveChangesAsync();
 			}
 			finally
@@ -120,7 +123,9 @@ namespace Infrastructure.Services.Auth
 		{
 			await db.RefreshTokens
 				.Where(rt => rt.UserId == accountId && rt.RevokedAt == null)
-				.ExecuteUpdateAsync(s => s.SetProperty(rt => rt.RevokedAt, now));
+				.ExecuteUpdateAsync(s => s
+					.SetProperty(rt => rt.RevokedAt, now)
+					.SetProperty(rt => rt.RevocationReason, RevocationReason.Security));
 		}
 
 		public async Task<Guid?> GetUserIdByTokenAsync(string refreshToken)

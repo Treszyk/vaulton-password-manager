@@ -4,6 +4,7 @@ using Application.Services.Auth.Errors;
 using Application.Services.Auth.Results;
 using Core.Crypto;
 using Core.Entities;
+using Core.Enums;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -152,13 +153,17 @@ namespace Infrastructure.Services.Auth
 				case RefreshTokenRotationStatus.Invalid:
 					return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
 				case RefreshTokenRotationStatus.Revoked:
-					if (rotation.UserId is not null)
+					if (rotation.UserId is not null && rotation.Reason == RevocationReason.Regular)
 					{
 						await refreshTokenStore.RevokeAllAsync(rotation.UserId.Value, now);
 					}
 					return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
 				case RefreshTokenRotationStatus.RecentlyRevoked:
-					return RefreshResult.Fail(RefreshError.RecentlyRevoked);
+					if (rotation.Reason == RevocationReason.Regular)
+					{
+						return RefreshResult.Fail(RefreshError.RecentlyRevoked);
+					}
+					return RefreshResult.Fail(RefreshError.InvalidRefreshToken);
 				case RefreshTokenRotationStatus.Rotated:
 					if (rotation.UserId is null || rotation.Token is null || rotation.ExpiresAt is null)
 						return RefreshResult.Fail(RefreshError.InvalidRefreshToken);

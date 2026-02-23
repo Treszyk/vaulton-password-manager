@@ -1,4 +1,6 @@
-﻿namespace Core.Entities;
+﻿using Core.Enums;
+
+namespace Core.Entities;
 
 public class RefreshToken
 {
@@ -11,6 +13,7 @@ public class RefreshToken
 	public DateTime CreatedAt { get; set; }
 	public DateTime ExpiresAt { get; set; }
 	public DateTime? RevokedAt { get; set; }
+	public RevocationReason? RevocationReason { get; set; }
 
 	// Hash of the active access token's Jti
 	public byte[]? AccessTokenJtiHash { get; set; }
