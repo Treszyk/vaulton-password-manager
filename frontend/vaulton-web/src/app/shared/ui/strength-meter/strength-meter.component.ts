@@ -1,9 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { zxcvbn, zxcvbnOptions } from '@zxcvbn-ts/core';
-import { adjacencyGraphs, dictionary as commonDictionary } from '@zxcvbn-ts/language-common';
-import { translations as enTranslations, dictionary as enDictionary } from '@zxcvbn-ts/language-en';
-import { translations as plTranslations, dictionary as plDictionary } from '@zxcvbn-ts/language-pl';
+import { loadZxcvbn } from '../../../core/auth/auth-utils';
 
 @Component({
   selector: 'app-strength-meter',
@@ -37,21 +34,7 @@ export class StrengthMeterComponent implements OnChanges {
   score = signal(0);
   label = signal('Empty');
 
-  constructor() {
-    const options = {
-      translations: {
-        ...enTranslations,
-        ...plTranslations,
-      },
-      graphs: adjacencyGraphs,
-      dictionary: {
-        ...commonDictionary,
-        ...enDictionary,
-        ...plDictionary,
-      },
-    };
-    zxcvbnOptions.setOptions(options);
-  }
+  constructor() {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['password'] || changes['visible']) {
@@ -59,12 +42,15 @@ export class StrengthMeterComponent implements OnChanges {
     }
   }
 
-  private evaluate(pwd: string) {
+  private async evaluate(pwd: string) {
     if (!pwd || !this.visible) {
       this.score.set(0);
       this.label.set(!pwd ? 'Empty' : 'Hidden');
       return;
     }
+
+    const zxcvbn = await loadZxcvbn();
+    if (pwd !== this.password) return;
 
     const result = zxcvbn(pwd);
     const entropy = result.guessesLog10;

@@ -9,7 +9,7 @@ import { SessionService } from '../../../../core/auth/session.service';
 import { zeroize } from '../../../../core/crypto/zeroize';
 import { StrengthMeterComponent } from '../../../../shared/ui/strength-meter/strength-meter.component';
 import { ScrollIndicatorDirective } from '../../../../shared/directives/scroll-indicator.directive';
-import { validateNewPassword } from '../../../../core/auth/auth-utils';
+import { validateNewPassword, loadZxcvbn } from '../../../../core/auth/auth-utils';
 
 @Component({
   selector: 'app-rekey-vault',
@@ -25,6 +25,11 @@ export class RekeyVaultComponent {
   private readonly session = inject(SessionService);
 
   strengthMeter = viewChild(StrengthMeterComponent);
+
+  prefetchZxcvbn() {
+    loadZxcvbn().catch(console.error);
+  }
+
   isPasswordStrong = computed(() => (this.strengthMeter()?.score() ?? 0) >= 2);
 
   isRekeyBusy = signal(false);
@@ -57,7 +62,17 @@ export class RekeyVaultComponent {
     }
 
     if (!this.isPasswordStrong()) {
-      this.toast.trigger('Password too weak', false);
+      return;
+    }
+
+    const validationError = await validateNewPassword(
+      this.rekeyNewPassword,
+      (await this.persistence.getBundle())?.AccountId || '',
+      this.rekeyConfirmPassword,
+    );
+
+    if (validationError) {
+      this.toast.trigger(validationError, false);
       return;
     }
 
@@ -123,7 +138,7 @@ export class RekeyVaultComponent {
       const bundle = await this.persistence.getBundle();
       if (!bundle) throw new Error('No vault session found');
 
-      const validationError = validateNewPassword(
+      const validationError = await validateNewPassword(
         this.rekeyNewPassword,
         bundle.AccountId,
         this.rekeyConfirmPassword,

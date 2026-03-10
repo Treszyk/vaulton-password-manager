@@ -152,6 +152,7 @@
                     type="password"
                     [ngModel]="password()"
                     [disabled]="isWorking() || isBenchmarking()"
+                    (focus)="prefetchZxcvbn()"
                     (ngModelChange)="
                       password.set($event);
                       isOptimized.set(false);
@@ -295,6 +296,7 @@
                       id="register-password"
                       type="password"
                       [ngModel]="password()"
+                      (focus)="prefetchZxcvbn()"
                       [disabled]="isWorking() || isBenchmarking()"
                       (ngModelChange)="
                         password.set($event);

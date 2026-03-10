@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { VaultRecord, VaultRecordInput } from './vault-record.model';
 import { StrengthMeterComponent } from '../../shared/ui/strength-meter/strength-meter.component';
 import { ScrollIndicatorDirective } from '../../shared/directives/scroll-indicator.directive';
+import { loadZxcvbn } from '../../core/auth/auth-utils';
 
 @Component({
   selector: 'app-record-editor',
@@ -136,6 +137,7 @@ import { ScrollIndicatorDirective } from '../../shared/directives/scroll-indicat
                           scroll-indicator
                           [type]="showPwd() ? 'text' : 'password'"
                           name="password"
+                          (focus)="prefetchZxcvbn()"
                           [(ngModel)]="form.password"
                           required
                           placeholder="••••••••••••"
@@ -272,6 +274,10 @@ export class RecordEditorComponent implements OnInit, OnDestroy {
   showPwd = signal(false);
   isSubmitting = signal(false);
   isClosing = signal(false);
+
+  prefetchZxcvbn() {
+    loadZxcvbn().catch(console.error);
+  }
 
   ngOnInit() {
     if (this.record) {

@@ -30,6 +30,7 @@
         <input
           type="password"
           [(ngModel)]="rekeyOldPassword"
+          (focus)="prefetchZxcvbn()"
           aria-label="Current Password"
           class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors"
           placeholder="••••••••"
@@ -43,6 +44,7 @@
           <input
             type="password"
             [(ngModel)]="rekeyNewPassword"
+            (focus)="prefetchZxcvbn()"
             (ngModelChange)="isOptimized.set(false); standardTime.set(null); hardenedTime.set(null)"
             aria-label="New Master Password"
             class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors"
@@ -63,6 +65,7 @@
         <input
           type="password"
           [(ngModel)]="rekeyConfirmPassword"
+          (focus)="prefetchZxcvbn()"
           aria-label="Confirm New Password"
           class="w-full pl-5 pr-5 py-3 bg-vault-black border border-zinc-800 rounded-xl text-white outline-none focus:border-vault-purple/50 transition-colors"
           placeholder="••••••••"

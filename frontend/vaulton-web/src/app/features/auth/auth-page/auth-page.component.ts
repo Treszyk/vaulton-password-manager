@@ -13,7 +13,7 @@ import { StrengthMeterComponent } from '../../../shared/ui/strength-meter/streng
 import { ScrollIndicatorDirective } from '../../../shared/directives/scroll-indicator.directive';
 import { ImportantInfoModal } from '../../../shared/components/important-info-modal/important-info-modal';
 import { RecoverAccountModal } from '../../../shared/components/recover-account-modal/recover-account-modal';
-import { validateNewPassword } from '../../../core/auth/auth-utils';
+import { validateNewPassword, loadZxcvbn } from '../../../core/auth/auth-utils';
 
 @Component({
   selector: 'app-auth-page',
@@ -64,6 +64,10 @@ export class AuthPageComponent {
   } | null>(null);
 
   showRecoverModal = signal(false);
+
+  prefetchZxcvbn() {
+    loadZxcvbn().catch(console.error);
+  }
 
   recommendedMode = computed(() => {
     const h = this.hardenedTime();
@@ -126,7 +130,7 @@ export class AuthPageComponent {
   async onOptimizeKdf(): Promise<void> {
     if (this.isBenchmarking()) return;
 
-    const validationError = validateNewPassword(this.password(), this.accountId());
+    const validationError = await validateNewPassword(this.password(), this.accountId());
     if (validationError) {
       this.toast.trigger(validationError, false);
       return;
@@ -211,7 +215,7 @@ export class AuthPageComponent {
   async register() {
     if (this.isWorking() || !this.accountId() || !this.password() || !this.isOptimized()) return;
 
-    const validationError = validateNewPassword(this.password(), this.accountId());
+    const validationError = await validateNewPassword(this.password(), this.accountId());
     if (validationError) {
       this.reportError(validationError);
       return;

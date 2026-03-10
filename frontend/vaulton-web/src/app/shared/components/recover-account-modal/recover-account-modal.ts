@@ -15,7 +15,7 @@ import { SessionService } from '../../../core/auth/session.service';
 import { ToastService } from '../../ui/toast/toast.service';
 import { StrengthMeterComponent } from '../../ui/strength-meter/strength-meter.component';
 import { ScrollIndicatorDirective } from '../../directives/scroll-indicator.directive';
-import { validateNewPassword } from '../../../core/auth/auth-utils';
+import { validateNewPassword, loadZxcvbn } from '../../../core/auth/auth-utils';
 
 type RecoveryStage = 'INPUT' | 'KEY_SETUP' | 'RECOVERING' | 'SUCCESS';
 
@@ -54,6 +54,11 @@ export class RecoverAccountModal implements OnInit, OnDestroy {
   private holdInterval: any;
 
   strengthMeter = viewChild(StrengthMeterComponent);
+
+  prefetchZxcvbn() {
+    loadZxcvbn().catch(console.error);
+  }
+
   isPasswordStrong = computed(() => (this.strengthMeter()?.score() ?? 0) >= 2);
 
   recommendedMode = computed(() => {
@@ -99,7 +104,7 @@ export class RecoverAccountModal implements OnInit, OnDestroy {
   async onOptimizeKdf() {
     if (this.isBenchmarking()) return;
 
-    const validationError = validateNewPassword(
+    const validationError = await validateNewPassword(
       this.newPassword(),
       this.accountId(),
       this.confirmPassword(),
@@ -145,7 +150,7 @@ export class RecoverAccountModal implements OnInit, OnDestroy {
   async onRecover() {
     if (!this.isOptimized() || this.newPassword() !== this.confirmPassword()) return;
 
-    const validationError = validateNewPassword(
+    const validationError = await validateNewPassword(
       this.newPassword(),
       this.accountId(),
       this.confirmPassword(),

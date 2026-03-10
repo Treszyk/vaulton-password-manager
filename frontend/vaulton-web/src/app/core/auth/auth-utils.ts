@@ -1,28 +1,39 @@
-import { zxcvbn, zxcvbnOptions } from '@zxcvbn-ts/core';
-import { adjacencyGraphs, dictionary as commonDictionary } from '@zxcvbn-ts/language-common';
-import { translations as enTranslations, dictionary as enDictionary } from '@zxcvbn-ts/language-en';
-import { translations as plTranslations, dictionary as plDictionary } from '@zxcvbn-ts/language-pl';
+import { zxcvbn as zxcvbnType } from '@zxcvbn-ts/core';
 
-const options = {
-  translations: {
-    ...enTranslations,
-    ...plTranslations,
-  },
-  graphs: adjacencyGraphs,
-  dictionary: {
-    ...commonDictionary,
-    ...enDictionary,
-    ...plDictionary,
-  },
-};
-zxcvbnOptions.setOptions(options);
+let zxcvbnInstance: typeof zxcvbnType | null = null;
 
-export function validateNewPassword(
+export async function loadZxcvbn() {
+  if (zxcvbnInstance) return zxcvbnInstance;
+
+  const [
+    { zxcvbn, zxcvbnOptions },
+    { adjacencyGraphs, dictionary: commonDictionary },
+    { translations: enTranslations, dictionary: enDictionary },
+    { translations: plTranslations, dictionary: plDictionary },
+  ] = await Promise.all([
+    import('@zxcvbn-ts/core'),
+    import('@zxcvbn-ts/language-common'),
+    import('@zxcvbn-ts/language-en'),
+    import('@zxcvbn-ts/language-pl'),
+  ]);
+
+  const options = {
+    translations: { ...enTranslations, ...plTranslations },
+    graphs: adjacencyGraphs,
+    dictionary: { ...commonDictionary, ...enDictionary, ...plDictionary },
+  };
+  zxcvbnOptions.setOptions(options);
+
+  zxcvbnInstance = zxcvbn;
+  return zxcvbnInstance;
+}
+
+export async function validateNewPassword(
   newPassword: string,
   accountId: string,
   confirmPassword?: string,
   oldPassword?: string,
-): string | null {
+): Promise<string | null> {
   if (!newPassword) {
     return 'Password is required';
   }
@@ -31,6 +42,7 @@ export function validateNewPassword(
     return 'Password cannot contain your Account ID';
   }
 
+  const zxcvbn = await loadZxcvbn();
   const result = zxcvbn(newPassword);
 
   let score = 0;
