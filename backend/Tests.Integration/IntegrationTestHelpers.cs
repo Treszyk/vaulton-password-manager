@@ -14,6 +14,18 @@ public static class IntegrationTestHelpers
 		return preData!.AccountId;
 	}
 
+	public static async Task<(Guid accountId, byte[] verifier)> RegisterUserAsync(this HttpClient client)
+	{
+		var accountId = await client.PreRegisterAccountIdAsync();
+		var verifier = CreateValidVerifier();
+		var req = CreateValidRegisterRequest(accountId, verifier: verifier);
+
+		var response = await client.PostAsJsonAsync("/auth/register", req);
+		response.EnsureSuccessStatusCode();
+
+		return (accountId, verifier);
+	}
+
 	public static byte[] CreateValidVerifier() => RandomNumberGenerator.GetBytes(32);
 	public static byte[] CreateValidSalt() => RandomNumberGenerator.GetBytes(16);
 

@@ -1,4 +1,4 @@
-﻿using Api.DTOs.Auth;
+using Api.DTOs.Auth;
 using Api.DTOs.Crypto;
 using Application.Services.Auth;
 using Application.Services.Auth.Commands;
@@ -77,6 +77,11 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	{
 		var cmd = new PreLoginCommand(request.AccountId);
 		var result = await _auth.PreLoginAsync(cmd);
+
+		if (!result.Success)
+		{
+			return BadRequest(new { message = "Invalid account ID." });
+		}
 
 		// we always return Ok to prevent accountId enumeration
 		return Ok(new PreLoginResponse(

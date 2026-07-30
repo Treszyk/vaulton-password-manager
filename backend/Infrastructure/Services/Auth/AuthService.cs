@@ -1,4 +1,4 @@
-﻿using Application.Services.Auth;
+using Application.Services.Auth;
 using Application.Services.Auth.Commands;
 using Application.Services.Auth.Errors;
 using Application.Services.Auth.Results;
@@ -186,6 +186,11 @@ namespace Infrastructure.Services.Auth
 
 		public async Task<PreLoginResult> PreLoginAsync(PreLoginCommand cmd)
 		{
+			if (cmd.AccountId == Guid.Empty)
+			{
+				return PreLoginResult.Fail(PreLoginError.InvalidAccountId);
+			}
+
 			var user = await db.Users
 				.Where(u => u.Id == cmd.AccountId)
 				.Select(u => new { u.S_Pwd, u.KdfMode, u.CryptoSchemaVer })
