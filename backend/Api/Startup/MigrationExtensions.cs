@@ -1,4 +1,4 @@
-﻿using Infrastructure.Data;
+using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Startup;
@@ -10,6 +10,12 @@ public static class MigrationExtensions
 		using var scope = app.Services.CreateScope();
 		var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DbMigrator");
 		var db = scope.ServiceProvider.GetRequiredService<VaultonDbContext>();
+
+		if (db.Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true)
+		{
+			await db.Database.EnsureCreatedAsync();
+			return;
+		}
 
 		var delay = TimeSpan.FromSeconds(5);
 		for (var attempt = 1; attempt <= maxRetries; attempt++)
