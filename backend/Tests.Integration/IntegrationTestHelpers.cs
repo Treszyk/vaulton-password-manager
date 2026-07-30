@@ -1,5 +1,6 @@
 using Api.DTOs.Auth;
 using Api.DTOs.Crypto;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 
@@ -24,6 +25,24 @@ public static class IntegrationTestHelpers
 		response.EnsureSuccessStatusCode();
 
 		return (accountId, verifier);
+	}
+
+	public static async Task<ExtLoginResponse> LoginExtAsync(this HttpClient client)
+	{
+		var (accountId, verifier) = await client.RegisterUserAsync();
+		var loginReq = new LoginRequest(accountId, verifier);
+		var loginRes = await client.PostAsJsonAsync("/auth/ext/login", loginReq);
+		loginRes.EnsureSuccessStatusCode();
+
+		var data = await loginRes.Content.ReadFromJsonAsync<ExtLoginResponse>();
+		return data!;
+	}
+
+	public static HttpRequestMessage CreateAuthorizedRequest(HttpMethod method, string url, string accessToken)
+	{
+		var req = new HttpRequestMessage(method, url);
+		req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+		return req;
 	}
 
 	public static byte[] CreateValidVerifier() => RandomNumberGenerator.GetBytes(32);

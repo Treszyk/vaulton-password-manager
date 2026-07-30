@@ -1,4 +1,4 @@
-﻿using Application.Services.Auth;
+using Application.Services.Auth;
 using Application.Services.Auth.Results;
 using Core.Crypto;
 using Core.Entities;
@@ -45,7 +45,7 @@ namespace Infrastructure.Services.Auth
 			try
 			{
 				var tokenRow = await db.RefreshTokens
-					.SingleOrDefaultAsync(x => x.TokenHash.SequenceEqual(hash));
+					.SingleOrDefaultAsync(x => x.TokenHash == hash);
 
 				if (tokenRow is null)
 					return new RefreshTokenRotationResult(RefreshTokenRotationStatus.Invalid, null, null, null, null);
@@ -104,7 +104,7 @@ namespace Infrastructure.Services.Auth
 			try
 			{
 				var rt = await db.RefreshTokens
-					.SingleOrDefaultAsync(x => x.TokenHash.SequenceEqual(hash) && x.RevokedAt == null);
+					.SingleOrDefaultAsync(x => x.TokenHash == hash && x.RevokedAt == null);
 
 				if (rt is null)
 					return;
@@ -136,7 +136,7 @@ namespace Infrastructure.Services.Auth
 			try
 			{
 				var tokenRow = await db.RefreshTokens
-					.SingleOrDefaultAsync(x => x.TokenHash.SequenceEqual(hash));
+					.SingleOrDefaultAsync(x => x.TokenHash == hash);
 
 				return tokenRow?.UserId;
 			}
