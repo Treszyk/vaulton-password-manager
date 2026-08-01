@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -40,39 +41,46 @@ namespace Api
 			builder.Services.AddControllers();
 			builder.Services.AddHealthChecks()
 				.AddCheck<FastSqlHealthCheck>("sql");
-			builder.Services.AddEndpointsApiExplorer();
-			builder.Services.AddSwaggerGen(c =>
+			builder.Services.AddOpenApi(options =>
 			{
-				c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+				options.AddDocumentTransformer((document, context, cancellationToken) =>
 				{
-					Name = "Authorization",
-					Type = SecuritySchemeType.Http,
-					Scheme = "bearer",
-					BearerFormat = "JWT",
-					In = ParameterLocation.Header,
-					Description = "Paste: Bearer {your JWT token}"
-				});
-
-				c.AddSecurityRequirement(new OpenApiSecurityRequirement
-				{
+					if (builder.Environment.IsDevelopment())
 					{
-						new OpenApiSecurityScheme
+						document.Servers = new List<OpenApiServer>
+						{
+							new OpenApiServer { Url = "/api", Description = "Frontend Proxy (localhost:4200)" },
+							new OpenApiServer { Url = "/", Description = "Direct Backend" }
+						};
+					}
+
+					var securityScheme = new OpenApiSecurityScheme
+					{
+						Name = "Authorization",
+						Type = SecuritySchemeType.Http,
+						Scheme = "bearer",
+						BearerFormat = "JWT",
+						In = ParameterLocation.Header,
+						Description = "Paste: Bearer {your JWT token}"
+					};
+
+					document.Components ??= new OpenApiComponents();
+					document.Components.SecuritySchemes["Bearer"] = securityScheme;
+
+					document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+					{
+						[new OpenApiSecurityScheme
 						{
 							Reference = new OpenApiReference
 							{
 								Type = ReferenceType.SecurityScheme,
 								Id = "Bearer"
 							}
-						},
-						Array.Empty<string>()
-					}
-				});
+						}] = Array.Empty<string>()
+					});
 
-				if (builder.Environment.IsDevelopment())
-				{
-					c.AddServer(new OpenApiServer { Url = "/api", Description = "Frontend Proxy (localhost:4200)" });
-					c.AddServer(new OpenApiServer { Url = "/", Description = "Direct Backend" });
-				}
+					return Task.CompletedTask;
+				});
 			});
 
 			builder.Services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
@@ -131,7 +139,9 @@ namespace Api
 							using var scope = context.HttpContext.RequestServices.CreateScope();
 							var db = scope.ServiceProvider.GetRequiredService<VaultonDbContext>();
 							
-							var jtiHash = SHA256.HashData(Encoding.UTF8.GetBytes(jti));
+							Span<byte> jtiBytes = stackalloc byte[128];
+							int jtiLen = Encoding.UTF8.GetBytes(jti, jtiBytes);
+							var jtiHash = SHA256.HashData(jtiBytes[..jtiLen]);
 
 							var now = DateTime.UtcNow;
 							var isValid = await db.RefreshTokens
@@ -200,8 +210,8 @@ namespace Api
 
 			if (app.Environment.IsDevelopment())
 			{
-				app.UseSwagger();
-				app.UseSwaggerUI();
+				app.MapOpenApi();
+				app.MapScalarApiReference();
 			}
 
 			app.UseRateLimiter();

@@ -1,4 +1,4 @@
-﻿using Api.DTOs.Crypto;
+using Api.DTOs.Crypto;
 using Api.DTOs.Vault;
 using Application.Services.Vault;
 using Application.Services.Vault.Commands;
@@ -14,12 +14,10 @@ namespace Api.Controllers;
 [Authorize]
 public sealed class VaultController(IVaultService vault) : ControllerBase
 {
-	private readonly IVaultService _vault = vault;
-
 	[HttpPost("pre-create")]
 	public async Task<ActionResult<PreCreateEntryResponse>> PreCreate()
 	{
-		var entryId = await _vault.PreCreateEntryAsync();
+		var entryId = await vault.PreCreateEntryAsync();
 		return Ok(new PreCreateEntryResponse(entryId));
 	}
 
@@ -32,7 +30,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 		var payload = request.Payload.ToDomain();
 
 		var cmd = new CreateEntryCommand(accountId, request.EntryId, payload);
-		var result = await _vault.CreateEntryAsync(cmd);
+		var result = await vault.CreateEntryAsync(cmd);
 
 		if (!result.Success)
 		{
@@ -69,7 +67,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 
 		if (take > 500)
 			take = 500;
-		var result = await _vault.ListEntriesAsync(new ListEntriesCommand(accountId, skip, take));
+		var result = await vault.ListEntriesAsync(new ListEntriesCommand(accountId, skip, take));
 
 		if (!result.Success)
 		{
@@ -95,7 +93,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 		if (!User.TryGetAccountId(out var accountId))
 			return Unauthorized();
 
-		var result = await _vault.GetEntryAsync(new GetEntryCommand(accountId, id));
+		var result = await vault.GetEntryAsync(new GetEntryCommand(accountId, id));
 
 		if (!result.Success)
 		{
@@ -124,7 +122,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 		if (!User.TryGetAccountId(out var accountId))
 			return Unauthorized();
 
-		var result = await _vault.DeleteEntryAsync(new DeleteEntryCommand(accountId, id));
+		var result = await vault.DeleteEntryAsync(new DeleteEntryCommand(accountId, id));
 
 		if (!result.Success)
 		{
@@ -152,7 +150,7 @@ public sealed class VaultController(IVaultService vault) : ControllerBase
 		};
 
 		var cmd = new UpdateEntryCommand(accountId, id, payload);
-		var result = await _vault.UpdateEntryAsync(cmd);
+		var result = await vault.UpdateEntryAsync(cmd);
 
 		if (!result.Success)
 		{
