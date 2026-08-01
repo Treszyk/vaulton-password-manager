@@ -14,14 +14,12 @@ namespace Api.Controllers;
 [Route("auth")]
 public class AuthController(IAuthService auth, IWebHostEnvironment env) : ControllerBase
 {
-	private readonly IAuthService _auth = auth;
-	private readonly IWebHostEnvironment _env = env;
 	private const string RefreshCookieName = "Vaulton.Refresh";
 	private CookieOptions RefreshCookieOptions(DateTime expiresUtc)
 	=> new()
 	{
 		HttpOnly = true,
-		Secure = !_env.IsDevelopment(),
+		Secure = !env.IsDevelopment(),
 		SameSite = SameSiteMode.Strict,
 		Expires = new DateTimeOffset(expiresUtc),
 		Path = "/" // Works for Swagger (/auth/...) and frontend (/api/auth/...) via proxy/Caddy
@@ -31,7 +29,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	[EnableRateLimiting("AuthPolicy")]
 	public async Task<ActionResult<PreRegisterResponse>> PreRegister()
 	{
-		var accountId = await _auth.PreRegisterAsync();
+		var accountId = await auth.PreRegisterAsync();
 		return Ok(new PreRegisterResponse(accountId, 1)); // hardcoded V1 CryptoSchemaVer
 	}
 
@@ -54,7 +52,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 			request.CryptoSchemaVer
 		);
 
-		var result = await _auth.RegisterAsync(cmd);
+		var result = await auth.RegisterAsync(cmd);
 
 		if (!result.Success)
 		{
@@ -76,7 +74,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	public async Task<ActionResult<PreLoginResponse>> PreLogin([FromBody] PreLoginRequest request)
 	{
 		var cmd = new PreLoginCommand(request.AccountId);
-		var result = await _auth.PreLoginAsync(cmd);
+		var result = await auth.PreLoginAsync(cmd);
 
 		if (!result.Success)
 		{
@@ -96,7 +94,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
 	{
 		var cmd = new LoginCommand(request.AccountId, request.Verifier);
-		var result = await _auth.LoginAsync(cmd);
+		var result = await auth.LoginAsync(cmd);
 
 		if (!result.Success)
 		{
@@ -121,7 +119,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	public async Task<ActionResult<ExtLoginResponse>> LoginExt([FromBody] LoginRequest request)
 	{
 		var cmd = new LoginCommand(request.AccountId, request.Verifier);
-		var result = await _auth.LoginAsync(cmd);
+		var result = await auth.LoginAsync(cmd);
 
 		if (!result.Success)
 		{
@@ -141,7 +139,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	[EnableRateLimiting("AuthPolicy")]
 	public async Task<ActionResult<WrapsResponse>> GetRecoveryWraps([FromBody] RecoveryWrapsRequest request)
 	{
-		var result = await _auth.GetRecoveryWrapsAsync(request.AccountId, request.RkVerifier);
+		var result = await auth.GetRecoveryWrapsAsync(request.AccountId, request.RkVerifier);
 
 		if (!result.Success)
 		{
@@ -173,7 +171,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 			request.CryptoSchemaVer
 		);
 
-		var result = await _auth.RecoverAsync(cmd);
+		var result = await auth.RecoverAsync(cmd);
 
 		if (!result.Success)
 		{
@@ -199,7 +197,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 			return Unauthorized();
 
 		var cmd = new WrapsCommand(accountId, request.AdminVerifier);
-		var result = await _auth.GetWrapsAsync(cmd);
+		var result = await auth.GetWrapsAsync(cmd);
 
 		if (!result.Success)
 		{
@@ -237,7 +235,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 			request.CryptoSchemaVer
 		);
 
-		var result = await _auth.ChangePasswordAsync(cmd);
+		var result = await auth.ChangePasswordAsync(cmd);
 
 		if (!result.Success)
 		{
@@ -260,7 +258,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		if (!Request.Cookies.TryGetValue(RefreshCookieName, out var rt) || string.IsNullOrWhiteSpace(rt))
 			return Unauthorized(new { message = "Missing refresh token." });
 
-		var result = await _auth.RefreshAsync(new RefreshCommand(rt));
+		var result = await auth.RefreshAsync(new RefreshCommand(rt));
 
 		if (!result.Success)
 		{
@@ -287,7 +285,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	[EnableRateLimiting("AuthPolicy")]
 	public async Task<ActionResult<ExtRefreshResponse>> RefreshExt([FromBody] ExtRefreshRequest request)
 	{
-		var result = await _auth.RefreshAsync(new RefreshCommand(request.RefreshToken));
+		var result = await auth.RefreshAsync(new RefreshCommand(request.RefreshToken));
 
 		if (!result.Success)
 		{
@@ -307,7 +305,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	{
 		if (Request.Cookies.TryGetValue(RefreshCookieName, out var rt) && !string.IsNullOrWhiteSpace(rt))
 		{
-			await _auth.LogoutAsync(rt);
+			await auth.LogoutAsync(rt);
 		}
 
 		Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/" });
@@ -317,7 +315,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 	[HttpPost("ext/logout")]
 	public async Task<IActionResult> LogoutExt([FromBody] ExtRefreshRequest request)
 	{
-		await _auth.LogoutAsync(request.RefreshToken);
+		await auth.LogoutAsync(request.RefreshToken);
 		return NoContent();
 	}
 
@@ -328,7 +326,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		if (!User.TryGetAccountId(out var accountId))
 			return Unauthorized();
 
-		await _auth.LogoutAllAsync(accountId);
+		await auth.LogoutAllAsync(accountId);
 
 		Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = "/" });
 		return NoContent();
@@ -341,7 +339,7 @@ public class AuthController(IAuthService auth, IWebHostEnvironment env) : Contro
 		if (!User.TryGetAccountId(out var accountId))
 			return Unauthorized();
 
-		await _auth.LogoutAllAsync(accountId);
+		await auth.LogoutAllAsync(accountId);
 		return NoContent();
 	}
 
