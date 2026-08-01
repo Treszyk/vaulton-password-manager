@@ -16,9 +16,9 @@ public class AuthLoginIntegrationTests : IClassFixture<CustomWebApplicationFacto
 	[Fact]
 	public async Task PreLogin_WithExistingAccount_ShouldReturnAccountSalt()
 	{
-		var (accountId, _) = await _client.RegisterUserAsync();
+		var user = await _client.RegisterUserAsync();
 
-		var preReq = new PreLoginRequest(accountId);
+		var preReq = new PreLoginRequest(user.AccountId);
 		var response = await _client.PostAsJsonAsync("/auth/pre-login", preReq);
 
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -61,9 +61,9 @@ public class AuthLoginIntegrationTests : IClassFixture<CustomWebApplicationFacto
 	[Fact]
 	public async Task Login_WithValidCredentials_ShouldReturnTokenAndSetCookie()
 	{
-		var (accountId, verifier) = await _client.RegisterUserAsync();
+		var user = await _client.RegisterUserAsync();
 
-		var loginReq = new LoginRequest(accountId, verifier);
+		var loginReq = new LoginRequest(user.AccountId, user.Verifier);
 		var response = await _client.PostAsJsonAsync("/auth/login", loginReq);
 
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -77,10 +77,10 @@ public class AuthLoginIntegrationTests : IClassFixture<CustomWebApplicationFacto
 	[Fact]
 	public async Task Login_WithInvalidVerifier_ShouldReturn401Unauthorized()
 	{
-		var (accountId, _) = await _client.RegisterUserAsync();
+		var user = await _client.RegisterUserAsync();
 
 		var invalidVerifier = IntegrationTestHelpers.CreateValidVerifier();
-		var loginReq = new LoginRequest(accountId, invalidVerifier);
+		var loginReq = new LoginRequest(user.AccountId, invalidVerifier);
 
 		var response = await _client.PostAsJsonAsync("/auth/login", loginReq);
 
@@ -102,9 +102,9 @@ public class AuthLoginIntegrationTests : IClassFixture<CustomWebApplicationFacto
 	[Fact]
 	public async Task LoginExt_WithValidCredentials_ShouldReturnAccessAndRefreshTokens()
 	{
-		var (accountId, verifier) = await _client.RegisterUserAsync();
+		var user = await _client.RegisterUserAsync();
 
-		var loginReq = new LoginRequest(accountId, verifier);
+		var loginReq = new LoginRequest(user.AccountId, user.Verifier);
 		var response = await _client.PostAsJsonAsync("/auth/ext/login", loginReq);
 
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -118,10 +118,10 @@ public class AuthLoginIntegrationTests : IClassFixture<CustomWebApplicationFacto
 	[Fact]
 	public async Task LoginExt_WithInvalidVerifier_ShouldReturn401Unauthorized()
 	{
-		var (accountId, _) = await _client.RegisterUserAsync();
+		var user = await _client.RegisterUserAsync();
 
 		var invalidVerifier = IntegrationTestHelpers.CreateValidVerifier();
-		var loginReq = new LoginRequest(accountId, invalidVerifier);
+		var loginReq = new LoginRequest(user.AccountId, invalidVerifier);
 
 		var response = await _client.PostAsJsonAsync("/auth/ext/login", loginReq);
 

@@ -25,6 +25,8 @@ TestResults/
 *.coverage
 *.coveragexml
 coverage*/
+CoverageReport/
+[Cc]overage*/
 
 # Packages (if you ever pack locally)
 *.nupkg

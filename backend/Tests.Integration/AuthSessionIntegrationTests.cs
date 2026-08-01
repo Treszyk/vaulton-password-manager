@@ -16,8 +16,8 @@ public class AuthSessionIntegrationTests : IClassFixture<CustomWebApplicationFac
 	[Fact]
 	public async Task Refresh_WithValidCookie_ShouldReturnNewTokenAndSetRotatedCookie()
 	{
-		var (accountId, verifier) = await _client.RegisterUserAsync();
-		var loginRes = await _client.PostAsJsonAsync("/auth/login", new LoginRequest(accountId, verifier));
+		var user = await _client.RegisterUserAsync();
+		var loginRes = await _client.PostAsJsonAsync("/auth/login", new LoginRequest(user.AccountId, user.Verifier));
 
 		Assert.Equal(HttpStatusCode.OK, loginRes.StatusCode);
 		Assert.True(loginRes.Headers.Contains("Set-Cookie"));
@@ -91,8 +91,8 @@ public class AuthSessionIntegrationTests : IClassFixture<CustomWebApplicationFac
 	[Fact]
 	public async Task Logout_WithValidSession_ShouldReturn204NoContentAndInvalidateSession()
 	{
-		var (accountId, verifier) = await _client.RegisterUserAsync();
-		await _client.PostAsJsonAsync("/auth/login", new LoginRequest(accountId, verifier));
+		var user = await _client.RegisterUserAsync();
+		await _client.PostAsJsonAsync("/auth/login", new LoginRequest(user.AccountId, user.Verifier));
 
 		var logoutRes = await _client.PostAsync("/auth/logout", null);
 		Assert.Equal(HttpStatusCode.NoContent, logoutRes.StatusCode);
@@ -118,8 +118,7 @@ public class AuthSessionIntegrationTests : IClassFixture<CustomWebApplicationFac
 	{
 		var loginData = await _client.LoginExtAsync();
 
-		var logoutAllReq = IntegrationTestHelpers.CreateAuthorizedRequest(HttpMethod.Post, "/auth/logout-all", loginData.AccessToken);
-		var logoutAllRes = await _client.SendAsync(logoutAllReq);
+		var logoutAllRes = await _client.SendAuthorizedAsync(HttpMethod.Post, "/auth/logout-all", loginData.AccessToken);
 		Assert.Equal(HttpStatusCode.NoContent, logoutAllRes.StatusCode);
 
 		var refreshRes = await _client.PostAsJsonAsync("/auth/ext/refresh", new ExtRefreshRequest(loginData.RefreshToken));
@@ -131,8 +130,7 @@ public class AuthSessionIntegrationTests : IClassFixture<CustomWebApplicationFac
 	{
 		var loginData = await _client.LoginExtAsync();
 
-		var logoutAllReq = IntegrationTestHelpers.CreateAuthorizedRequest(HttpMethod.Post, "/auth/ext/logout-all", loginData.AccessToken);
-		var logoutAllRes = await _client.SendAsync(logoutAllReq);
+		var logoutAllRes = await _client.SendAuthorizedAsync(HttpMethod.Post, "/auth/ext/logout-all", loginData.AccessToken);
 		Assert.Equal(HttpStatusCode.NoContent, logoutAllRes.StatusCode);
 
 		var refreshRes = await _client.PostAsJsonAsync("/auth/ext/refresh", new ExtRefreshRequest(loginData.RefreshToken));
@@ -155,8 +153,34 @@ public class AuthSessionIntegrationTests : IClassFixture<CustomWebApplicationFac
 		var logoutRes = await _client.PostAsJsonAsync("/auth/ext/logout", new ExtRefreshRequest(loginData.RefreshToken));
 		Assert.Equal(HttpStatusCode.NoContent, logoutRes.StatusCode);
 
-		var wrapsReq = IntegrationTestHelpers.CreateAuthorizedRequest(HttpMethod.Post, "/auth/logout-all", loginData.AccessToken);
-		var wrapsRes = await _client.SendAsync(wrapsReq);
+		var wrapsRes = await _client.SendAuthorizedAsync(HttpMethod.Post, "/auth/logout-all", loginData.AccessToken);
 		Assert.Equal(HttpStatusCode.Unauthorized, wrapsRes.StatusCode);
+	}
+
+	[Fact]
+	public async Task LogoutAll_WithMultipleSessions_ShouldRevokeAllSessions()
+	{
+		var user = await _client.RegisterUserAsync();
+		var loginReq = new LoginRequest(user.AccountId, user.Verifier);
+
+		var session1 = await _client.PostAsJsonAsync("/auth/ext/login", loginReq);
+		var session1Data = await session1.Content.ReadFromJsonAsync<ExtLoginResponse>();
+
+		var session2 = await _client.PostAsJsonAsync("/auth/ext/login", loginReq);
+		var session2Data = await session2.Content.ReadFromJsonAsync<ExtLoginResponse>();
+
+		var session3 = await _client.PostAsJsonAsync("/auth/ext/login", loginReq);
+		var session3Data = await session3.Content.ReadFromJsonAsync<ExtLoginResponse>();
+
+		var logoutAllRes = await _client.SendAuthorizedAsync(HttpMethod.Post, "/auth/ext/logout-all", session1Data!.AccessToken);
+		Assert.Equal(HttpStatusCode.NoContent, logoutAllRes.StatusCode);
+
+		var refresh1 = await _client.PostAsJsonAsync("/auth/ext/refresh", new ExtRefreshRequest(session1Data.RefreshToken));
+		var refresh2 = await _client.PostAsJsonAsync("/auth/ext/refresh", new ExtRefreshRequest(session2Data!.RefreshToken));
+		var refresh3 = await _client.PostAsJsonAsync("/auth/ext/refresh", new ExtRefreshRequest(session3Data!.RefreshToken));
+
+		Assert.Equal(HttpStatusCode.Unauthorized, refresh1.StatusCode);
+		Assert.Equal(HttpStatusCode.Unauthorized, refresh2.StatusCode);
+		Assert.Equal(HttpStatusCode.Unauthorized, refresh3.StatusCode);
 	}
 }
