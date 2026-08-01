@@ -1,4 +1,4 @@
-﻿using Core.Crypto;
+using Core.Crypto;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Cryptography;
 
@@ -8,14 +8,20 @@ namespace Infrastructure.Services.Auth
 	{
 		public byte[] ComputeStoredVerifier(byte[] verifierRaw, byte[] salt)
 		{
-			var input = new byte[verifierRaw.Length + options.VerifierPepperBytes.Length];
-			Buffer.BlockCopy(verifierRaw, 0, input, 0, verifierRaw.Length);
-			Buffer.BlockCopy(options.VerifierPepperBytes, 0, input, verifierRaw.Length, options.VerifierPepperBytes.Length);
+			Span<byte> input = stackalloc byte[verifierRaw.Length + options.VerifierPepperBytes.Length];
+			verifierRaw.CopyTo(input);
+			options.VerifierPepperBytes.CopyTo(input[verifierRaw.Length..]);
 
 			try
 			{
-				using var pbkdf2 = new Rfc2898DeriveBytes(input, salt, options.VerifierPbkdf2Iterations, HashAlgorithmName.SHA256);
-				return pbkdf2.GetBytes(CryptoSizes.VerifierLen);
+				var result = new byte[CryptoSizes.VerifierLen];
+				Rfc2898DeriveBytes.Pbkdf2(
+					input,
+					salt,
+					result,
+					options.VerifierPbkdf2Iterations,
+					HashAlgorithmName.SHA256);
+				return result;
 			}
 			finally
 			{
@@ -39,33 +45,32 @@ namespace Infrastructure.Services.Auth
 
 		private byte[] ComputeFakeBlob(Guid accountId, string contextLabel, int length, ReadOnlySpan<byte> extraSeed = default)
 		{
-			byte[] context = System.Text.Encoding.UTF8.GetBytes(contextLabel);
-			
 			Span<byte> idBytes = stackalloc byte[16];
 			if (!accountId.TryWriteBytes(idBytes))
 			{
 				throw new InvalidOperationException("Failed to write Guid bytes.");
 			}
 
-			var inputLen = context.Length + idBytes.Length + extraSeed.Length;
-			byte[] input = new byte[inputLen];
-			
-			Buffer.BlockCopy(context, 0, input, 0, context.Length);
-			idBytes.CopyTo(input.AsSpan(context.Length));
-			
+			int contextByteCount = System.Text.Encoding.UTF8.GetByteCount(contextLabel);
+			int inputLen = contextByteCount + idBytes.Length + extraSeed.Length;
+
+			Span<byte> input = stackalloc byte[inputLen];
+			System.Text.Encoding.UTF8.GetBytes(contextLabel, input);
+			idBytes.CopyTo(input[contextByteCount..]);
+
 			if (extraSeed.Length > 0)
 			{
-				extraSeed.CopyTo(input.AsSpan(context.Length + idBytes.Length));
+				extraSeed.CopyTo(input[(contextByteCount + idBytes.Length)..]);
 			}
 
 			try
 			{
-				using var hmac = new HMACSHA256(options.FakeSaltSecretBytes);
-				var hash = hmac.ComputeHash(input);
+				Span<byte> hash = stackalloc byte[32];
+				HMACSHA256.HashData(options.FakeSaltSecretBytes, input, hash);
 
 				var result = new byte[length];
 				var take = Math.Min(hash.Length, length);
-				Buffer.BlockCopy(hash, 0, result, 0, take);
+				hash[..take].CopyTo(result);
 
 				return result;
 			}
@@ -77,7 +82,9 @@ namespace Infrastructure.Services.Auth
 
 		public static (string token, byte[] tokenHash) MintRefreshToken()
 		{
-			var raw = RandomNumberGenerator.GetBytes(64);
+			Span<byte> raw = stackalloc byte[64];
+			RandomNumberGenerator.Fill(raw);
+
 			try
 			{
 				var token = WebEncoders.Base64UrlEncode(raw);
@@ -98,25 +105,20 @@ namespace Infrastructure.Services.Auth
 				return false;
 			}
 
-			byte[] raw;
+			Span<byte> raw = stackalloc byte[64];
 			try
 			{
-				raw = WebEncoders.Base64UrlDecode(token);
-			}
-			catch
-			{
-				return false;
-			}
-
-			try
-			{
-				if (raw.Length != 64)
+				if (!System.Buffers.Text.Base64Url.TryDecodeFromChars(token, raw, out int bytesWritten) || bytesWritten != 64)
 				{
 					return false;
 				}
 
 				hash = SHA256.HashData(raw);
 				return true;
+			}
+			catch
+			{
+				return false;
 			}
 			finally
 			{

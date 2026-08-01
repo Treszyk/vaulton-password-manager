@@ -131,7 +131,9 @@ namespace Api
 							using var scope = context.HttpContext.RequestServices.CreateScope();
 							var db = scope.ServiceProvider.GetRequiredService<VaultonDbContext>();
 							
-							var jtiHash = SHA256.HashData(Encoding.UTF8.GetBytes(jti));
+							Span<byte> jtiBytes = stackalloc byte[128];
+							int jtiLen = Encoding.UTF8.GetBytes(jti, jtiBytes);
+							var jtiHash = SHA256.HashData(jtiBytes[..jtiLen]);
 
 							var now = DateTime.UtcNow;
 							var isValid = await db.RefreshTokens
