@@ -1,7 +1,8 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Observable, catchError, finalize, shareReplay, switchMap, tap, throwError } from 'rxjs';
-import { AuthApiService, TokenResponse } from '../api/auth-api.service';
+import { AuthApiService } from '../api/auth-api.service';
+import type { TokenResponse } from '../api/dto/auth.dto';
 import { AuthStateService } from './auth-state.service';
 import { SessionService } from './session.service';
 

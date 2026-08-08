@@ -1,19 +1,28 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import {
+import type {
   CreateVaultEntryRequest,
+  CreateVaultEntryResponse,
   EntryDto,
   PreCreateEntryResponse,
   UpdateVaultEntryRequest,
-} from '../crypto/worker/crypto.worker.types';
+} from './dto/vault.dto';
+
+export type {
+  CreateVaultEntryRequest,
+  CreateVaultEntryResponse,
+  EntryDto,
+  PreCreateEntryResponse,
+  UpdateVaultEntryRequest,
+};
 
 @Injectable({ providedIn: 'root' })
 export class VaultApiService {
   private readonly baseUrl = '/api';
 
-  constructor(private readonly http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   list(skip = 0, take = 200): Observable<EntryDto[]> {
     return this.http.get<EntryDto[]>(`${this.baseUrl}/vault/entries`, {
@@ -25,8 +34,8 @@ export class VaultApiService {
     return this.http.post<PreCreateEntryResponse>(`${this.baseUrl}/vault/entries/pre-create`, {});
   }
 
-  create(req: CreateVaultEntryRequest): Observable<{ EntryId: string }> {
-    return this.http.post<{ EntryId: string }>(`${this.baseUrl}/vault/entries`, req);
+  create(req: CreateVaultEntryRequest): Observable<CreateVaultEntryResponse> {
+    return this.http.post<CreateVaultEntryResponse>(`${this.baseUrl}/vault/entries`, req);
   }
 
   update(id: string, req: UpdateVaultEntryRequest): Observable<void> {

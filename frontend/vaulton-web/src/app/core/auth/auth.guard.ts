@@ -1,9 +1,8 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthStateService } from './auth-state.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter, map, take } from 'rxjs';
-import { AuthCryptoService } from './auth-crypto.service';
+import { AuthStateService } from './auth-state.service';
 
 export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthStateService);
@@ -17,8 +16,7 @@ export const authGuard: CanActivateFn = () => {
         return true;
       }
 
-      router.navigateByUrl('/auth');
-      return false;
-    })
+      return router.createUrlTree(['/auth']);
+    }),
   );
 };
